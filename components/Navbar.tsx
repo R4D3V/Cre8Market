@@ -152,8 +152,8 @@ export default function Navbar() {
           <nav className="flex items-center justify-center gap-2 sm:gap-3 overflow-x-auto scrollbar-none py-2.5 px-1">
             {[
               { href: "/products", label: "Browse" },
-              { href: "/deals", label: "Deals 🔥" },
-              { href: "/wanted", label: "Wanted" },
+              { href: "/deals", label: "Hot 🔥" },
+
               { href: "/selltous", label: "Sell to Us" },
             ].map((item) => (
               <Link

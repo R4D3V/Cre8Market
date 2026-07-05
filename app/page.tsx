@@ -3,8 +3,6 @@ import CategoryBar from "@/components/CategoryBar";
 import HeroBanner from "@/components/HeroBanner";
 
 import ListingsSection from "@/components/ListingsSection";
-import WantedBoard from "@/components/WantedBoard";
-import WhatsAppGroupsBanner from "@/components/WhatsAppGroupsBanner";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -44,13 +42,7 @@ export default function HomePage() {
           </div>
         </ScrollReveal>
 
-        {/* Wanted + WhatsApp groups */}
-        <ScrollReveal delay={200}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-            <WantedBoard />
-            <WhatsAppGroupsBanner />
-          </div>
-        </ScrollReveal>
+
       </main>
 
       <Footer />

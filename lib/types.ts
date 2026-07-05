@@ -29,17 +29,6 @@ export interface Product {
   images?: string[];
 }
 
-export interface WantedPost {
-  id: string;
-  slug: string;
-  title: string;
-  priceMin?: number;
-  priceMax?: number;
-  exactPrice?: number;
-  timeAgo: string;
-  contact?: string;
-}
-
 export interface Category {
   id: number;
   name: string;

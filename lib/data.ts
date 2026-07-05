@@ -1,4 +1,4 @@
-import type { Product, WantedPost, Category } from "./types";
+import type { Product, Category } from "./types";
 
 export const categories: Category[] = [
   {
@@ -919,43 +919,6 @@ export const latestProducts: Product[] = [
       { label: "Noise Reduction", value: "Yes" },
       { label: "Interface", value: "USB" },
     ],
-  },
-];
-
-export const wantedPosts: WantedPost[] = [
-  {
-    id: "1",
-    slug: "iphone13",
-    title: "iPhone 13",
-    priceMax: 600000,
-    timeAgo: "11 hours ago",
-    contact: "256700511678",
-  },
-  {
-    id: "2",
-    slug: "testproduct123",
-    title: "TestProduct123",
-    priceMax: 100000,
-    timeAgo: "13 hours ago",
-    contact: "256700511678",
-  },
-  {
-    id: "3",
-    slug: "landroverrangeroversport2018",
-    title: "Land Rover Range Rover Sport 2018",
-    priceMin: 100000000,
-    priceMax: 130000000,
-    timeAgo: "1 day ago",
-    contact: "256700511678",
-  },
-  {
-    id: "4",
-    slug: "primehilltoplandforsaleingaruga3acres",
-    title: "Prime Hilltop Land for Sale in Garuga – 3 Acres",
-    priceMin: 1500000000,
-    priceMax: 2500000000,
-    timeAgo: "1 day ago",
-    contact: "256700511678",
   },
 ];
 
