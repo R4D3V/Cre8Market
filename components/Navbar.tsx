@@ -153,7 +153,9 @@ export default function Navbar() {
             {[
               { href: "/products", label: "Browse" },
               { href: "/deals", label: "Hot 🔥" },
+              { href: "/sellers", label: "Sellers" },
 
+              { href: "/install", label: "Install App" },
               { href: "/selltous", label: "Sell to Us" },
             ].map((item) => (
               <Link

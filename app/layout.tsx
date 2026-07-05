@@ -13,6 +13,17 @@ export const metadata: Metadata = {
     url: "https://cre8market.com",
     type: "website",
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "CRE8MARKET",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
 };
 
 export const viewport: Viewport = {

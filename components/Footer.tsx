@@ -69,8 +69,6 @@ export default function Footer() {
                   { href: "/products", label: "All Listings" },
                   { href: "/deals", label: "Deals" },
                   { href: "/products?sort=latest", label: "Latest" },
-                  { href: "/about", label: "About" },
-                  { href: "/contact", label: "Contact" },
                 ].map((l) => (
                   <li key={l.href}>
                     <Link
@@ -84,15 +82,18 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* Sell */}
+            {/* Links */}
             <div>
               <p className="font-bold text-sm uppercase tracking-widest text-white/35 mb-3">
-                Sell
+                Links
               </p>
               <ul className="space-y-2 text-sm text-white/65">
                 {[
                   { href: "/register", label: "Become a Seller" },
                   { href: "/selltous", label: "Sell to Us" },
+                  { href: "/sellers", label: "Sellers" },
+                  { href: "/about", label: "About" },
+                  { href: "/contact", label: "Contact" },
                 ].map((l) => (
                   <li key={l.href}>
                     <Link
