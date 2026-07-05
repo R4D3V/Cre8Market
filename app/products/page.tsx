@@ -224,7 +224,7 @@ function ProductsPageContent() {
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-8">
                 <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                   disabled={page === 1}
                   className="neu-pill bg-surface px-4 py-2 text-sm font-medium text-gray-600 disabled:opacity-40 transition-all"
                 >
@@ -234,7 +234,7 @@ function ProductsPageContent() {
                   (n) => (
                     <button
                       key={n}
-                      onClick={() => setPage(n)}
+                      onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                       className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${
                         page === n
                           ? "bg-navy text-white neu-dark-pill"
@@ -246,7 +246,7 @@ function ProductsPageContent() {
                   ),
                 )}
                 <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                   disabled={page === totalPages}
                   className="neu-pill bg-surface px-4 py-2 text-sm font-medium text-gray-600 disabled:opacity-40 transition-all"
                 >
