@@ -37,7 +37,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     setShareUrl(window.location.href);
   }, []);
-  const waContactUrl = `https://wa.me/${product.seller?.whatsapp ?? "256751621506"}?text=${encodeURIComponent(`Hey, I would like to purchase this product\n\n${shareUrl}`)}`;
+  const waContactUrl = `https://wa.me/${product.seller?.whatsapp ?? "256751621506"}?text=${encodeURIComponent(`Hey, I would like to purchase this product.\n\n${shareUrl}`)}`;
 
   function handleCopyLink() {
     navigator.clipboard.writeText(shareUrl);
