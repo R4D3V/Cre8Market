@@ -2,7 +2,7 @@
 
 import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
@@ -33,8 +33,11 @@ export default function ProductDetailPage() {
   const icon = getCategoryIcon(product.categorySlug);
   const color = getCategoryColor(product.categorySlug);
   const bg = getCategoryBg(product.categorySlug);
-  const waContactUrl = `https://wa.me/${product.seller?.whatsapp ?? "256751621506"}?text=${encodeURIComponent(`I want to BUY: ${product.title}. – ${formatPrice(product.price)}.`)}`;
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const [shareUrl, setShareUrl] = useState("");
+  useEffect(() => {
+    setShareUrl(window.location.href);
+  }, []);
+  const waContactUrl = `https://wa.me/${product.seller?.whatsapp ?? "256751621506"}?text=${encodeURIComponent(`Hey, I would like to purchase this product\n\n${shareUrl}`)}`;
 
   function handleCopyLink() {
     navigator.clipboard.writeText(shareUrl);
