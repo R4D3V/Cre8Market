@@ -87,7 +87,7 @@ function ProductsPageContent() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar filters */}
           <aside className="lg:w-56 shrink-0">
-            <div className="neu-card p-4 sticky top-24">
+            <div className="neu-card p-4 lg:sticky lg:top-24">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-bold text-gray-900">Filters</h2>
                 <button

@@ -83,10 +83,10 @@ export default function HeroBanner() {
                 { step: "2", text: "Sell to us your item if its worth it" },
                 { step: "3", text: "Strictly business" },
               ].map((s) => (
-                <div
-                  key={s.step}
-                  className="neu-dark-card flex items-center gap-3 px-4 py-3.5 min-w-[260px]"
-                >
+                  <div
+                    key={s.step}
+                    className="neu-dark-card flex items-center gap-3 px-4 py-3.5 min-w-0 sm:min-w-[260px]"
+                  >
                   <span className="neu-dark-pill w-8 h-8 bg-accent text-navy font-bold text-sm flex items-center justify-center shrink-0">
                     {s.step}
                   </span>

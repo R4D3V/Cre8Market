@@ -124,7 +124,7 @@ export default function ProductDetailPage() {
                 {product.specs && product.specs.length > 0 && (
                   <div className="neu-inset p-5">
                     <p className="eyebrow mb-4">SPECS</p>
-                    <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
+                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
                       {product.specs.map((s) => (
                         <div key={s.label}>
                           <dt className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
