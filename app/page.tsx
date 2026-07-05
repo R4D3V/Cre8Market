@@ -41,8 +41,6 @@ export default function HomePage() {
             />
           </div>
         </ScrollReveal>
-
-
       </main>
 
       <Footer />
