@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/", label: "Home", icon: "🏠" },
-  { href: "/products", label: "Shop", icon: "🏪" },
+  { href: "/products", label: "Shop", icon: "🛒" },
   { href: "/selltous", label: "Add Product", icon: "➕" },
-  { href: "/login", label: "Login", icon: "🔑" },
+  { href: "/login", label: "Login", icon: "👤" },
 ];
 
 export default function MobileBottomNav() {
