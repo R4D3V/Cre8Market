@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #021e40;
+  --color-navy-hover: #0d3a73;
+  --color-navy-dark: #01102a;
+  --color-accent: #6ce97a;
+  --color-accent-dark: #4fd162;
+  --color-wa: #25d366;
+  --color-wa-dark: #128c7e;
+  --color-featured: #dc2626;
+  --color-surface: #f8f8f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[data-scroll-behavior="smooth"] {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f8f8f8;
+  color: #111827;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f8f8f8;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ============================================
+   Neumorphic design system (soft / tactile UI)
+   Base surface: #f8f8f8 · Dark surface: #021e40
+   ============================================ */
+
+:root {
+  --neu-light: rgba(255, 255, 255, 0.85);
+  --neu-shadow: rgba(2, 30, 64, 0.14);
+  --neu-dark-light: rgba(255, 255, 255, 0.06);
+  --neu-dark-shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* Raised soft card on the light surface */
+.neu-card {
+  background: #f8f8f8;
+  border-radius: 1.5rem;
+  box-shadow: 8px 8px 18px var(--neu-shadow), -8px -8px 18px var(--neu-light);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.neu-card-sm {
+  box-shadow: 5px 5px 10px var(--neu-shadow), -5px -5px 10px var(--neu-light);
+}
+.neu-card-hover:hover {
+  box-shadow: 12px 12px 24px var(--neu-shadow), -12px -12px 24px var(--neu-light);
+  transform: translateY(-2px);
+}
+
+/* Pressed / inset surface — used for inputs, search bars, pressed states */
+.neu-inset {
+  background: #f8f8f8;
+  border-radius: 1rem;
+  box-shadow: inset 4px 4px 9px var(--neu-shadow), inset -4px -4px 9px var(--neu-light);
+}
+
+/* Raised pill button on light surface */
+.neu-pill {
+  border-radius: 9999px;
+  box-shadow: 6px 6px 12px var(--neu-shadow), -6px -6px 12px var(--neu-light);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.neu-pill:hover {
+  box-shadow: 8px 8px 16px var(--neu-shadow), -8px -8px 16px var(--neu-light);
+}
+.neu-pill:active {
+  box-shadow: inset 3px 3px 6px var(--neu-shadow), inset -3px -3px 6px var(--neu-light);
+  transform: translateY(1px);
+}
+
+/* Raised soft card / button on the dark navy surface */
+.neu-dark-card {
+  background: #021e40;
+  border-radius: 1.5rem;
+  box-shadow: 8px 8px 18px var(--neu-dark-shadow), -8px -8px 18px var(--neu-dark-light);
+}
+.neu-dark-pill {
+  border-radius: 9999px;
+  box-shadow: 5px 5px 10px var(--neu-dark-shadow), -5px -5px 10px var(--neu-dark-light);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.neu-dark-pill:hover {
+  box-shadow: 7px 7px 14px var(--neu-dark-shadow), -7px -7px 14px var(--neu-dark-light);
+}
+.neu-dark-inset {
+  box-shadow: inset 3px 3px 7px var(--neu-dark-shadow), inset -3px -3px 7px var(--neu-dark-light);
+}
+
+/* Floating icons animation — continuous left to right */
+@keyframes float-lr {
+  0% { left: -10%; }
+  100% { left: 110%; }
+}
+
+/* Eyebrow label pattern: small accent label above a bold heading */
+.eyebrow {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent-dark);
+  margin-bottom: 0.35rem;
+}
