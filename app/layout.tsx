@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
+import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "CRE8MARKET ENTEBBE — Entebbe's #1 Marketplace",
@@ -20,6 +21,10 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
   },
   icons: {
+    icon: [
+      { url: "/icon.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon.png", sizes: "192x192", type: "image/png" },
+    ],
     apple: [
       { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
     ],
@@ -40,7 +45,9 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body className="min-h-screen bg-surface font-sans antialiased">
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <Providers>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </Providers>
       </body>
     </html>
   );

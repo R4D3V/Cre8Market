@@ -1,12 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { signIn, getSession } from 'next-auth/react'
 import Link from 'next/link'
 import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { PhoneInput, toFullNumber } from '@/components/PhoneInput'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -16,9 +20,26 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
-    await new Promise((r) => setTimeout(r, 1000))
-    setLoading(false)
-    setError('Invalid phone number or password. Try registering a new account.')
+
+    const result = await signIn('user-credentials', {
+      phone: toFullNumber(phone),
+      password,
+      redirect: false,
+    })
+
+    if (result?.error) {
+      setError('Invalid phone number or password. Try registering a new account.')
+      setLoading(false)
+      return
+    }
+
+    const session = await getSession()
+    if (session?.user?.role === 'admin') {
+      router.push('/admin')
+    } else {
+      router.push('/dashboard')
+    }
+    router.refresh()
   }
 
   return (
@@ -45,13 +66,11 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone Number</label>
-                <input
-                  type="tel"
+                <PhoneInput
                   required
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+256 700 000 000"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                  onChange={setPhone}
+                  placeholder="700 000 000"
                 />
               </div>
               <div>
@@ -81,7 +100,13 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="mt-5 pt-4 border-t border-gray-100 text-center">
+            <div className="mt-5 pt-4 border-t border-gray-100 text-center space-y-2">
+              <p className="text-sm text-gray-500">
+                Forgot your password?{' '}
+                <Link href="/reset-password" className="text-navy font-bold hover:underline">
+                  Reset it
+                </Link>
+              </p>
               <p className="text-sm text-gray-500">
                 Don't have an account?{' '}
                 <Link href="/register" className="text-navy font-bold hover:underline">

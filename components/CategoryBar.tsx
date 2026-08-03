@@ -1,7 +1,17 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { categories } from "@/lib/data";
+import { fetchCategoriesAction } from "@/lib/actions/categories";
+import type { CategoryDB } from "@/lib/types";
 
 export default function CategoryBar() {
+  const [categories, setCategories] = useState<CategoryDB[]>([]);
+
+  useEffect(() => {
+    fetchCategoriesAction().then((data) => setCategories(data ?? []));
+  }, []);
+
   return (
     <div className="bg-surface px-3 sm:px-4 -mt-2">
       <div className="max-w-7xl mx-auto">

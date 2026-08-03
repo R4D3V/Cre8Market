@@ -27,7 +27,7 @@ export default function ListingsSection({ title, eyebrow, products, viewAllHref,
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
         {products.map((p) => (
-          <ProductCard key={p.id} product={p} />
+          <ProductCard key={`${p.id}-${p.slug}`} product={p} />
         ))}
       </div>
     </section>

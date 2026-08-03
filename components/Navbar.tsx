@@ -2,13 +2,23 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
+import { fetchCategoriesAction } from "@/lib/actions/categories";
+import type { CategoryDB } from "@/lib/types";
 
 export default function Navbar() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+  const [categories, setCategories] = useState<CategoryDB[]>([]);
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const isUser = status === "authenticated" && session?.user?.role === "user";
+
+  useEffect(() => {
+    fetchCategoriesAction().then((data) => setCategories(data ?? []));
+  }, []);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -49,24 +59,11 @@ export default function Navbar() {
                   <option value="All" className="text-gray-900">
                     All
                   </option>
-                  <option value="electronics" className="text-gray-900">
-                    Electronics
-                  </option>
-                  <option value="phones-tablets" className="text-gray-900">
-                    Phones & Tablets
-                  </option>
-                  <option value="computers-laptops" className="text-gray-900">
-                    Computers
-                  </option>
-                  <option value="home-appliances" className="text-gray-900">
-                    Home Appliances
-                  </option>
-                  <option value="vehicles" className="text-gray-900">
-                    Vehicles
-                  </option>
-                  <option value="property" className="text-gray-900">
-                    Property
-                  </option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.slug} className="text-gray-900">
+                      {c.name}
+                    </option>
+                  ))}
                 </select>
                 <input
                   type="text"
@@ -86,18 +83,37 @@ export default function Navbar() {
 
             {/* Mobile actions (visible on small screens) */}
             <div className="flex items-center gap-2 shrink-0 sm:hidden">
-              <Link
-                href="/login"
-                className="text-white/70 hover:text-white text-sm font-medium transition-colors px-2 py-1.5"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="text-white/70 hover:text-white text-sm font-medium transition-colors px-2 py-1.5"
-              >
-                Register
-              </Link>
+              {isUser ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-2 py-1.5"
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-2 py-1.5"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-2 py-1.5"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-2 py-1.5"
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
               <Link
                 href="/selltous"
                 className="neu-dark-pill bg-accent hover:bg-accent-dark text-navy font-bold text-xs px-3 py-1.5 transition-all flex items-center gap-1"
@@ -108,18 +124,37 @@ export default function Navbar() {
 
             {/* Desktop actions (hidden on small screens) */}
             <div className="hidden sm:flex items-center gap-2 shrink-0">
-              <Link
-                href="/login"
-                className="text-white/70 hover:text-white text-sm font-medium transition-colors px-3 py-2"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="text-white/70 hover:text-white text-sm font-medium transition-colors px-3 py-2"
-              >
-                Register Free
-              </Link>
+              {isUser ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-3 py-2"
+                  >
+                    My Dashboard
+                  </Link>
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-3 py-2"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-3 py-2"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-3 py-2"
+                  >
+                    Register Free
+                  </Link>
+                </>
+              )}
               <Link
                 href="/selltous"
                 className="neu-dark-pill bg-accent hover:bg-accent-dark text-navy font-bold text-sm px-4 py-2 transition-all flex items-center gap-1"
@@ -153,7 +188,6 @@ export default function Navbar() {
             {[
               { href: "/products", label: "Browse" },
               { href: "/deals", label: "Hot 🔥" },
-              { href: "/sellers", label: "Sellers" },
 
               { href: "/install", label: "Install App" },
               { href: "/selltous", label: "Sell to Us" },

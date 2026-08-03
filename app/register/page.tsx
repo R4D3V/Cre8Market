@@ -1,28 +1,62 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { registerUserAction } from '@/lib/actions/auth'
+import { PhoneInput, toFullNumber } from '@/components/PhoneInput'
 
 export default function RegisterPage() {
+  const router = useRouter()
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [whatsapp, setWhatsapp] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [accountExists, setAccountExists] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (password !== confirm) { setError('Passwords do not match'); return }
     setLoading(true)
     setError('')
-    await new Promise((r) => setTimeout(r, 1200))
-    setLoading(false)
-    setSuccess(true)
+    setAccountExists(false)
+
+    try {
+      await registerUserAction({
+        name,
+        phone: toFullNumber(phone),
+        whatsapp: whatsapp ? toFullNumber(whatsapp) : undefined,
+        password,
+      })
+
+      // Registration succeeded — sign the new account in right away.
+      const result = await signIn('user-credentials', {
+        phone: toFullNumber(phone),
+        password,
+        redirect: false,
+      })
+      if (result?.error) {
+        // Account was created but auto sign-in failed for some reason; send them to log in manually.
+        router.push('/login')
+        return
+      }
+
+      setSuccess(true)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      setError(message)
+      if (message.includes('already exists')) setAccountExists(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (success) {
@@ -35,8 +69,8 @@ export default function RegisterPage() {
             <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Welcome, {name}!</h1>
             <p className="text-gray-500 mb-6">Your account has been created. You can now post listings and contact sellers.</p>
             <div className="flex gap-3 justify-center">
-              <Link href="/selltous" className="neu-pill bg-navy text-white font-bold px-5 py-2.5 text-sm hover:bg-navy-hover transition-all">
-                Sell to Us
+              <Link href="/dashboard/products/new" className="neu-pill bg-navy text-white font-bold px-5 py-2.5 text-sm hover:bg-navy-hover transition-all">
+                Add a Listing
               </Link>
               <Link href="/products" className="neu-pill bg-surface text-navy font-bold px-5 py-2.5 text-sm transition-all">
                 Browse Listings
@@ -83,13 +117,21 @@ export default function RegisterPage() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone / WhatsApp Number</label>
-                <input
-                  type="tel"
+                <PhoneInput
                   required
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+256 700 000 000"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                  onChange={setPhone}
+                  placeholder="700 000 000"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  WhatsApp Number (if different)
+                </label>
+                <PhoneInput
+                  value={whatsapp}
+                  onChange={setWhatsapp}
+                  placeholder="Leave blank to use the number above"
                 />
               </div>
               <div>
@@ -97,6 +139,7 @@ export default function RegisterPage() {
                 <input
                   type="password"
                   required
+                  minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Create a password"
@@ -117,7 +160,15 @@ export default function RegisterPage() {
 
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
-                  {error}
+                  <p>{error}</p>
+                  {accountExists && (
+                    <Link
+                      href="/reset-password"
+                      className="inline-block mt-2 text-navy font-bold hover:underline"
+                    >
+                      Forgot your password? Reset it here →
+                    </Link>
+                  )}
                 </div>
               )}
 

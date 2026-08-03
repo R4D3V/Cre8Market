@@ -7,7 +7,11 @@ import CategoryBar from "@/components/CategoryBar";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import ProductCard from "@/components/ProductCard";
-import { allProducts, categories, formatPrice } from "@/lib/data";
+import { formatPrice } from "@/lib/data";
+import { fetchProductsAction } from "@/lib/actions/products";
+import { fetchCategoriesAction } from "@/lib/actions/categories";
+import type { Product } from "@/lib/types";
+import type { CategoryDB } from "@/lib/types";
 
 const ITEMS_PER_PAGE = 16;
 
@@ -26,6 +30,10 @@ function ProductsPageContent() {
   const featuredParam = searchParams.get("featured") ?? "";
   const sortParam = searchParams.get("sort") ?? "";
 
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<CategoryDB[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState(qParam);
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
   const [minPrice, setMinPrice] = useState("");
@@ -36,6 +44,16 @@ function ProductsPageContent() {
     setSelectedCategory(categoryParam);
     setPage(1);
   }, [categoryParam]);
+
+  useEffect(() => {
+    fetchProductsAction().then((data) => {
+      setAllProducts(data);
+      setLoading(false);
+    });
+    fetchCategoriesAction().then((data) => {
+      setCategories(data ?? []);
+    });
+  }, []);
 
   const filtered = useMemo(() => {
     let list = [...allProducts];
@@ -62,7 +80,7 @@ function ProductsPageContent() {
     if (maxPrice) list = list.filter((p) => p.price <= Number(maxPrice));
 
     return list;
-  }, [search, selectedCategory, minPrice, maxPrice, featuredParam, sortParam]);
+  }, [search, selectedCategory, minPrice, maxPrice, featuredParam, sortParam, allProducts]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(
@@ -196,10 +214,12 @@ function ProductsPageContent() {
             </div>
 
             {/* Grid */}
-            {paginated.length > 0 ? (
+            {loading ? (
+              <div className="text-center py-20 text-gray-500 text-sm">Loading…</div>
+            ) : paginated.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
                 {paginated.map((p) => (
-                  <ProductCard key={p.id} product={p} />
+                  <ProductCard key={`${p.id}-${p.slug}`} product={p} />
                 ))}
               </div>
             ) : (

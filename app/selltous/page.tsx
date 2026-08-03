@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ScrollReveal from '@/components/ScrollReveal'
-import { categories } from '@/lib/data'
+import { fetchCategoriesAction } from '@/lib/actions/categories'
+import type { CategoryDB } from '@/lib/types'
 
 export default function SellToUsPage() {
   const [name, setName] = useState('')
@@ -14,6 +15,11 @@ export default function SellToUsPage() {
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [categories, setCategories] = useState<CategoryDB[]>([])
+
+  useEffect(() => {
+    fetchCategoriesAction().then((data) => setCategories(data ?? []))
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

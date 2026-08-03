@@ -7,37 +7,61 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import {
-  allProducts,
-  getProductBySlug,
-  getRelatedProducts,
   formatPrice,
-  getCategoryIcon,
-  getCategoryColor,
-  getCategoryBg,
 } from "@/lib/data";
+import {
+  fetchProductBySlugAction,
+  fetchRelatedProductsAction,
+} from "@/lib/actions/products";
+import type { Product } from "@/lib/types";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const product = getProductBySlug(slug);
 
+  const [product, setProduct] = useState<Product | null>(null);
+  const [related, setRelated] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [selectedImage, setSelectedImage] = useState(0);
   const [offerOpen, setOfferOpen] = useState(false);
   const [offerAmount, setOfferAmount] = useState("");
   const [offerMessage, setOfferMessage] = useState("");
   const [offerSent, setOfferSent] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  if (!product) return notFound();
+  useEffect(() => {
+    fetchProductBySlugAction(slug).then((data) => {
+      setProduct(data);
+      setLoading(false);
+      if (data) {
+        fetchRelatedProductsAction(data).then(setRelated);
+      }
+    });
+  }, [slug]);
 
-  const related = getRelatedProducts(product, 4);
-  const icon = getCategoryIcon(product.categorySlug);
-  const color = getCategoryColor(product.categorySlug);
-  const bg = getCategoryBg(product.categorySlug);
   const [shareUrl, setShareUrl] = useState("");
   useEffect(() => {
     setShareUrl(window.location.href);
   }, []);
-  const waContactUrl = `https://wa.me/${product.seller?.whatsapp ?? "256751621506"}?text=${encodeURIComponent(`Hey, I would like to purchase this product.\n\n${shareUrl}`)}`;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-gray-500">Loading…</p>
+      </div>
+    );
+  }
+
+  if (!product) return notFound();
+
+  const icon = product.categoryIcon ?? "📦";
+  const color = product.categoryColor ?? "#64748b";
+  const bg = product.categoryBg ?? "#f8fafc";
+  // Prefer the registered user who added the product; fall back to the stored seller record.
+  const sellerName = product.ownerName ?? product.seller?.name;
+  const sellerWhatsapp = product.ownerWhatsapp ?? product.seller?.whatsapp ?? "256751621506";
+  const waContactUrl = `https://wa.me/${sellerWhatsapp}?text=${encodeURIComponent(`Hey, I would like to purchase this product.\n\n${shareUrl}`)}`;
 
   function handleCopyLink() {
     navigator.clipboard.writeText(shareUrl);
@@ -52,7 +76,7 @@ export default function ProductDetailPage() {
       `Hi, I'd like to make an offer of UGX ${Number(offerAmount).toLocaleString()} for: ${product.title}. ${offerMessage}`,
     );
     window.open(
-      `https://wa.me/${product.seller?.whatsapp ?? "256751621506"}?text=${text}`,
+      `https://wa.me/${sellerWhatsapp}?text=${text}`,
       "_blank",
     );
     setOfferSent(true);
@@ -73,12 +97,43 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           {/* Left - Image + Info */}
           <div className="md:col-span-3 space-y-4">
-            {/* Image */}
-            <div
-              className="w-full rounded-2xl overflow-hidden flex items-center justify-center"
-              style={{ backgroundColor: bg, minHeight: 280 }}
-            >
-              <span className="text-9xl opacity-50">{icon}</span>
+            {/* Image Gallery */}
+            <div className="space-y-3">
+              <div
+                className="w-full rounded-2xl overflow-hidden flex items-center justify-center"
+                style={{ backgroundColor: bg, minHeight: 320 }}
+              >
+                {product.images?.[selectedImage] ? (
+                  <img
+                    src={product.images[selectedImage]}
+                    alt={product.title}
+                    className="w-full h-full object-contain max-h-96"
+                  />
+                ) : (
+                  <span className="text-9xl opacity-50">{icon}</span>
+                )}
+              </div>
+              {product.images && product.images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {product.images.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedImage(i)}
+                      className={`w-16 h-16 rounded-lg overflow-hidden shrink-0 border-2 transition-all ${
+                        i === selectedImage
+                          ? "border-navy opacity-100"
+                          : "border-transparent opacity-60 hover:opacity-90"
+                      }`}
+                    >
+                      <img
+                        src={img}
+                        alt={`${product.title} ${i + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Category badge */}
@@ -150,9 +205,9 @@ export default function ProductDetailPage() {
                   { label: "Category", value: product.category },
                   {
                     label: "Seller",
-                    value: product.seller?.name ?? "Private Seller",
+                    value: sellerName ?? "Private Seller",
                   },
-                  { label: "Location", value: product.location ?? "Uganda" },
+                  { label: "Location", value: product.location ?? "Entebbe" },
                   ...(product.condition
                     ? [{ label: "Condition", value: product.condition }]
                     : []),
@@ -275,19 +330,27 @@ export default function ProductDetailPage() {
                 About the Seller
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center text-white font-bold text-lg shrink-0">
-                  {(product.seller?.name ?? "S")[0].toUpperCase()}
+                <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center text-white font-bold text-lg shrink-0 overflow-hidden">
+                  {product.ownerAvatar ? (
+                    <img
+                      src={product.ownerAvatar}
+                      alt={sellerName ?? "Seller"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    (sellerName ?? "S")[0].toUpperCase()
+                  )}
                 </div>
                 <div>
                   <p className="font-bold text-gray-900 text-sm">
-                    {product.seller?.name ?? "Private Seller"}
+                    {sellerName ?? "Private Seller"}
                   </p>
-                  {product.seller?.memberSince && (
-                    <p className="text-gray-400 text-xs">
-                      Member since {product.seller.memberSince}
-                    </p>
+                  {product.ownerName && (
+                    <span className="inline-block bg-green-50 text-green-600 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1">
+                      ✓ Registered Member
+                    </span>
                   )}
-                  {product.seller?.verified && (
+                  {!product.ownerName && product.seller?.verified && (
                     <span className="inline-block bg-green-50 text-green-600 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1">
                       ✓ Verified Seller
                     </span>
@@ -319,7 +382,7 @@ export default function ProductDetailPage() {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {related.map((p) => (
-                <ProductCard key={p.id} product={p} />
+                <ProductCard key={`${p.id}-${p.slug}`} product={p} />
               ))}
             </div>
           </div>

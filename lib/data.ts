@@ -1,468 +1,4 @@
-import type { Product, Category } from "./types";
-
-export const categories: Category[] = [
-  {
-    id: 1,
-    name: "Electronics",
-    slug: "electronics",
-    icon: "🔌",
-    color: "#3b82f6",
-    bgColor: "#eff6ff",
-  },
-  {
-    id: 2,
-    name: "Phones & Tablets",
-    slug: "phones-tablets",
-    icon: "📱",
-    color: "#8b5cf6",
-    bgColor: "#f5f3ff",
-  },
-  {
-    id: 3,
-    name: "Computers & Laptops",
-    slug: "computers-laptops",
-    icon: "💻",
-    color: "#6366f1",
-    bgColor: "#eef2ff",
-  },
-  {
-    id: 4,
-    name: "Home Appliances",
-    slug: "home-appliances",
-    icon: "🏠",
-    color: "#10b981",
-    bgColor: "#ecfdf5",
-  },
-  {
-    id: 5,
-    name: "Furniture",
-    slug: "furniture",
-    icon: "🛋️",
-    color: "#f59e0b",
-    bgColor: "#fffbeb",
-  },
-  {
-    id: 6,
-    name: "Clothing & Fashion",
-    slug: "clothing-fashion",
-    icon: "👗",
-    color: "#ec4899",
-    bgColor: "#fdf2f8",
-  },
-  {
-    id: 7,
-    name: "Tools & Equipment",
-    slug: "tools-equipment",
-    icon: "🔧",
-    color: "#6b7280",
-    bgColor: "#f9fafb",
-  },
-  {
-    id: 8,
-    name: "Vehicles",
-    slug: "vehicles",
-    icon: "🚗",
-    color: "#ef4444",
-    bgColor: "#fef2f2",
-  },
-  {
-    id: 9,
-    name: "Property",
-    slug: "property",
-    icon: "🏗️",
-    color: "#f97316",
-    bgColor: "#fff7ed",
-  },
-  {
-    id: 10,
-    name: "Other",
-    slug: "other",
-    icon: "📦",
-    color: "#64748b",
-    bgColor: "#f8fafc",
-  },
-  {
-    id: 11,
-    name: "Perfumes & Beauty",
-    slug: "perfumes-beauty",
-    icon: "💄",
-    color: "#f43f5e",
-    bgColor: "#fff1f2",
-  },
-  {
-    id: 12,
-    name: "Wigs & Hair",
-    slug: "wigs-hair",
-    icon: "💇",
-    color: "#7c3aed",
-    bgColor: "#f5f3ff",
-  },
-  {
-    id: 13,
-    name: "Food & Agriculture",
-    slug: "food-agriculture",
-    icon: "🌾",
-    color: "#22c55e",
-    bgColor: "#f0fdf4",
-  },
-];
-
-export const featuredProducts: Product[] = [
-  {
-    id: "1",
-    slug: "samsung-galaxy-s20-ultra-5g-12gb-128gb-black",
-    title: "Samsung Galaxy S20 Ultra 5G 12GB 128GB - Black",
-    price: 600000,
-    category: "Phones & Tablets",
-    categorySlug: "phones-tablets",
-    featured: true,
-    daysAgo: 2,
-    timeAgo: "2 days ago",
-    condition: "Like New",
-    location: "Kampala, Uganda",
-    description:
-      "Samsung Galaxy S20 Ultra 5G smartphone featuring a powerful processor, quad camera system with 108MP main sensor, and 5G connectivity. Device is in excellent condition with minimal signs of use. Includes original box and accessories.",
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "RAM", value: "12GB" },
-      { label: "Storage", value: "128GB" },
-      { label: "Display", value: '6.9" QHD+' },
-      { label: "Camera", value: "108MP Quad" },
-      { label: "Battery", value: "5000mAh" },
-      { label: "Network", value: "5G" },
-    ],
-  },
-  {
-    id: "2",
-    slug: "3-camera-dash-cam-system-4-inch-display",
-    title: "3-Camera Dash Cam System with 4-inch Display & Rear Camera",
-    price: 100000,
-    category: "Electronics",
-    categorySlug: "electronics",
-    featured: true,
-    daysAgo: 3,
-    timeAgo: "3 days ago",
-    condition: "New",
-    location: "Kampala, Uganda",
-    description:
-      "Professional 3-camera dash cam system with 4-inch HD display. Captures front, interior and rear simultaneously. Features night vision, loop recording, emergency lock, G-sensor and parking mode.",
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "Channels", value: "3 Cameras" },
-      { label: "Display", value: "4-inch" },
-      { label: "Night Vision", value: "Yes" },
-      { label: "G-Sensor", value: "Yes" },
-      { label: "Loop Recording", value: "Yes" },
-    ],
-  },
-  {
-    id: "3",
-    slug: "lenovo-thinkpad-x390",
-    title: "Lenovo ThinkPad X390",
-    price: 950000,
-    category: "Computers & Laptops",
-    categorySlug: "computers-laptops",
-    featured: true,
-    daysAgo: 4,
-    timeAgo: "4 days ago",
-    condition: "Used - Good",
-    location: "Kampala, Uganda",
-    description:
-      'Lenovo ThinkPad X390. Intel Core i5 8th Gen, 8GB RAM, 256GB SSD. 13.3" Full HD IPS display. Windows 10 Pro licensed. Battery holds approximately 5 hours. Military-grade durability.',
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "Processor", value: "Core i5 8th Gen" },
-      { label: "RAM", value: "8GB" },
-      { label: "Storage", value: "256GB SSD" },
-      { label: "Display", value: '13.3" FHD IPS' },
-      { label: "OS", value: "Windows 10 Pro" },
-      { label: "Weight", value: "1.3kg" },
-    ],
-  },
-  {
-    id: "4",
-    slug: "lenovo-yoga-11e",
-    title: "Lenovo Yoga 11e",
-    price: 550000,
-    category: "Computers & Laptops",
-    categorySlug: "computers-laptops",
-    featured: true,
-    daysAgo: 4,
-    timeAgo: "4 days ago",
-    condition: "Used - Good",
-    location: "Kampala, Uganda",
-    description:
-      'Lenovo Yoga 11e convertible laptop. Intel Celeron N3450, 4GB RAM, 128GB SSD. 11.6" touchscreen, 360° hinge. Rugged design perfect for students. Windows 10 installed.',
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "Processor", value: "Celeron N3450" },
-      { label: "RAM", value: "4GB" },
-      { label: "Storage", value: "128GB SSD" },
-      { label: "Display", value: '11.6" Touch' },
-      { label: "Form Factor", value: "2-in-1" },
-      { label: "Battery", value: "6 hours" },
-    ],
-  },
-  {
-    id: "5",
-    slug: "hp-elitebook-840-g3",
-    title: "HP EliteBook 840 G3",
-    price: 850000,
-    category: "Computers & Laptops",
-    categorySlug: "computers-laptops",
-    featured: true,
-    daysAgo: 4,
-    timeAgo: "4 days ago",
-    condition: "Used - Good",
-    location: "Kampala, Uganda",
-    description:
-      'HP EliteBook 840 G3. Intel Core i5 6th Gen, 8GB DDR4 RAM, 256GB SSD, 14" Full HD display. Windows 10 Pro. Slim business laptop in excellent condition. Backlit keyboard.',
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "Processor", value: "Core i5 6th Gen" },
-      { label: "RAM", value: "8GB DDR4" },
-      { label: "Storage", value: "256GB SSD" },
-      { label: "Display", value: '14" FHD' },
-      { label: "OS", value: "Windows 10 Pro" },
-      { label: "Keyboard", value: "Backlit" },
-    ],
-  },
-  {
-    id: "6",
-    slug: "mikrotik-hap-series-wifi-router-new-in-box",
-    title: "MikroTik hAP Series WiFi Router - New in Box",
-    price: 100000,
-    category: "Electronics",
-    categorySlug: "electronics",
-    featured: true,
-    daysAgo: 4,
-    timeAgo: "4 days ago",
-    condition: "New",
-    location: "Kampala, Uganda",
-    description:
-      "MikroTik hAP series wireless router. Brand new in original sealed box. Dual-band WiFi, five Gigabit Ethernet ports. RouterOS included. Ideal for home or small office networking.",
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "Connectivity", value: "Dual-band WiFi" },
-      { label: "Ports", value: "5x Gigabit" },
-      { label: "OS", value: "RouterOS" },
-      { label: "Type", value: "hAP Series" },
-    ],
-  },
-  {
-    id: "7",
-    slug: "hp-elitebook-dragonfly",
-    title: "HP EliteBook Dragonfly",
-    price: 1900000,
-    category: "Computers & Laptops",
-    categorySlug: "computers-laptops",
-    featured: true,
-    daysAgo: 4,
-    timeAgo: "4 days ago",
-    condition: "Used - Good",
-    location: "Kampala, Uganda",
-    description:
-      'HP EliteBook Dragonfly G1 ultra-premium laptop. Intel Core i7 8th Gen, 16GB LPDDR3, 512GB NVMe SSD. 13.3" FHD IPS sure view display. Carbon fiber chassis, just 990g. Exceptional battery life of 10+ hours.',
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "Processor", value: "Core i7 8th Gen" },
-      { label: "RAM", value: "16GB LPDDR3" },
-      { label: "Storage", value: "512GB NVMe" },
-      { label: "Display", value: '13.3" FHD' },
-      { label: "Weight", value: "990g" },
-      { label: "Battery", value: "10+ hours" },
-    ],
-  },
-  {
-    id: "8",
-    slug: "hp-elitebook-g6",
-    title: "HP EliteBook G6",
-    price: 1200000,
-    category: "Computers & Laptops",
-    categorySlug: "computers-laptops",
-    featured: true,
-    daysAgo: 4,
-    timeAgo: "4 days ago",
-    condition: "Used - Good",
-    location: "Kampala, Uganda",
-    description:
-      'HP EliteBook G6 series. Intel Core i5 8th Gen, 8GB RAM, 256GB SSD. 14" FHD display. Windows 10 Pro. Business-grade durability with integrated HP Sure View privacy screen.',
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "Processor", value: "Core i5 8th Gen" },
-      { label: "RAM", value: "8GB" },
-      { label: "Storage", value: "256GB SSD" },
-      { label: "Display", value: '14" FHD' },
-      { label: "Security", value: "HP Sure View" },
-    ],
-  },
-  {
-    id: "9",
-    slug: "dell-latitude-7400-2-in-1",
-    title: "Dell Latitude 7400 2 in 1",
-    price: 1400000,
-    category: "Computers & Laptops",
-    categorySlug: "computers-laptops",
-    featured: true,
-    daysAgo: 4,
-    timeAgo: "4 days ago",
-    condition: "Used - Good",
-    location: "Kampala, Uganda",
-    description:
-      'Dell Latitude 7400 2-in-1 convertible. Intel Core i7 8th Gen, 16GB RAM, 512GB NVMe SSD. 14" FHD touchscreen. Premium business convertible with stylus support.',
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "Processor", value: "Core i7 8th Gen" },
-      { label: "RAM", value: "16GB" },
-      { label: "Storage", value: "512GB NVMe" },
-      { label: "Display", value: '14" FHD Touch' },
-      { label: "Form Factor", value: "2-in-1" },
-      { label: "Stylus", value: "Included" },
-    ],
-  },
-  {
-    id: "10",
-    slug: "lenovo-thinkpad-x1-yoga",
-    title: "Lenovo ThinkPad X1 Yoga",
-    price: 1800000,
-    category: "Computers & Laptops",
-    categorySlug: "computers-laptops",
-    featured: true,
-    daysAgo: 4,
-    timeAgo: "4 days ago",
-    condition: "Used - Good",
-    location: "Kampala, Uganda",
-    description:
-      'Lenovo ThinkPad X1 Yoga Gen 3. Intel Core i7 8th Gen, 16GB LPDDR3, 512GB PCIe NVMe SSD. 14" WQHD IPS touchscreen. Pen included. OLED display option available.',
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "Processor", value: "Core i7 8th Gen" },
-      { label: "RAM", value: "16GB LPDDR3" },
-      { label: "Storage", value: "512GB PCIe NVMe" },
-      { label: "Display", value: '14" WQHD Touch' },
-      { label: "Form Factor", value: "2-in-1" },
-      { label: "Pen", value: "Included" },
-    ],
-  },
-  {
-    id: "11",
-    slug: "spiro-exon-electric-motorcycle-blue",
-    title: "Spiro Exon Electric Motorcycle - Blue",
-    price: 3500000,
-    category: "Vehicles",
-    categorySlug: "vehicles",
-    featured: true,
-    daysAgo: 4,
-    timeAgo: "4 days ago",
-    condition: "Used - Good",
-    location: "Kampala, Uganda",
-    description:
-      "Spiro Exon electric motorcycle in blue. Low mileage, excellent condition. Swappable battery system compatible with Spiro swap stations across Uganda. Very affordable running cost — ideal for boda boda operations.",
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "Motor", value: "Electric" },
-      { label: "Range", value: "100 km" },
-      { label: "Battery", value: "Swappable" },
-      { label: "Color", value: "Blue" },
-      { label: "Usage", value: "Boda Boda" },
-    ],
-  },
-  {
-    id: "12",
-    slug: "lg-51-channel-home-theater-4-tallboy-speakers",
-    title: "LG 5.1 Channel Home Theater – 4 Tallboy Speakers + Subwoofer",
-    price: 400000,
-    category: "Electronics",
-    categorySlug: "electronics",
-    featured: true,
-    daysAgo: 6,
-    timeAgo: "6 days ago",
-    condition: "Used - Good",
-    location: "Kampala, Uganda",
-    description:
-      "LG 5.1 Channel Home Theater System with 4 tallboy speakers, powerful subwoofer, and DVD receiver. Exceptional surround sound quality. All components included and working perfectly.",
-    seller: {
-      name: "CRE8MARKET ENTEBBE",
-      phone: "256751621506",
-      whatsapp: "256751621506",
-      verified: true,
-      memberSince: "May 2025",
-    },
-    specs: [
-      { label: "Channels", value: "5.1 Surround" },
-      { label: "Speakers", value: "4 Tallboy + Sub" },
-      { label: "Power", value: "1000W" },
-      { label: "Input", value: "HDMI, USB, AUX" },
-      { label: "Disc", value: "DVD Player" },
-    ],
-  },
-];
+import type { Product } from "./types";
 
 export const latestProducts: Product[] = [
   {
@@ -476,7 +12,7 @@ export const latestProducts: Product[] = [
     daysAgo: 0,
     timeAgo: "16 hours ago",
     condition: "New",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "Midea Inverter Quattro Microwave Oven, 25 litres. Advanced inverter technology for even, precise cooking. Multiple power levels and pre-set cooking functions. Brand new in box.",
     seller: {
@@ -504,7 +40,7 @@ export const latestProducts: Product[] = [
     daysAgo: 0,
     timeAgo: "19 hours ago",
     condition: "Like New",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "iPhone 8 in white, 64GB storage. Excellent condition with no cracks or scratches on screen. Battery health at 82%. Includes original charger and cable. Screen protector applied.",
     seller: {
@@ -532,7 +68,7 @@ export const latestProducts: Product[] = [
     daysAgo: 0,
     timeAgo: "19 hours ago",
     condition: "Used - Good",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       'Samsung Galaxy A05. 6.7" HD+ display, 64GB storage, 4GB RAM, Android 13. Good battery life at 5000mAh. Minor wear on body, screen is perfect. Includes charger.',
     seller: {
@@ -560,7 +96,7 @@ export const latestProducts: Product[] = [
     daysAgo: 1,
     timeAgo: "1 day ago",
     condition: "New",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "CHiQ 50 inch 4K Ultra HD Smart TV with Google TV. Built-in Chromecast, Google Assistant, Netflix, YouTube pre-installed. 3 HDMI ports, 2 USB ports. Dolby Audio. Brand new with warranty.",
     seller: {
@@ -588,7 +124,7 @@ export const latestProducts: Product[] = [
     daysAgo: 2,
     timeAgo: "2 days ago",
     condition: "New",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "True wireless earbuds with compact charging case. 6 hours battery life per charge, 18 hours total with case. Touch controls, built-in microphone, IPX5 sweat resistance. Black colour.",
     seller: {
@@ -616,7 +152,7 @@ export const latestProducts: Product[] = [
     daysAgo: 2,
     timeAgo: "2 days ago",
     condition: "New",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "TOZO A1 Mini Wireless Earbuds. Brand new in sealed box. IPX5 waterproof rating, 6-hour playtime with up to 24 hours using charging case. Deep bass Bluetooth 5.3 sound. Excellent deal.",
     seller: {
@@ -645,7 +181,7 @@ export const latestProducts: Product[] = [
     daysAgo: 2,
     timeAgo: "2 days ago",
     condition: "New",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "Anker SoundCore Bluetooth Speaker. 24-hour battery life, 360° full sound, IPX5 waterproof, built-in microphone. Brand new in original packaging. Connects to 2 phones simultaneously.",
     seller: {
@@ -674,7 +210,7 @@ export const latestProducts: Product[] = [
     daysAgo: 3,
     timeAgo: "3 days ago",
     condition: "Used - Good",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "OPPO A15 in good condition. 32GB storage, 3GB RAM, Android 10. Triple camera setup with 13MP main lens. 4230mAh battery. Fingerprint sensor on back.",
     seller: {
@@ -703,7 +239,7 @@ export const latestProducts: Product[] = [
     daysAgo: 3,
     timeAgo: "3 days ago",
     condition: "Used - Good",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "Samsung Galaxy A05s in black. 128GB storage, 4GB RAM. 50MP triple camera system. 5000mAh long-life battery. Minor scratches on back cover, screen is perfect. Comes with charger.",
     seller: {
@@ -731,7 +267,7 @@ export const latestProducts: Product[] = [
     daysAgo: 4,
     timeAgo: "4 days ago",
     condition: "Used - Good",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       'HP ZBook Firefly G8 mobile workstation. Intel Core i7 11th Gen, 16GB RAM, 512GB NVMe SSD. NVIDIA T500 4GB GPU. 14" FHD IPS display. ISV certified for professional creative work.',
     seller: {
@@ -760,7 +296,7 @@ export const latestProducts: Product[] = [
     daysAgo: 4,
     timeAgo: "4 days ago",
     condition: "Like New",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "MacBook Pro 13-inch 2020, Apple M1 chip. 8GB unified memory, 256GB SSD. Space Gray. Battery cycle count under 100. Runs macOS Sonoma. Includes original MagSafe charger. Excellent condition.",
     seller: {
@@ -789,7 +325,7 @@ export const latestProducts: Product[] = [
     daysAgo: 2,
     timeAgo: "2 days ago",
     condition: "Used - Good",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "Saachi electric steam iron box. Variable temperature control, steam burst function, self-cleaning mode. Working perfectly. Good soleplate.",
     seller: {
@@ -817,7 +353,7 @@ export const latestProducts: Product[] = [
     daysAgo: 4,
     timeAgo: "4 days ago",
     condition: "Used - Good",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "Apple AirPods Pro 2nd generation. Active Noise Cancellation, Transparency mode, Adaptive Audio. MagSafe charging case included. Battery health good. One ear tip size missing.",
     seller: {
@@ -845,7 +381,7 @@ export const latestProducts: Product[] = [
     daysAgo: 4,
     timeAgo: "4 days ago",
     condition: "Used - Good",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       'Dell Latitude 7490. Intel Core i7 8th Gen, 16GB DDR4, 512GB SSD. 14" FHD IPS display. LTE 4G modem built-in. Backlit keyboard, fingerprint reader. In great working condition.',
     seller: {
@@ -874,7 +410,7 @@ export const latestProducts: Product[] = [
     daysAgo: 2,
     timeAgo: "2 days ago",
     condition: "Used - Good",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "ZTE MF935 4G LTE Mobile WiFi Hotspot router, MTN Uganda locked. Connect up to 10 devices simultaneously. Compact pocket-size design. Includes original charger.",
     seller: {
@@ -902,7 +438,7 @@ export const latestProducts: Product[] = [
     daysAgo: 2,
     timeAgo: "2 days ago",
     condition: "New",
-    location: "Kampala, Uganda",
+    location: "Entebbe",
     description:
       "REC007 Digital Voice Recorder with HD stereo speakers. 32GB built-in memory, up to 15 hours continuous recording. Noise reduction technology, MP3/WAV playback, USB transfer.",
     seller: {
@@ -922,36 +458,8 @@ export const latestProducts: Product[] = [
   },
 ];
 
-export const allProducts: Product[] = [...featuredProducts, ...latestProducts];
-
-export function getProductBySlug(slug: string): Product | undefined {
-  return allProducts.find((p) => p.slug === slug);
-}
-
-export function getRelatedProducts(product: Product, limit = 4): Product[] {
-  return allProducts
-    .filter(
-      (p) => p.categorySlug === product.categorySlug && p.id !== product.id,
-    )
-    .slice(0, limit);
-}
-
-export function getCategoryBySlug(slug: string): Category | undefined {
-  return categories.find((c) => c.slug === slug);
-}
+export const allProducts: Product[] = [...latestProducts];
 
 export function formatPrice(price: number): string {
   return `UGX ${price.toLocaleString("en-UG")}`;
-}
-
-export function getCategoryIcon(categorySlug: string): string {
-  return categories.find((c) => c.slug === categorySlug)?.icon ?? "📦";
-}
-
-export function getCategoryColor(categorySlug: string): string {
-  return categories.find((c) => c.slug === categorySlug)?.color ?? "#64748b";
-}
-
-export function getCategoryBg(categorySlug: string): string {
-  return categories.find((c) => c.slug === categorySlug)?.bgColor ?? "#f8fafc";
 }

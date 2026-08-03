@@ -91,7 +91,6 @@ export default function Footer() {
                 {[
                   { href: "/register", label: "Become a Seller" },
                   { href: "/selltous", label: "Sell to Us" },
-                  { href: "/sellers", label: "Sellers" },
                   { href: "/about", label: "About" },
                   { href: "/contact", label: "Contact" },
                 ].map((l) => (

@@ -1,11 +1,6 @@
 import Link from "next/link";
 import type { Product } from "@/lib/types";
-import {
-  formatPrice,
-  getCategoryIcon,
-  getCategoryColor,
-  getCategoryBg,
-} from "@/lib/data";
+import { formatPrice } from "@/lib/data";
 
 interface Props {
   product: Product;
@@ -13,9 +8,9 @@ interface Props {
 }
 
 export default function ProductCard({ product, size = "default" }: Props) {
-  const icon = getCategoryIcon(product.categorySlug);
-  const color = getCategoryColor(product.categorySlug);
-  const bg = getCategoryBg(product.categorySlug);
+  const icon = product.categoryIcon ?? "📦";
+  const color = product.categoryColor ?? "#64748b";
+  const bg = product.categoryBg ?? "#f8fafc";
 
   return (
     <Link
@@ -27,12 +22,25 @@ export default function ProductCard({ product, size = "default" }: Props) {
         className="relative aspect-[4/3] flex items-center justify-center overflow-hidden rounded-t-3xl"
         style={{ backgroundColor: bg }}
       >
-        <span className="text-5xl opacity-60 group-hover:scale-110 transition-transform duration-300">
-          {icon}
-        </span>
+        {product.images?.[0] ? (
+          <img
+            src={product.images[0]}
+            alt={product.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <span className="text-5xl opacity-60 group-hover:scale-110 transition-transform duration-300">
+            {icon}
+          </span>
+        )}
         {product.featured && (
           <span className="absolute top-2 left-2 bg-featured text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
             Featured
+          </span>
+        )}
+        {product.isDeal && (
+          <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+            🔥 Deal
           </span>
         )}
         {product.condition && (

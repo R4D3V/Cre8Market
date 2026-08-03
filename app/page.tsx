@@ -6,9 +6,12 @@ import ListingsSection from "@/components/ListingsSection";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import ScrollReveal from "@/components/ScrollReveal";
-import { featuredProducts, latestProducts } from "@/lib/data";
+import { latestProducts } from "@/lib/data";
+import { getFeaturedProducts } from "@/lib/db/queries";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featuredProducts = await getFeaturedProducts();
+
   return (
     <>
       <Navbar />
