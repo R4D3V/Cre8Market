@@ -9,6 +9,9 @@ import ScrollReveal from "@/components/ScrollReveal";
 import { latestProducts } from "@/lib/data";
 import { getFeaturedProducts } from "@/lib/db/queries";
 
+// Featured products come from the database, so render on each request instead of at build time.
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const featuredProducts = await getFeaturedProducts();
 

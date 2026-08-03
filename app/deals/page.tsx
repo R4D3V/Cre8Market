@@ -4,6 +4,9 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { getDeals } from "@/lib/db/queries";
 
+// Deals come from the database, so render on each request instead of at build time.
+export const dynamic = "force-dynamic";
+
 export default async function DealsPage() {
   const deals = await getDeals();
 
