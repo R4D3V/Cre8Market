@@ -62,6 +62,9 @@ ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS name TEXT;
 ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS phone TEXT;
 ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS whatsapp TEXT;
 
+-- Migration: admin avatar (profile picture shown in the admin dashboard).
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS avatar TEXT;
+
 -- Migration: link products to the registered user who added them.
 -- Safe to re-run — only adds the column/index if missing.
 ALTER TABLE products ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(id) ON DELETE SET NULL;
@@ -80,3 +83,6 @@ ALTER TABLE products ADD COLUMN IF NOT EXISTS is_deal BOOLEAN DEFAULT false;
 
 -- Migration: user avatar (profile picture shown on listings).
 ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT;
+
+-- Migration: 4-digit reset pin (hashed) used as 2-step verification to reset a password.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS pin_hash TEXT;

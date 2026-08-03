@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import { fetchMyAdminProfileAction } from "@/lib/actions/admin";
 
 export default function AdminLayout({
   children,
@@ -13,6 +14,8 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const [adminName, setAdminName] = useState("");
+  const [adminAvatar, setAdminAvatar] = useState("");
 
   useEffect(() => {
     if (pathname === "/admin/login" || pathname === "/admin/reset-password") return;
@@ -23,6 +26,18 @@ export default function AdminLayout({
       router.replace("/dashboard");
     }
   }, [status, session, router, pathname]);
+
+  useEffect(() => {
+    if (status !== "authenticated" || session?.user?.role !== "admin") return;
+    fetchMyAdminProfileAction()
+      .then((p) => {
+        if (p) {
+          setAdminName(p.name ?? "");
+          setAdminAvatar(p.avatar ?? "");
+        }
+      })
+      .catch(() => {});
+  }, [status, session]);
 
   if (pathname === "/admin/login" || pathname === "/admin/reset-password") return <>{children}</>;
 
@@ -102,6 +117,18 @@ export default function AdminLayout({
             </nav>
           </div>
           <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center text-white font-bold text-xs overflow-hidden shrink-0">
+                {adminAvatar ? (
+                  <img src={adminAvatar} alt="Admin" className="w-full h-full object-cover" />
+                ) : (
+                  (adminName || session?.user?.name || "A")[0].toUpperCase()
+                )}
+              </div>
+              <span className="hidden sm:inline text-xs text-white/70 max-w-[120px] truncate">
+                {adminName || session?.user?.name}
+              </span>
+            </div>
             <Link
               href="/"
               className="text-white/50 hover:text-white text-xs transition-colors"

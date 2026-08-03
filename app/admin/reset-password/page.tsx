@@ -7,6 +7,7 @@ import { resetAdminPasswordAction } from "@/lib/actions/auth";
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -18,10 +19,11 @@ export default function ResetPasswordPage() {
     setMessage("");
 
     try {
-      await resetAdminPasswordAction(email, password);
+      await resetAdminPasswordAction(email, password, pin);
       setMessage("Password reset successfully! You can now log in.");
       setEmail("");
       setPassword("");
+      setPin("");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -67,6 +69,22 @@ export default function ResetPasswordPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Min 6 characters"
+                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                Backup Pin
+              </label>
+              <input
+                type="password"
+                required
+                inputMode="numeric"
+                maxLength={4}
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                placeholder="Enter backup pin"
                 className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
               />
             </div>

@@ -44,6 +44,7 @@ export async function createUserByAdminAction(data: {
   phone: string;
   whatsapp?: string;
   password: string;
+  pin?: string;
 }) {
   await requireAdmin();
 
@@ -53,16 +54,21 @@ export async function createUserByAdminAction(data: {
   if (data.password.length < 6) {
     throw new Error("Password must be at least 6 characters");
   }
+  if (data.pin && !/^\d{4}$/.test(data.pin)) {
+    throw new Error("Reset pin must be a 4-digit code");
+  }
 
   const exists = await checkPhoneExists(data.phone);
   if (exists) throw new Error("A user with this phone number already exists");
 
   const password_hash = await bcrypt.hash(data.password, 12);
+  const pin_hash = data.pin ? await bcrypt.hash(data.pin, 12) : null;
   const user = await createUser({
     name: data.name,
     phone: data.phone,
     whatsapp: data.whatsapp || data.phone,
     password_hash,
+    pin_hash,
   });
 
   revalidatePath("/admin/users");
@@ -109,6 +115,18 @@ export async function setUserAdminAction(id: string, isAdmin: boolean) {
   revalidatePath("/admin/users");
   revalidatePath("/admin");
   return user;
+}
+
+// Backup plan: an admin sets a new password for a user (e.g. if they forgot their reset pin).
+export async function resetUserPasswordByAdminAction(id: string, newPassword: string) {
+  await requireAdmin();
+  if (!newPassword || newPassword.length < 6) {
+    throw new Error("New password must be at least 6 characters");
+  }
+  const passwordHash = await bcrypt.hash(newPassword, 12);
+  await updateUserPassword(id, passwordHash);
+  revalidatePath("/admin/users");
+  return { success: true };
 }
 
 // Removes the user account. Any products they added are kept and simply become

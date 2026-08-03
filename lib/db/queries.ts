@@ -15,6 +15,7 @@ export interface AdminUserRow {
   name: string | null;
   phone: string | null;
   whatsapp: string | null;
+  avatar: string | null;
   created_at: string;
 }
 
@@ -233,15 +234,16 @@ export async function getAdminUserById(id: string): Promise<AdminUserRow | null>
 
 export async function updateAdminProfile(
   id: string,
-  data: { name?: string; phone?: string; whatsapp?: string },
+  data: { name?: string; phone?: string; whatsapp?: string; avatar?: string | null },
 ): Promise<AdminUserRow | null> {
   const { rows } = await pool.query(
     `UPDATE admin_users SET
        name = COALESCE($1, name),
        phone = COALESCE($2, phone),
-       whatsapp = COALESCE($3, whatsapp)
-     WHERE id = $4 RETURNING *`,
-    [data.name ?? null, data.phone ?? null, data.whatsapp ?? null, id],
+       whatsapp = COALESCE($3, whatsapp),
+       avatar = $4
+     WHERE id = $5 RETURNING *`,
+    [data.name ?? null, data.phone ?? null, data.whatsapp ?? null, data.avatar ?? null, id],
   );
   return rows[0] ?? null;
 }
@@ -255,6 +257,41 @@ export async function updateAdminUserPassword(id: string, passwordHash: string):
   await pool.query("UPDATE admin_users SET password_hash = $1 WHERE id = $2", [passwordHash, id]);
 }
 
+export async function getAdminUsers(): Promise<AdminUserRow[]> {
+  const { rows } = await pool.query(
+    "SELECT * FROM admin_users ORDER BY created_at ASC",
+  );
+  return rows;
+}
+
+export async function createAdminUser(data: {
+  email: string;
+  name?: string;
+  phone?: string;
+  whatsapp?: string;
+  avatar?: string | null;
+  password_hash: string;
+}): Promise<AdminUserRow> {
+  const { rows } = await pool.query(
+    `INSERT INTO admin_users (email, password_hash, name, phone, whatsapp, avatar)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     RETURNING *`,
+    [
+      data.email,
+      data.password_hash,
+      data.name ?? null,
+      data.phone ?? null,
+      data.whatsapp ?? null,
+      data.avatar ?? null,
+    ],
+  );
+  return rows[0];
+}
+
+export async function deleteAdminUser(id: string): Promise<void> {
+  await pool.query("DELETE FROM admin_users WHERE id = $1", [id]);
+}
+
 // ── Users (registered marketplace users) ──
 
 export interface UserRow {
@@ -264,6 +301,7 @@ export interface UserRow {
   whatsapp: string | null;
   avatar: string | null;
   password_hash: string;
+  pin_hash: string | null;
   is_active: boolean;
   is_admin: boolean;
   created_at: string;
@@ -309,12 +347,13 @@ export async function createUser(data: {
   phone: string;
   whatsapp?: string;
   password_hash: string;
+  pin_hash?: string | null;
   is_active?: boolean;
 }): Promise<AppUser> {
   const { rows } = await pool.query(
-    `INSERT INTO users (name, phone, whatsapp, password_hash, is_active)
-     VALUES ($1,$2,$3,$4,$5) RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, created_at`,
-    [data.name, data.phone, data.whatsapp ?? null, data.password_hash, data.is_active ?? true],
+    `INSERT INTO users (name, phone, whatsapp, password_hash, pin_hash, is_active)
+     VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, created_at`,
+    [data.name, data.phone, data.whatsapp ?? null, data.password_hash, data.pin_hash ?? null, data.is_active ?? true],
   );
   return mapUser(rows[0]);
 }

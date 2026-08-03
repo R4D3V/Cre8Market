@@ -48,6 +48,11 @@ export default function AdminDashboard() {
           <p className="font-bold text-gray-900 text-sm">Users</p>
           <p className="text-gray-400 text-xs mt-0.5">Manage</p>
         </Link>
+        <Link href="/admin/admins" className="neu-card p-4 text-center hover:shadow-lg transition-shadow">
+          <p className="text-2xl mb-1">🛡️</p>
+          <p className="font-bold text-gray-900 text-sm">Admins</p>
+          <p className="text-gray-400 text-xs mt-0.5">Add or remove</p>
+        </Link>
       </div>
     </div>
   );

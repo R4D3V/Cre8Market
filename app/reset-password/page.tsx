@@ -8,11 +8,13 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { resetUserPasswordAction } from "@/lib/actions/auth";
+import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -24,7 +26,7 @@ export default function ResetPasswordPage() {
     setMessage("");
 
     try {
-      await resetUserPasswordAction(phone, password);
+      await resetUserPasswordAction(toFullNumber(phone), password, pin);
       setMessage("Password reset successfully! You can now log in.");
       const result = await signIn("user-credentials", { phone, password, redirect: false });
       if (!result?.error) {
@@ -72,13 +74,11 @@ export default function ResetPasswordPage() {
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                   Phone Number
                 </label>
-                <input
-                  type="tel"
+                <PhoneInput
                   required
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+256 700 000 000"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                  onChange={setPhone}
+                  placeholder="700 000 000"
                 />
               </div>
               <div>
@@ -94,6 +94,25 @@ export default function ResetPasswordPage() {
                   placeholder="Min 6 characters"
                   className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  4-Digit Reset Pin
+                </label>
+                <input
+                  type="password"
+                  required
+                  inputMode="numeric"
+                  pattern="\d{4}"
+                  maxLength={4}
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Pin you set when registering"
+                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Verification pin set when you created your account.
+                </p>
               </div>
 
               {error && (

@@ -8,6 +8,7 @@ import {
   changeMyAdminPasswordAction,
 } from "@/lib/actions/admin";
 import type { AdminUserRow } from "@/lib/db/queries";
+import { compressImage } from "@/lib/imageCompress";
 
 export default function AdminProfilePage() {
   const [profile, setProfile] = useState<AdminUserRow | null>(null);
@@ -16,6 +17,7 @@ export default function AdminProfilePage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [avatar, setAvatar] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
@@ -30,16 +32,32 @@ export default function AdminProfilePage() {
       setName(data.name ?? "");
       setPhone(data.phone ?? "");
       setWhatsapp(data.whatsapp ?? "");
+      setAvatar(data.avatar ?? "");
       setLoading(false);
     });
   }, []);
+
+  async function handleAvatarUpload(file: File | null) {
+    if (!file) return;
+    try {
+      const dataUrl = await compressImage(file, 400, 0.7);
+      setAvatar(dataUrl);
+    } catch {
+      setInfoError("Could not read that image. Please try a different file.");
+    }
+  }
 
   async function handleInfoSubmit(e: React.FormEvent) {
     e.preventDefault();
     setInfoMsg("");
     setInfoError("");
     try {
-      const updated = await updateMyAdminProfileAction({ name, phone, whatsapp });
+      const updated = await updateMyAdminProfileAction({
+        name,
+        phone,
+        whatsapp,
+        avatar: avatar || null,
+      });
       if (updated) setProfile(updated);
       setInfoMsg("Profile updated successfully!");
     } catch (err: unknown) {
@@ -84,6 +102,35 @@ export default function AdminProfilePage() {
       <div className="neu-card p-6 mb-6">
         <h2 className="font-bold text-gray-900 mb-4">Account Information</h2>
         <form onSubmit={handleInfoSubmit} className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-full bg-navy flex items-center justify-center text-white font-bold text-2xl shrink-0 overflow-hidden">
+              {avatar ? (
+                <img src={avatar} alt="Profile avatar" className="w-full h-full object-cover" />
+              ) : (
+                (name || profile?.name || "A")[0].toUpperCase()
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="neu-pill bg-surface text-navy text-xs font-semibold px-3 py-1.5 cursor-pointer text-center">
+                📷 Upload Photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleAvatarUpload(e.target.files?.[0] ?? null)}
+                />
+              </label>
+              {avatar && (
+                <button
+                  type="button"
+                  onClick={() => setAvatar("")}
+                  className="text-xs text-red-500 hover:text-red-700 font-semibold"
+                >
+                  Remove Photo
+                </button>
+              )}
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
               Full Name

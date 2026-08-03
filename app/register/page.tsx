@@ -17,6 +17,7 @@ export default function RegisterPage() {
   const [whatsapp, setWhatsapp] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [pin, setPin] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
@@ -25,6 +26,7 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (password !== confirm) { setError('Passwords do not match'); return }
+    if (!/^\d{4}$/.test(pin)) { setError('Reset pin must be a 4-digit code'); return }
     setLoading(true)
     setError('')
     setAccountExists(false)
@@ -35,6 +37,7 @@ export default function RegisterPage() {
         phone: toFullNumber(phone),
         whatsapp: whatsapp ? toFullNumber(whatsapp) : undefined,
         password,
+        pin,
       })
 
       // Registration succeeded — sign the new account in right away.
@@ -156,6 +159,25 @@ export default function RegisterPage() {
                   placeholder="Repeat password"
                   className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  4-Digit Reset Pin
+                </label>
+                <input
+                  type="password"
+                  required
+                  inputMode="numeric"
+                  pattern="\d{4}"
+                  maxLength={4}
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+                  placeholder="e.g. 1234"
+                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  You'll use this pin to verify your identity when resetting your password.
+                </p>
               </div>
 
               {error && (

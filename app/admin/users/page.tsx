@@ -7,7 +7,7 @@ import {
   createUserByAdminAction,
   setUserActiveAction,
   updateUserByAdminAction,
-  setUserAdminAction,
+  resetUserPasswordByAdminAction,
   deleteUserAction,
 } from "@/lib/actions/users";
 import type { AppUser } from "@/lib/types";
@@ -17,7 +17,7 @@ import { compressImage } from "@/lib/imageCompress";
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: "", phone: "", whatsapp: "", password: "" });
+  const [form, setForm] = useState({ name: "", phone: "", whatsapp: "", password: "", pin: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export default function AdminUsersPage() {
     phone: "",
     whatsapp: "",
     avatar: "",
-    isAdmin: false,
+    newPassword: "",
   });
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState("");
@@ -48,7 +48,7 @@ export default function AdminUsersPage() {
       phone: toLocalPart(u.phone),
       whatsapp: toLocalPart(u.whatsapp ?? ""),
       avatar: u.avatar ?? "",
-      isAdmin: u.isAdmin,
+      newPassword: "",
     });
     setEditError("");
   }
@@ -73,8 +73,8 @@ export default function AdminUsersPage() {
         whatsapp: editForm.whatsapp ? toFullNumber(editForm.whatsapp) : undefined,
         avatar: editForm.avatar || null,
       });
-      if (editForm.isAdmin !== u.isAdmin) {
-        await setUserAdminAction(u.id, editForm.isAdmin);
+      if (editForm.newPassword) {
+        await resetUserPasswordByAdminAction(u.id, editForm.newPassword);
       }
       setEditingId(null);
       await load();
@@ -95,8 +95,9 @@ export default function AdminUsersPage() {
         phone: toFullNumber(form.phone),
         whatsapp: form.whatsapp ? toFullNumber(form.whatsapp) : undefined,
         password: form.password,
+        pin: form.pin || undefined,
       });
-      setForm({ name: "", phone: "", whatsapp: "", password: "" });
+      setForm({ name: "", phone: "", whatsapp: "", password: "", pin: "" });
       await load();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to add user");
@@ -176,6 +177,23 @@ export default function AdminUsersPage() {
               onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
               className="neu-inset w-full px-3 py-2 text-sm focus:outline-none"
               placeholder="At least 6 characters"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              4-Digit Reset Pin (optional)
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="\d{4}"
+              maxLength={4}
+              value={form.pin}
+              onChange={(e) => setForm((f) => ({ ...f, pin: e.target.value.replace(/\D/g, "") }))}
+              className="neu-inset w-full px-3 py-2 text-sm focus:outline-none"
+              placeholder="e.g. 1234"
             />
           </div>
         </div>
@@ -333,17 +351,16 @@ export default function AdminUsersPage() {
                     <td className="py-3 pr-4">
                       {editing ? (
                         <div className="flex flex-col items-start gap-2">
-                          <label className="flex items-center gap-2 text-xs font-semibold text-gray-700 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={editForm.isAdmin}
-                              onChange={(e) =>
-                                setEditForm((f) => ({ ...f, isAdmin: e.target.checked }))
-                              }
-                              className="w-4 h-4 rounded border-gray-300"
-                            />
-                            Admin
-                          </label>
+                          <input
+                            type="text"
+                            value={editForm.newPassword}
+                            onChange={(e) =>
+                              setEditForm((f) => ({ ...f, newPassword: e.target.value }))
+                            }
+                            placeholder="New password (optional)"
+                            minLength={6}
+                            className="neu-inset w-40 px-2.5 py-1.5 text-xs focus:outline-none"
+                          />
                           {editError && (
                             <span className="text-xs text-red-600">{editError}</span>
                           )}
