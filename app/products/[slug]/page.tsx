@@ -72,8 +72,9 @@ export default function ProductDetailPage() {
   function handleSendOffer(e: React.FormEvent) {
     e.preventDefault();
     if (!product) return;
+    const url = shareUrl || window.location.href;
     const text = encodeURIComponent(
-      `Hi, I'd like to make an offer of UGX ${Number(offerAmount).toLocaleString()} for: ${product.title}. ${offerMessage}`,
+      `Hi, I'd like to make an offer of UGX ${Number(offerAmount).toLocaleString()} for: ${product.title}.${offerMessage ? ` ${offerMessage}` : ""}\n\n${url}`,
     );
     window.open(
       `https://wa.me/${sellerWhatsapp}?text=${text}`,

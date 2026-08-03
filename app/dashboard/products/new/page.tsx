@@ -100,16 +100,6 @@ export default function NewMyProductPage() {
         timeAgo: "Just now",
       });
 
-      await fetch("/api/push/notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: "New Product Added!",
-          body: `${form.title} — UGX ${Number(form.price).toLocaleString()}`,
-          url: `/products/${product.slug}`,
-        }),
-      }).catch(() => {});
-
       router.push("/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save product");

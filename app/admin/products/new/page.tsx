@@ -111,17 +111,6 @@ export default function NewProductPage() {
         timeAgo: "Just now",
       });
 
-      // Send push notification about new product
-      await fetch("/api/push/notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: "New Product Added!",
-          body: `${form.title} — UGX ${Number(form.price).toLocaleString()}`,
-          url: `/products/${slug}`,
-        }),
-      }).catch(() => {});
-
       router.push("/admin");
     } catch (err: unknown) {
       alert("Error saving: " + (err instanceof Error ? err.message : "Unknown error"));

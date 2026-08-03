@@ -19,6 +19,7 @@ import {
   getProductOwnerIds,
 } from "@/lib/db/queries";
 import { auth } from "@/lib/auth";
+import { sendPushNotification } from "@/lib/push";
 import { revalidatePath } from "next/cache";
 import type { Product } from "@/lib/types";
 
@@ -75,6 +76,11 @@ export async function createProductAction(data: Record<string, unknown>) {
   const exists = await checkSlugExists(data.slug as string);
   if (exists) throw new Error("Slug already exists");
   const product = await createProduct(data);
+  await sendPushNotification({
+    title: "New Product Added!",
+    body: `${product.title} — UGX ${Number(product.price).toLocaleString()}`,
+    url: `/products/${product.slug}`,
+  }).catch(() => {});
   revalidatePath("/admin");
   revalidatePath("/products");
   revalidatePath("/deals");
@@ -132,6 +138,11 @@ export async function createMyProductAction(data: Record<string, unknown>) {
   const exists = await checkSlugExists(data.slug as string);
   if (exists) throw new Error("Slug already exists");
   const product = await createProduct({ ...data, user_id: userId });
+  await sendPushNotification({
+    title: "New Product Added!",
+    body: `${product.title} — UGX ${Number(product.price).toLocaleString()}`,
+    url: `/products/${product.slug}`,
+  }).catch(() => {});
   revalidatePath("/dashboard");
   revalidatePath("/admin");
   revalidatePath("/products");
