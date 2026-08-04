@@ -22,9 +22,11 @@ export default function Navbar() {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    if (search.trim()) {
-      router.push(`/products?q=${encodeURIComponent(search.trim())}`);
-    }
+    const params = new URLSearchParams();
+    if (search.trim()) params.set("q", search.trim());
+    if (category && category !== "All") params.set("category", category);
+    const qs = params.toString();
+    router.push(qs ? `/products?${qs}` : "/products");
   }
 
   return (
@@ -85,12 +87,6 @@ export default function Navbar() {
             <div className="flex items-center gap-2 shrink-0 sm:hidden">
               {isUser ? (
                 <>
-                  <Link
-                    href="/dashboard"
-                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-2 py-1.5"
-                  >
-                    Dashboard
-                  </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="text-white/70 hover:text-white text-sm font-medium transition-colors px-2 py-1.5"

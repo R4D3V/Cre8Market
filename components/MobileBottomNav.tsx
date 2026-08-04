@@ -17,7 +17,11 @@ export default function MobileBottomNav() {
       label: "Add Product",
       icon: "➕",
     },
-    { href: "/login", label: "Login", icon: "👤" },
+    {
+      href: isLoggedIn ? "/dashboard" : "/login",
+      label: isLoggedIn ? "Dashboard" : "Login",
+      icon: "👤",
+    },
   ];
 
   return (

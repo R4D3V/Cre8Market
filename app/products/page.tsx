@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import CategoryBar from "@/components/CategoryBar";
 import Footer from "@/components/Footer";
@@ -25,6 +25,7 @@ export default function ProductsPage() {
 
 function ProductsPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const qParam = searchParams.get("q") ?? "";
   const categoryParam = searchParams.get("category") ?? "";
   const featuredParam = searchParams.get("featured") ?? "";
@@ -46,6 +47,11 @@ function ProductsPageContent() {
   }, [categoryParam]);
 
   useEffect(() => {
+    setSearch(qParam);
+    setPage(1);
+  }, [qParam]);
+
+  useEffect(() => {
     fetchProductsAction().then((data) => {
       setAllProducts(data);
       setLoading(false);
@@ -60,7 +66,13 @@ function ProductsPageContent() {
 
     if (featuredParam === "1") list = list.filter((p) => p.featured);
     if (sortParam === "latest")
-      list = list.sort((a, b) => a.daysAgo - b.daysAgo);
+      list = [...list].sort((a, b) => a.daysAgo - b.daysAgo);
+    else if (sortParam === "price-asc")
+      list = [...list].sort((a, b) => a.price - b.price);
+    else if (sortParam === "price-desc")
+      list = [...list].sort((a, b) => b.price - a.price);
+    else if (sortParam === "featured")
+      list = [...list].sort((a, b) => Number(b.featured) - Number(a.featured));
 
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -205,7 +217,15 @@ function ProductsPageContent() {
                     ` in ${categories.find((c) => c.slug === selectedCategory)?.name}`}
                 </p>
               </div>
-              <select className="neu-inset px-3 py-2 text-sm focus:outline-none">
+              <select
+                value={sortParam || "latest"}
+                onChange={(e) => {
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.set("sort", e.target.value);
+                  router.replace(`/products?${params.toString()}`);
+                }}
+                className="neu-inset px-3 py-2 text-sm focus:outline-none"
+              >
                 <option value="latest">Latest first</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
