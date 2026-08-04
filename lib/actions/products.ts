@@ -17,6 +17,7 @@ import {
   getProductsByUserId,
   getProductOwnerId,
   getProductOwnerIds,
+  getSellers,
 } from "@/lib/db/queries";
 import { auth } from "@/lib/auth";
 import { sendPushNotification } from "@/lib/push";
@@ -40,6 +41,10 @@ async function requireUser() {
 
 export async function fetchProductsAction() {
   return getProducts();
+}
+
+export async function fetchSellersAction() {
+  return getSellers();
 }
 
 export async function fetchFeaturedProductsAction() {

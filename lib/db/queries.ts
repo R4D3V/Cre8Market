@@ -319,6 +319,33 @@ export async function getUsers(): Promise<AppUser[]> {
   return rows.map(mapUser);
 }
 
+// Public: sellers for the /products filter — registered users with listings,
+// plus the store (admin-added products, which have no user_id).
+export async function getSellers(): Promise<{ id: string; name: string; productCount: number }[]> {
+  const { rows } = await pool.query(`
+    SELECT u.id, u.name, COUNT(p.id)::int AS product_count
+    FROM users u
+    INNER JOIN products p ON p.user_id = u.id
+    GROUP BY u.id
+    ORDER BY u.name ASC
+  `);
+  const sellers = rows.map((r) => ({
+    id: r.id as string,
+    name: r.name as string,
+    productCount: Number(r.product_count),
+  }));
+
+  const storeCount = await pool.query(
+    "SELECT COUNT(*)::int AS count FROM products WHERE user_id IS NULL",
+  );
+  const storeProducts = Number(storeCount.rows[0]?.count ?? 0);
+  if (storeProducts > 0) {
+    sellers.push({ id: "store", name: "CRE8MARKET Store", productCount: storeProducts });
+  }
+
+  return sellers;
+}
+
 export async function getUserById(id: string): Promise<AppUser | null> {
   const { rows } = await pool.query(
     "SELECT id, name, phone, whatsapp, avatar, is_active, is_admin, created_at FROM users WHERE id = $1",

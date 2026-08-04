@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import ProductCard from "@/components/ProductCard";
 import { formatPrice } from "@/lib/data";
-import { fetchProductsAction } from "@/lib/actions/products";
+import { fetchProductsAction, fetchSellersAction } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import type { Product } from "@/lib/types";
 import type { CategoryDB } from "@/lib/types";
@@ -33,10 +33,12 @@ function ProductsPageContent() {
 
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<CategoryDB[]>([]);
+  const [sellers, setSellers] = useState<{ id: string; name: string; productCount: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState(qParam);
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
+  const [selectedSeller, setSelectedSeller] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [page, setPage] = useState(1);
@@ -58,6 +60,9 @@ function ProductsPageContent() {
     });
     fetchCategoriesAction().then((data) => {
       setCategories(data ?? []);
+    });
+    fetchSellersAction().then((data) => {
+      setSellers(data ?? []);
     });
   }, []);
 
@@ -88,11 +93,17 @@ function ProductsPageContent() {
       list = list.filter((p) => p.categorySlug === selectedCategory);
     }
 
+    if (selectedSeller === "store") {
+      list = list.filter((p) => !p.user_id);
+    } else if (selectedSeller) {
+      list = list.filter((p) => p.user_id === selectedSeller);
+    }
+
     if (minPrice) list = list.filter((p) => p.price >= Number(minPrice));
     if (maxPrice) list = list.filter((p) => p.price <= Number(maxPrice));
 
     return list;
-  }, [search, selectedCategory, minPrice, maxPrice, featuredParam, sortParam, allProducts]);
+  }, [search, selectedCategory, selectedSeller, minPrice, maxPrice, featuredParam, sortParam, allProducts]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(
@@ -103,6 +114,7 @@ function ProductsPageContent() {
   function resetFilters() {
     setSearch("");
     setSelectedCategory("");
+    setSelectedSeller("");
     setMinPrice("");
     setMaxPrice("");
     setPage(1);
@@ -162,6 +174,28 @@ function ProductsPageContent() {
                   {categories.map((c) => (
                     <option key={c.id} value={c.slug}>
                       {c.icon} {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Seller */}
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">
+                  Seller
+                </label>
+                <select
+                  value={selectedSeller}
+                  onChange={(e) => {
+                    setSelectedSeller(e.target.value);
+                    setPage(1);
+                  }}
+                  className="neu-inset w-full px-3 py-2 text-sm focus:outline-none"
+                >
+                  <option value="">All Sellers</option>
+                  {sellers.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.productCount})
                     </option>
                   ))}
                 </select>
