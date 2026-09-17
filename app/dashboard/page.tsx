@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { formatPrice } from "@/lib/data";
 import { fetchMyProductsAction, deleteMyProductsAction } from "@/lib/actions/products";
+import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { Product } from "@/lib/types";
 
 export default function MyProductsPage() {
@@ -58,23 +59,19 @@ export default function MyProductsPage() {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-heading text-2xl font-extrabold text-foreground">My Products</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            {products.length} product{products.length !== 1 && "s"} listed
-          </p>
-        </div>
+    <DashboardPanel
+      title="My Products"
+      description={`${products.length} product${products.length !== 1 && "s"} listed`}
+      action={
         <Link
           href="/dashboard/products/new"
-          className="neu-pill bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-5 py-2.5 text-sm transition-all"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           + Add Product
         </Link>
-      </div>
-
-      <div className="mb-6 bg-card border border-border rounded-xl p-4 flex items-center justify-between">
+      }
+    >
+      <div className="mb-6 bg-background/40 border border-border rounded-xl p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shrink-0">
             {(session?.user?.name ?? "U")[0].toUpperCase()}
@@ -198,6 +195,6 @@ export default function MyProductsPage() {
           </table>
         </div>
       )}
-    </div>
+    </DashboardPanel>
   );
 }
