@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, LogOut } from "lucide-react";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { fetchMyProfileAction } from "@/lib/actions/users";
@@ -82,9 +83,13 @@ export default function DashboardLayout({
               href="/dashboard"
               className="hidden items-center gap-2 font-heading text-sm font-extrabold tracking-wide sm:flex"
             >
-              <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground text-[10px] font-black">
-                C8
-              </span>
+              <Image
+                src="/brand/logo.webp"
+                alt="Cre8 Market"
+                width={1080}
+                height={1080}
+                className="size-7 shrink-0 rounded-lg object-contain"
+              />
               CRE8<span className="text-primary">MARKET</span>
             </Link>
 

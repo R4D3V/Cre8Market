@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 
@@ -14,8 +15,15 @@ export default function Navbar() {
       <div className="container flex items-center justify-between gap-x-4 py-3">
         <Link
           href="/"
-          className="flex items-center gap-x-1 text-h5 font-black font-heading"
+          className="flex items-center gap-x-2 text-h5 font-black font-heading"
         >
+          <Image
+            src="/brand/logo.webp"
+            alt="Cre8 Market"
+            width={1080}
+            height={1080}
+            className="size-8 shrink-0 rounded-lg object-contain"
+          />
           Cre8<span className="text-primary">Market</span>
         </Link>
 

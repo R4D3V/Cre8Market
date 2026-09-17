@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -6,7 +7,14 @@ export default function Footer() {
       <div className="container grid gap-x-8 gap-y-10 py-14 md:grid-cols-2 xl:grid-cols-4">
         {/* Brand */}
         <div>
-          <Link href="/" className="text-h5 font-black font-heading">
+          <Link href="/" className="inline-flex items-center gap-x-2 text-h5 font-black font-heading">
+            <Image
+              src="/brand/logo.webp"
+              alt="Cre8 Market"
+              width={1080}
+              height={1080}
+              className="size-10 shrink-0 object-contain"
+            />
             Cre8<span className="text-primary">Market</span>
           </Link>
           <p className="mt-3 text-sm text-muted-foreground">
