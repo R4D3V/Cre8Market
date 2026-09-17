@@ -1,59 +1,129 @@
-"use client";
-
 import Link from "next/link";
+import {
+  Package,
+  PlusCircle,
+  FolderTree,
+  Users,
+  ShieldCheck,
+  Tag,
+  UserCircle,
+} from "lucide-react";
+import { AdminPanel } from "@/components/admin/AdminPanel";
+import { AdminStatCard } from "@/components/admin/AdminStatCard";
+import { auth } from "@/lib/auth";
+import {
+  getProducts,
+  getDeals,
+  getUsers,
+  getAdminUsers,
+} from "@/lib/db/queries";
 
-export default function AdminDashboard() {
+export const dynamic = "force-dynamic";
+
+async function getDashboardStats() {
+  const [products, deals, users, admins] = await Promise.all([
+    getProducts(),
+    getDeals(),
+    getUsers(),
+    getAdminUsers(),
+  ]);
+
+  return {
+    totalListings: products.length,
+    activeDeals: deals.length,
+    totalUsers: users.length,
+    totalAdmins: admins.length,
+  };
+}
+
+const QUICK_ACTIONS = [
+  {
+    label: "All Products",
+    description: "View, edit and feature listings",
+    href: "/admin/products",
+    icon: Package,
+  },
+  {
+    label: "Add Product",
+    description: "List a new item for sale",
+    href: "/admin/products/new",
+    icon: PlusCircle,
+  },
+  {
+    label: "Categories",
+    description: "Manage marketplace categories",
+    href: "/admin/categories",
+    icon: FolderTree,
+  },
+  {
+    label: "Users",
+    description: "Manage registered sellers",
+    href: "/admin/users",
+    icon: Users,
+  },
+  {
+    label: "Admins",
+    description: "Add or remove administrators",
+    href: "/admin/admins",
+    icon: ShieldCheck,
+  },
+  {
+    label: "My Profile",
+    description: "Update your account details",
+    href: "/admin/profile",
+    icon: UserCircle,
+  },
+];
+
+export default async function AdminDashboardPage() {
+  const session = await auth();
+  if (session?.user?.role !== "admin") return null;
+
+  const stats = await getDashboardStats();
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-extrabold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
-            Manage your store from here
-          </p>
-        </div>
+    <AdminPanel
+      title="Admin Dashboard"
+      description="Overview of your marketplace listings and users"
+      action={
         <Link
           href="/admin/products/new"
-          className="neu-pill bg-navy hover:bg-navy-hover text-white font-bold px-5 py-2.5 text-sm transition-all"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
         >
-          + Add Product
+          <PlusCircle className="size-4" />
+          Add Product
         </Link>
+      }
+    >
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard label="Total Listings" value={stats.totalListings} icon={Package} />
+        <AdminStatCard label="Active Deals" value={stats.activeDeals} icon={Tag} />
+        <AdminStatCard label="Users" value={stats.totalUsers} icon={Users} />
+        <AdminStatCard label="Admins" value={stats.totalAdmins} icon={ShieldCheck} />
       </div>
 
-      {/* Manage cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Link
-          href="/admin/products"
-          className="neu-card p-4 text-center hover:shadow-lg transition-shadow"
-        >
-          <p className="text-2xl mb-1">📦</p>
-          <p className="font-bold text-gray-900 text-sm">All Products</p>
-          <p className="text-gray-400 text-xs mt-0.5">View & edit</p>
-        </Link>
-        <Link
-          href="/admin/products/new"
-          className="neu-card p-4 text-center hover:shadow-lg transition-shadow"
-        >
-          <p className="text-2xl mb-1">➕</p>
-          <p className="font-bold text-gray-900 text-sm">Add Product</p>
-          <p className="text-gray-400 text-xs mt-0.5">List new item</p>
-        </Link>
-        <Link href="/admin/categories" className="neu-card p-4 text-center hover:shadow-lg transition-shadow">
-          <p className="text-2xl mb-1">📂</p>
-          <p className="font-bold text-gray-900 text-sm">Categories</p>
-          <p className="text-gray-400 text-xs mt-0.5">Manage</p>
-        </Link>
-        <Link href="/admin/users" className="neu-card p-4 text-center hover:shadow-lg transition-shadow">
-          <p className="text-2xl mb-1">🧑‍🤝‍🧑</p>
-          <p className="font-bold text-gray-900 text-sm">Users</p>
-          <p className="text-gray-400 text-xs mt-0.5">Manage</p>
-        </Link>
-        <Link href="/admin/admins" className="neu-card p-4 text-center hover:shadow-lg transition-shadow">
-          <p className="text-2xl mb-1">🛡️</p>
-          <p className="font-bold text-gray-900 text-sm">Admins</p>
-          <p className="text-gray-400 text-xs mt-0.5">Add or remove</p>
-        </Link>
+      <div className="mt-8">
+        <h2 className="mb-3 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {QUICK_ACTIONS.map(({ label, description, href, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className="flex items-start gap-3 rounded-2xl border border-border bg-background/40 p-4 transition-colors hover:border-primary/40 hover:bg-primary/5"
+            >
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Icon className="size-4" />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-semibold text-foreground">{label}</span>
+                <span className="block text-sm text-muted-foreground">{description}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
-    </div>
+    </AdminPanel>
   );
 }

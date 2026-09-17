@@ -13,12 +13,12 @@ export default function CategoryBar() {
   }, []);
 
   return (
-    <div className="bg-surface px-3 sm:px-4 -mt-2">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-2">
+    <div className="border-b border-border bg-background px-3 sm:px-4">
+      <div className="container">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-3">
           <Link
             href="/products"
-            className="neu-pill bg-surface text-sm font-semibold text-navy px-4 py-2 whitespace-nowrap"
+            className="shrink-0 rounded-md border border-border bg-card text-sm font-semibold text-foreground px-4 py-2 whitespace-nowrap transition hover:border-primary hover:text-primary"
           >
             All
           </Link>
@@ -26,7 +26,7 @@ export default function CategoryBar() {
             <Link
               key={cat.id}
               href={`/products?category=${cat.slug}`}
-              className="neu-pill bg-surface flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-navy px-4 py-2 whitespace-nowrap"
+              className="shrink-0 flex items-center gap-1.5 rounded-md border border-border bg-card text-sm font-medium text-muted-foreground hover:text-foreground hover:border-primary px-4 py-2 whitespace-nowrap transition"
             >
               <span>{cat.icon}</span>
               <span>{cat.name}</span>

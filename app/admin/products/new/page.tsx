@@ -126,17 +126,17 @@ export default function NewProductPage() {
     <div>
       <Link
         href="/admin"
-        className="text-sm text-navy font-semibold hover:underline mb-4 inline-block"
+        className="text-sm text-primary font-semibold hover:underline mb-4 inline-block"
       >
         ← Back to Dashboard
       </Link>
-      <h1 className="text-2xl font-extrabold text-gray-900 mb-6">
+      <h1 className="text-2xl font-extrabold font-heading text-foreground mb-6">
         Add New Product
       </h1>
 
       <form onSubmit={handleSubmit} className="neu-card p-6 max-w-2xl space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
             Title *
           </label>
           <input
@@ -144,20 +144,20 @@ export default function NewProductPage() {
             value={form.title}
             onChange={(e) => update("title", e.target.value)}
             placeholder="e.g. Samsung Galaxy S24 Ultra"
-            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+            className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
         </div>
 
         {/* Images */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-muted-foreground mb-2">
             Product Images (up to 4)
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[0, 1, 2, 3].map((i) => (
               <label
                 key={i}
-                className="neu-inset aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors overflow-hidden"
+                className="neu-inset aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors overflow-hidden"
               >
                 {images[i] ? (
                   <img
@@ -166,7 +166,7 @@ export default function NewProductPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="flex flex-col items-center gap-1 text-gray-400">
+                  <div className="flex flex-col items-center gap-1 text-muted-foreground">
                     <span className="text-xl">📷</span>
                     <span className="text-[10px] font-semibold">Image {i + 1}</span>
                   </div>
@@ -184,7 +184,7 @@ export default function NewProductPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Price (UGX) *
             </label>
             <input
@@ -193,18 +193,18 @@ export default function NewProductPage() {
               value={form.price}
               onChange={(e) => update("price", e.target.value)}
               placeholder="e.g. 1200000"
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Category *
             </label>
             <select
               required
               value={form.categorySlug}
               onChange={(e) => update("categorySlug", e.target.value)}
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             >
               <option value="">Select…</option>
               {categories.map((c) => (
@@ -218,13 +218,13 @@ export default function NewProductPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Condition
             </label>
             <select
               value={form.condition}
               onChange={(e) => update("condition", e.target.value)}
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             >
               <option value="">Select…</option>
               {["New", "Like New", "Used - Good", "Used - Fair", "Refurbished"].map(
@@ -237,20 +237,20 @@ export default function NewProductPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Location
             </label>
             <input
               value={form.location}
               onChange={(e) => update("location", e.target.value)}
               placeholder="Kitoro, Entebbe"
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
             Description
           </label>
           <textarea
@@ -258,12 +258,12 @@ export default function NewProductPage() {
             value={form.description}
             onChange={(e) => update("description", e.target.value)}
             placeholder="Describe the product, its condition, what's included…"
-            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none resize-none"
+            className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none resize-none"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
             Specs (one per line — Label: Value)
           </label>
           <textarea
@@ -271,21 +271,21 @@ export default function NewProductPage() {
             value={form.specs}
             onChange={(e) => update("specs", e.target.value)}
             placeholder={"Storage: 256GB\nRAM: 8GB\nColor: Phantom Black"}
-            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none resize-none font-mono"
+            className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none resize-none font-mono"
           />
         </div>
 
         <div className="neu-inset p-4">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">
             Seller (from your profile)
           </p>
-          <p className="text-sm font-semibold text-gray-800">
+          <p className="text-sm font-semibold text-foreground">
             {form.sellerName || "—"} · Phone {form.sellerPhone || "—"} · WhatsApp{" "}
             {form.sellerWhatsapp || "—"}
           </p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             This is taken from your admin profile. Update it in{" "}
-            <Link href="/admin/profile" className="text-navy hover:underline">
+            <Link href="/admin/profile" className="text-primary hover:underline">
               My Profile
             </Link>{" "}
             if it changes.
@@ -297,9 +297,9 @@ export default function NewProductPage() {
             type="checkbox"
             checked={form.featured}
             onChange={(e) => update("featured", e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-navy focus:ring-navy"
+            className="w-4 h-4 rounded border-border bg-card text-primary focus:ring-primary"
           />
-          <span className="text-sm font-semibold text-gray-700">
+          <span className="text-sm font-semibold text-muted-foreground">
             Mark as Featured
           </span>
         </label>
@@ -309,9 +309,9 @@ export default function NewProductPage() {
             type="checkbox"
             checked={form.isDeal}
             onChange={(e) => update("isDeal", e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-navy focus:ring-navy"
+            className="w-4 h-4 rounded border-border bg-card text-primary focus:ring-primary"
           />
-          <span className="text-sm font-semibold text-gray-700">
+          <span className="text-sm font-semibold text-muted-foreground">
             🔥 Mark as a Deal (shows on the Deals page)
           </span>
         </label>
@@ -320,13 +320,13 @@ export default function NewProductPage() {
           <button
             type="submit"
             disabled={saving}
-            className="neu-pill bg-navy hover:bg-navy-hover text-white font-bold px-6 py-2.5 text-sm transition-all disabled:opacity-60"
+            className="neu-pill bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 py-2.5 text-sm transition-all disabled:opacity-60"
           >
             {saving ? "Saving…" : "Save Product"}
           </button>
           <Link
             href="/admin"
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Cancel
           </Link>

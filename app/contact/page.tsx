@@ -29,31 +29,31 @@ export default function ContactPage() {
   return (
     <>
       <Navbar />
-      <main className="max-w-3xl mx-auto px-4 py-10 pb-28 sm:pb-10">
-        <Link href="/" className="text-sm text-navy font-semibold hover:underline mb-6 inline-block">← Home</Link>
+      <main className="container py-10 pb-28 sm:pb-10">
+        <Link href="/" className="text-sm text-primary font-semibold hover:underline mb-6 inline-block">← Home</Link>
 
         {/* Hero */}
         <ScrollReveal>
-          <div className="neu-dark-card text-white text-center py-12 px-6 mb-8">
-            <h1 className="text-3xl font-extrabold mb-3">Contact Us</h1>
-            <p className="text-white/70 text-base max-w-lg mx-auto">
+          <div className="neu-dark-card text-foreground text-center py-12 px-6 mb-8">
+            <h1 className="text-3xl font-extrabold font-heading mb-3">Contact Us</h1>
+            <p className="text-muted-foreground text-base max-w-lg mx-auto">
               Have a question, feedback, or need help? We&apos;re here for you.
             </p>
           </div>
         </ScrollReveal>
 
-        <div className="grid md:grid-cols-5 gap-6">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Sidebar info */}
-          <ScrollReveal className="md:col-span-2 space-y-4">
+          <ScrollReveal className="lg:col-span-1 space-y-4">
             <div className="neu-card p-5">
-              <h2 className="font-extrabold text-gray-900 text-sm mb-3">Get in Touch</h2>
-              <ul className="space-y-3 text-sm text-gray-600">
+              <h2 className="font-extrabold text-foreground text-sm mb-3">Get in Touch</h2>
+              <ul className="space-y-3 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2.5">
                   <span className="text-lg shrink-0">📍</span>
                   <span>Kitoro Entebbe Uganda</span>
                 </li>
                 <li>
-                  <a href="mailto:raymonjohns@gmail.com" className="flex items-start gap-2.5 hover:text-navy transition-colors">
+                  <a href="mailto:raymonjohns@gmail.com" className="flex items-start gap-2.5 hover:text-primary transition-colors">
                     <span className="text-lg shrink-0">📧</span>
                     <span>raymonjohns@gmail.com</span>
                   </a>
@@ -68,49 +68,49 @@ export default function ContactPage() {
             </div>
 
             <div className="neu-card p-5">
-              <h2 className="font-extrabold text-gray-900 text-sm mb-3">Hours</h2>
-              <ul className="space-y-2 text-sm text-gray-600">
+              <h2 className="font-extrabold text-foreground text-sm mb-3">Hours</h2>
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex justify-between"><span>Mon – Fri</span><span className="font-medium">8:00 AM – 6:00 PM</span></li>
                 <li className="flex justify-between"><span>Saturday</span><span className="font-medium">9:00 AM – 4:00 PM</span></li>
-                <li className="flex justify-between"><span>Sunday</span><span className="font-medium text-gray-400">Closed</span></li>
+                <li className="flex justify-between"><span>Sunday</span><span className="font-medium text-muted-foreground">Closed</span></li>
               </ul>
             </div>
           </ScrollReveal>
 
           {/* Form */}
-          <ScrollReveal delay={100} className="md:col-span-3">
+          <ScrollReveal delay={100} className="lg:col-span-2">
             {submitted ? (
               <div className="neu-card text-center py-12 px-6">
                 <div className="text-5xl mb-4">✅</div>
-                <h2 className="text-xl font-extrabold text-gray-900 mb-2">Message Sent!</h2>
-                <p className="text-gray-500 text-sm mb-6">We&apos;ll get back to you on WhatsApp shortly.</p>
-                <button onClick={() => { setSubmitted(false); setName(''); setEmail(''); setSubject(''); setMessage('') }} className="neu-pill bg-navy text-white font-bold px-5 py-2.5 text-sm hover:bg-navy-hover transition-all">
+                <h2 className="text-xl font-extrabold text-foreground mb-2">Message Sent!</h2>
+                <p className="text-muted-foreground text-sm mb-6">We&apos;ll get back to you on WhatsApp shortly.</p>
+                <button onClick={() => { setSubmitted(false); setName(''); setEmail(''); setSubject(''); setMessage('') }} className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm hover:bg-primary/90 transition-all">
                   Send Another Message
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="neu-card p-6 space-y-4">
-                <h2 className="text-lg font-extrabold text-gray-900">Send us a message</h2>
+                <h2 className="text-lg font-extrabold text-foreground">Send us a message</h2>
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Your Name *</label>
-                    <input required type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all" />
+                    <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Your Name *</label>
+                    <input required type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all" />
+                    <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Email</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Subject *</label>
-                  <input required type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="What is this about?" className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all" />
+                  <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Subject *</label>
+                  <input required type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="What is this about?" className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all" />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Message *</label>
-                  <textarea required rows={4} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Tell us more about your enquiry…" className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none resize-none transition-all" />
+                  <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Message *</label>
+                  <textarea required rows={4} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Tell us more about your enquiry…" className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none resize-none transition-all" />
                 </div>
 
                 <button type="submit" disabled={loading} className="neu-pill w-full bg-wa hover:bg-wa-dark text-white font-bold py-3.5 text-sm transition-all disabled:opacity-60 flex items-center justify-center gap-2">

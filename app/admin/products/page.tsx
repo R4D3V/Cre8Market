@@ -124,15 +124,15 @@ function AdminProductsPageInner() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900">All Products</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
+          <h1 className="text-2xl font-extrabold font-heading text-foreground">All Products</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">
             {filteredProducts.length} product{filteredProducts.length !== 1 && "s"}
             {filteredProducts.length !== products.length && ` of ${products.length} total`}
           </p>
         </div>
         <Link
           href="/admin/products/new"
-          className="neu-pill bg-navy hover:bg-navy-hover text-white font-bold px-5 py-2.5 text-sm transition-all"
+          className="neu-pill bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-5 py-2.5 text-sm transition-all"
         >
           + Add Product
         </Link>
@@ -144,12 +144,12 @@ function AdminProductsPageInner() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search title, category, owner…"
-          className="neu-inset px-3 py-2 text-sm focus:outline-none w-full sm:w-64"
+          className="neu-inset px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none w-full sm:w-64"
         />
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="neu-inset px-3 py-2 text-sm focus:outline-none"
+          className="neu-inset px-3 py-2 text-sm text-foreground focus:outline-none"
         >
           <option value="">All Categories</option>
           {categories.map((c) => (
@@ -164,7 +164,7 @@ function AdminProductsPageInner() {
             setOwnerFilter(e.target.value);
             if (e.target.value !== "user") setSelectedUserId("");
           }}
-          className="neu-inset px-3 py-2 text-sm focus:outline-none"
+          className="neu-inset px-3 py-2 text-sm text-foreground focus:outline-none"
         >
           <option value="all">All Owners</option>
           <option value="admin">Added by Store (Admin)</option>
@@ -174,7 +174,7 @@ function AdminProductsPageInner() {
           <select
             value={selectedUserId}
             onChange={(e) => setSelectedUserId(e.target.value)}
-            className="neu-inset px-3 py-2 text-sm focus:outline-none"
+            className="neu-inset px-3 py-2 text-sm text-foreground focus:outline-none"
           >
             <option value="">Select user…</option>
             {owners.map((o) => (
@@ -189,33 +189,33 @@ function AdminProductsPageInner() {
       {/* Bulk actions */}
       {selectedIds.length > 0 && (
         <div className="neu-card p-3 mb-4 flex flex-wrap items-center gap-3">
-          <span className="text-sm font-bold text-gray-900">
+          <span className="text-sm font-bold text-foreground">
             {selectedIds.length} selected
           </span>
           <button
             onClick={() => handleBulkFeatured(true)}
             disabled={busy}
-            className="neu-pill bg-surface text-navy text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
+            className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
           >
             ★ Mark Featured
           </button>
           <button
             onClick={() => handleBulkFeatured(false)}
             disabled={busy}
-            className="neu-pill bg-surface text-navy text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
+            className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
           >
             Unmark Featured
           </button>
           <button
             onClick={() => handleBulkDelete()}
             disabled={busy}
-            className="neu-pill bg-surface text-red-500 text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
+            className="neu-pill bg-destructive text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
           >
             Delete Selected
           </button>
           <button
             onClick={() => setSelected(new Set())}
-            className="text-xs text-gray-500 hover:text-gray-700"
+            className="text-xs text-muted-foreground hover:text-foreground"
           >
             Clear
           </button>
@@ -224,34 +224,34 @@ function AdminProductsPageInner() {
 
       {/* Products table */}
       {loading ? (
-        <div className="text-center py-12 text-gray-500 text-sm">Loading…</div>
+        <div className="text-center py-12 text-muted-foreground text-sm">Loading…</div>
       ) : filteredProducts.length === 0 ? (
         <div className="neu-card text-center py-12">
           <p className="text-4xl mb-3">📦</p>
-          <h3 className="font-bold text-gray-900 mb-1">No products found</h3>
-          <p className="text-gray-500 text-sm mb-4">
+          <h3 className="font-bold text-foreground mb-1">No products found</h3>
+          <p className="text-muted-foreground text-sm mb-4">
             {products.length === 0
               ? "Add your first product to get started."
               : "Try a different filter or search."}
           </p>
           <Link
             href="/admin/products/new"
-            className="neu-pill bg-navy text-white font-bold px-5 py-2.5 text-sm inline-block"
+            className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm inline-block"
           >
             + Add Product
           </Link>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="bg-card border border-border rounded-xl overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-gray-400 text-xs uppercase tracking-wide">
+              <tr className="text-left text-muted-foreground text-xs uppercase tracking-wide">
                 <th className="pb-3 pr-4 font-semibold">
                   <input
                     type="checkbox"
                     checked={selectedIds.length === filteredProducts.length && filteredProducts.length > 0}
                     onChange={toggleAll}
-                    className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+                    className="w-4 h-4 rounded border-border bg-card text-primary cursor-pointer"
                   />
                 </th>
                 <th className="pb-3 pr-4 font-semibold">Product</th>
@@ -266,51 +266,51 @@ function AdminProductsPageInner() {
               {filteredProducts.map((p) => (
                 <tr
                   key={`${p.id}-${p.slug}`}
-                  className={`border-t border-gray-100 ${selected.has(p.id) ? "bg-navy/5" : ""}`}
+                  className={`border-t border-border ${selected.has(p.id) ? "bg-primary/5" : ""}`}
                 >
                   <td className="py-3 pr-4">
                     <input
                       type="checkbox"
                       checked={selected.has(p.id)}
                       onChange={() => toggleSelected(p.id)}
-                      className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+                      className="w-4 h-4 rounded border-border bg-card text-primary cursor-pointer"
                     />
                   </td>
                   <td className="py-3 pr-4">
-                    <p className="font-semibold text-gray-900 truncate max-w-[200px]">{p.title}</p>
+                    <p className="font-semibold text-foreground truncate max-w-[200px]">{p.title}</p>
                   </td>
-                  <td className="py-3 pr-4 text-gray-500">{p.category}</td>
-                  <td className="py-3 pr-4 text-navy font-bold">{formatPrice(p.price)}</td>
+                  <td className="py-3 pr-4 text-muted-foreground">{p.category}</td>
+                  <td className="py-3 pr-4 text-primary font-bold">{formatPrice(p.price)}</td>
                   <td className="py-3 pr-4">
                     {p.ownerType === "user" ? (
                       <span className="inline-flex items-center gap-1.5">
-                        <span className="w-5 h-5 rounded-full bg-navy text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                        <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shrink-0">
                           {(p.ownerName ?? "U")[0].toUpperCase()}
                         </span>
-                        <span className="text-gray-700 text-xs font-semibold">{p.ownerName}</span>
+                        <span className="text-muted-foreground text-xs font-semibold">{p.ownerName}</span>
                       </span>
                     ) : (
-                      <span className="text-gray-400 text-xs font-semibold">Store (Admin)</span>
+                      <span className="text-muted-foreground text-xs font-semibold">Store (Admin)</span>
                     )}
                   </td>
                   <td className="py-3 pr-4">
                     {p.featured ? (
                       <span className="text-featured text-xs font-bold">★ Featured</span>
                     ) : (
-                      <span className="text-gray-300 text-xs">—</span>
+                      <span className="text-muted-foreground text-xs">—</span>
                     )}
                   </td>
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/admin/products/${p.id}/edit`}
-                        className="neu-pill bg-surface text-navy text-xs font-semibold px-3 py-1.5 transition-all"
+                        className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 transition-all"
                       >
                         Edit
                       </Link>
                       <button
                         onClick={() => handleDelete(p.id)}
-                        className="neu-pill bg-surface text-red-500 text-xs font-semibold px-3 py-1.5 transition-all"
+                        className="neu-pill bg-destructive text-white text-xs font-semibold px-3 py-1.5 transition-all"
                       >
                         Delete
                       </button>

@@ -48,7 +48,7 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-gray-500">Loading…</p>
+        <p className="text-muted-foreground">Loading…</p>
       </div>
     );
   }
@@ -60,6 +60,8 @@ export default function ProductDetailPage() {
   const bg = product.categoryBg ?? "#f8fafc";
   // Prefer the registered user who added the product; fall back to the stored seller record.
   const sellerName = product.ownerName ?? product.seller?.name;
+  // Admin-created products (no user_id) are always treated as verified.
+  const isVerified = product.user_id ? !!product.ownerVerified : true;
   const sellerWhatsapp = product.ownerWhatsapp ?? product.seller?.whatsapp ?? "256751621506";
   const waContactUrl = `https://wa.me/${sellerWhatsapp}?text=${encodeURIComponent(`Hey, I would like to purchase this product.\n\n${shareUrl}`)}`;
 
@@ -90,7 +92,7 @@ export default function ProductDetailPage() {
         {/* Back */}
         <Link
           href="/products"
-          className="inline-flex items-center gap-1.5 text-sm text-navy font-semibold mb-5 hover:underline"
+          className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold mb-5 hover:underline"
         >
           ← Back to Listings
         </Link>
@@ -122,7 +124,7 @@ export default function ProductDetailPage() {
                       onClick={() => setSelectedImage(i)}
                       className={`w-16 h-16 rounded-lg overflow-hidden shrink-0 border-2 transition-all ${
                         i === selectedImage
-                          ? "border-navy opacity-100"
+                          ? "border-primary opacity-100"
                           : "border-transparent opacity-60 hover:opacity-90"
                       }`}
                     >
@@ -149,19 +151,19 @@ export default function ProductDetailPage() {
 
             {/* Title & Price */}
             <div>
-              <h1 className="text-2xl font-extrabold text-gray-900 leading-tight mb-2">
+              <h1 className="font-heading text-2xl font-extrabold text-foreground leading-tight mb-2">
                 {product.title}
               </h1>
               <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-2xl font-extrabold text-navy">
+                <span className="text-2xl font-extrabold text-primary">
                   {formatPrice(product.price)}
                 </span>
                 {product.condition && (
-                  <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                  <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-full">
                     {product.condition}
                   </span>
                 )}
-                <span className="bg-blue-50 text-blue-600 text-xs font-semibold px-2 py-1 rounded-full">
+                <span className="bg-secondary/10 text-secondary text-xs font-semibold px-2 py-1 rounded-full">
                   Available
                 </span>
               </div>
@@ -170,7 +172,7 @@ export default function ProductDetailPage() {
             {/* Description */}
             {product.description && (
               <div className="neu-card p-4">
-                <p className="text-gray-700 text-sm leading-relaxed">
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   {product.description}
                 </p>
               </div>
@@ -186,10 +188,10 @@ export default function ProductDetailPage() {
                     <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
                       {product.specs.map((s) => (
                         <div key={s.label}>
-                          <dt className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
+                          <dt className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                             {s.label}
                           </dt>
-                          <dd className="mt-0.5 text-sm text-ink">{s.value}</dd>
+                          <dd className="mt-0.5 text-sm text-foreground">{s.value}</dd>
                         </div>
                       ))}
                     </dl>
@@ -214,10 +216,10 @@ export default function ProductDetailPage() {
                     : []),
                 ].map((m) => (
                   <div key={m.label}>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
                       {m.label}
                     </p>
-                    <p className="text-sm font-semibold text-gray-800 mt-0.5">
+                    <p className="text-sm font-semibold text-foreground mt-0.5">
                       {m.value}
                     </p>
                   </div>
@@ -227,7 +229,7 @@ export default function ProductDetailPage() {
 
             {/* Share */}
             <div className="neu-card p-4">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">
                 Share this listing
               </p>
               <div className="flex flex-wrap gap-2">
@@ -248,7 +250,7 @@ export default function ProductDetailPage() {
                 </a>
                 <button
                   onClick={handleCopyLink}
-                  className="flex items-center gap-1.5 bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="flex items-center gap-1.5 bg-muted text-muted-foreground text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-muted transition-colors"
                 >
                   {copied ? "✅ Copied!" : "🔗 Copy Link"}
                 </button>
@@ -277,7 +279,7 @@ export default function ProductDetailPage() {
               </a>
               <button
                 onClick={() => setOfferOpen(!offerOpen)}
-                className="neu-pill w-full border-2 border-navy text-navy font-bold py-3 text-sm hover:bg-navy hover:text-white transition-all"
+                className="neu-pill w-full border-2 border-primary text-primary font-bold py-3 text-sm hover:bg-primary hover:text-primary-foreground transition-all"
               >
                 Make an Offer
               </button>
@@ -286,7 +288,7 @@ export default function ProductDetailPage() {
               {offerOpen && !offerSent && (
                 <form onSubmit={handleSendOffer} className="mt-4 space-y-3">
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 block mb-1">
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
                       Your offer (UGX)
                     </label>
                     <input
@@ -295,11 +297,11 @@ export default function ProductDetailPage() {
                       value={offerAmount}
                       onChange={(e) => setOfferAmount(e.target.value)}
                       placeholder={`e.g. ${Math.round(product.price * 0.85).toLocaleString()}`}
-                      className="neu-inset w-full px-3 py-2 text-sm focus:outline-none"
+                      className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 block mb-1">
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1">
                       Message (optional)
                     </label>
                     <textarea
@@ -307,19 +309,19 @@ export default function ProductDetailPage() {
                       onChange={(e) => setOfferMessage(e.target.value)}
                       placeholder="Any details about your offer…"
                       rows={2}
-                      className="neu-inset w-full px-3 py-2 text-sm focus:outline-none resize-none"
+                      className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none resize-none"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="neu-pill w-full bg-accent hover:bg-accent-dark text-navy font-bold py-2.5 text-sm transition-all"
+                    className="neu-pill w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2.5 text-sm transition-all"
                   >
                     📤 Send Offer via WhatsApp
                   </button>
                 </form>
               )}
               {offerSent && (
-                <p className="mt-3 text-center text-sm text-green-600 font-semibold">
+                <p className="mt-3 text-center text-sm text-primary font-semibold">
                   ✅ Offer sent on WhatsApp!
                 </p>
               )}
@@ -327,11 +329,11 @@ export default function ProductDetailPage() {
 
             {/* Seller info */}
             <div className="neu-card p-5">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">
                 About the Seller
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center text-white font-bold text-lg shrink-0 overflow-hidden">
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shrink-0 overflow-hidden">
                   {product.ownerAvatar ? (
                     <img
                       src={product.ownerAvatar}
@@ -343,17 +345,31 @@ export default function ProductDetailPage() {
                   )}
                 </div>
                 <div>
-                  <p className="font-bold text-gray-900 text-sm">
+                  <p className="font-bold text-foreground text-sm flex items-center gap-1">
                     {sellerName ?? "Private Seller"}
+                    {isVerified && (
+                      <svg
+                        className="w-4 h-4 text-secondary shrink-0"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        aria-label="Verified"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.707-9.293a1 1 0 0 0-1.414-1.414L9 10.586 7.707 9.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4Z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
                   </p>
-                  {product.ownerName && (
-                    <span className="inline-block bg-green-50 text-green-600 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1">
-                      ✓ Registered Member
+                  {isVerified && (
+                    <span className="inline-block bg-secondary/10 text-secondary text-[10px] font-bold px-2 py-0.5 rounded-full mt-1">
+                      ✓ Verified Seller
                     </span>
                   )}
-                  {!product.ownerName && product.seller?.verified && (
-                    <span className="inline-block bg-green-50 text-green-600 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1">
-                      ✓ Verified Seller
+                  {product.user_id && !isVerified && (
+                    <span className="inline-block bg-muted text-muted-foreground text-[10px] font-bold px-2 py-0.5 rounded-full mt-1">
+                      ○ Not Verified
                     </span>
                   )}
                 </div>
@@ -361,11 +377,11 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Safety tips */}
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-              <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-2">
+            <div className="bg-secondary/10 border border-secondary/40 rounded-2xl p-4">
+              <p className="text-xs font-bold text-secondary uppercase tracking-wide mb-2">
                 🛡️ Safety Tips
               </p>
-              <ul className="text-xs text-amber-800 space-y-1">
+              <ul className="text-xs text-secondary space-y-1">
                 <li>• Meet seller in a safe, public location</li>
                 <li>• Inspect the item before paying</li>
                 <li>• Never send money in advance</li>
@@ -378,7 +394,7 @@ export default function ProductDetailPage() {
         {/* Related products */}
         {related.length > 0 && (
           <div className="mt-10">
-            <h2 className="text-xl font-extrabold text-gray-900 mb-4">
+            <h2 className="font-heading text-xl font-extrabold text-foreground mb-4">
               Similar Listings
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

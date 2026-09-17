@@ -33,8 +33,8 @@ export default function MobileBottomNav() {
             href={item.href}
             className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors ${
               pathname === item.href
-                ? "text-accent"
-                : "text-white/45 hover:text-white"
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <span className="text-xl leading-none">{item.icon}</span>

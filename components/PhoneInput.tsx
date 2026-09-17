@@ -21,14 +21,14 @@ export function PhoneInput({
 }) {
   return (
     <div className="neu-inset flex items-center w-full overflow-hidden">
-      <span className="pl-3 text-sm font-semibold text-gray-500 select-none">+256</span>
+      <span className="pl-3 text-sm font-semibold text-muted-foreground select-none">+256</span>
       <input
         required={required}
         type="tel"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-transparent px-2 py-2 text-sm focus:outline-none"
+        className="w-full bg-transparent px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
       />
     </div>
   );

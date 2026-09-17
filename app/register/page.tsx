@@ -69,13 +69,13 @@ export default function RegisterPage() {
         <main className="min-h-[70vh] flex items-center justify-center px-4 py-12">
           <div className="text-center max-w-sm">
             <div className="text-6xl mb-4">🎉</div>
-            <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Welcome, {name}!</h1>
-            <p className="text-gray-500 mb-6">Your account has been created. You can now post listings and contact sellers.</p>
+            <h1 className="font-heading text-2xl font-extrabold text-foreground mb-2">Welcome, {name}!</h1>
+            <p className="text-muted-foreground mb-6">Your account has been created. You can now post listings and contact sellers.</p>
             <div className="flex gap-3 justify-center">
-              <Link href="/dashboard/products/new" className="neu-pill bg-navy text-white font-bold px-5 py-2.5 text-sm hover:bg-navy-hover transition-all">
+              <Link href="/dashboard/products/new" className="neu-pill bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-5 py-2.5 text-sm transition-all">
                 Add a Listing
               </Link>
-              <Link href="/products" className="neu-pill bg-surface text-navy font-bold px-5 py-2.5 text-sm transition-all">
+              <Link href="/products" className="neu-pill border border-border bg-card text-foreground font-bold px-5 py-2.5 text-sm transition-all">
                 Browse Listings
               </Link>
             </div>
@@ -101,25 +101,25 @@ export default function RegisterPage() {
                 className="w-24 h-24 object-contain mx-auto"
               />
             </Link>
-            <h1 className="text-xl font-extrabold text-gray-900 mt-4 mb-1">Create a free account</h1>
-            <p className="text-gray-500 text-sm">Buy, sell and get the best deals in Uganda</p>
+            <h1 className="font-heading text-xl font-extrabold text-foreground mt-4 mb-1">Create a free account</h1>
+            <p className="text-muted-foreground text-sm">Buy, sell and get the best deals in Uganda</p>
           </div>
 
           <div className="neu-card p-7">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Full Name</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your full name"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                  className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone / WhatsApp Number</label>
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Phone / WhatsApp Number</label>
                 <PhoneInput
                   required
                   value={phone}
@@ -128,7 +128,7 @@ export default function RegisterPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                   WhatsApp Number (if different)
                 </label>
                 <PhoneInput
@@ -138,7 +138,7 @@ export default function RegisterPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Password</label>
                 <input
                   type="password"
                   required
@@ -146,22 +146,22 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Create a password"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                  className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Confirm Password</label>
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Confirm Password</label>
                 <input
                   type="password"
                   required
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   placeholder="Repeat password"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                  className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                   4-Digit Reset Pin
                 </label>
                 <input
@@ -173,20 +173,20 @@ export default function RegisterPage() {
                   value={pin}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
                   placeholder="e.g. 1234"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                  className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                 />
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   You'll use this pin to verify your identity when resetting your password.
                 </p>
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+                <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
                   <p>{error}</p>
                   {accountExists && (
                     <Link
                       href="/reset-password"
-                      className="inline-block mt-2 text-navy font-bold hover:underline"
+                      className="inline-block mt-2 text-primary font-bold hover:underline"
                     >
                       Forgot your password? Reset it here →
                     </Link>
@@ -197,22 +197,22 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="neu-pill w-full bg-navy hover:bg-navy-hover text-white font-bold py-3 text-sm transition-all disabled:opacity-60"
+                className="neu-pill w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold py-3 text-sm transition-all disabled:opacity-60"
               >
                 {loading ? 'Creating account…' : 'Register Free'}
               </button>
 
-              <p className="text-center text-xs text-gray-400">
+              <p className="text-center text-xs text-muted-foreground">
                 By registering you agree to our{' '}
-                <Link href="/terms" className="text-navy hover:underline">Terms</Link> &{' '}
-                <Link href="/privacy" className="text-navy hover:underline">Privacy Policy</Link>
+                <Link href="/terms" className="text-primary hover:underline">Terms</Link> &{' '}
+                <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
               </p>
             </form>
 
-            <div className="mt-4 pt-4 border-t border-gray-100 text-center">
-              <p className="text-sm text-gray-500">
+            <div className="mt-4 pt-4 border-t border-border text-center">
+              <p className="text-sm text-muted-foreground">
                 Already have an account?{' '}
-                <Link href="/login" className="text-navy font-bold hover:underline">Sign In</Link>
+                <Link href="/login" className="text-primary font-bold hover:underline">Sign In</Link>
               </p>
             </div>
           </div>

@@ -5,21 +5,32 @@ import { formatPrice } from "@/lib/data";
 interface Props {
   product: Product;
   size?: "default" | "small";
+  variant?: "light" | "dark";
 }
 
-export default function ProductCard({ product, size = "default" }: Props) {
+export default function ProductCard({
+  product,
+  variant = "light",
+}: Props) {
   const icon = product.categoryIcon ?? "📦";
   const color = product.categoryColor ?? "#64748b";
   const bg = product.categoryBg ?? "#f8fafc";
+  const dark = variant === "dark";
 
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group neu-card neu-card-hover overflow-hidden flex flex-col"
+      className={
+        dark
+          ? "group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition hover:border-primary"
+          : "group neu-card neu-card-hover overflow-hidden flex flex-col"
+      }
     >
       {/* Image / Placeholder */}
       <div
-        className="relative aspect-[4/3] flex items-center justify-center overflow-hidden rounded-t-3xl"
+        className={`relative aspect-[4/3] flex items-center justify-center overflow-hidden ${
+          dark ? "rounded-t-xl" : "rounded-t-3xl"
+        }`}
         style={{ backgroundColor: bg }}
       >
         {product.images?.[0] ? (
@@ -57,24 +68,42 @@ export default function ProductCard({ product, size = "default" }: Props) {
       <div className="p-3.5 flex flex-col gap-1 flex-1">
         <span
           className="text-[10px] font-semibold uppercase tracking-wide"
-          style={{ color }}
+          style={{ color: dark ? "var(--color-primary)" : color }}
         >
           {product.category}
         </span>
-        <p className="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug">
+        <p
+          className={`text-sm font-semibold line-clamp-2 leading-snug ${
+            dark ? "text-foreground" : "text-gray-900"
+          }`}
+        >
           {product.title}
         </p>
         <div className="flex items-center justify-between mt-auto pt-2">
-          <span className="text-navy font-bold text-sm">
+          <span
+            className={`font-bold text-sm ${
+              dark ? "text-primary" : "text-navy"
+            }`}
+          >
             {formatPrice(product.price)}
           </span>
-          <span className="text-gray-400 text-[10px]">{product.timeAgo}</span>
+          <span
+            className={`text-[10px] ${
+              dark ? "text-muted-foreground" : "text-gray-400"
+            }`}
+          >
+            {product.timeAgo}
+          </span>
         </div>
       </div>
 
       {/* CTA strip */}
       <div className="px-3.5 pb-3.5">
-        <span className="text-xs text-navy font-medium group-hover:underline">
+        <span
+          className={`text-xs font-medium group-hover:underline ${
+            dark ? "text-primary" : "text-navy"
+          }`}
+        >
           View Product →
         </span>
       </div>

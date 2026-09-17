@@ -86,10 +86,10 @@ export default function AdminCategoriesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-extrabold text-gray-900">Categories</h1>
+        <h1 className="text-2xl font-extrabold font-heading text-foreground">Categories</h1>
         <Link
           href="/admin"
-          className="text-sm text-navy font-semibold hover:underline"
+          className="text-sm text-primary font-semibold hover:underline"
         >
           ← Back to Dashboard
         </Link>
@@ -97,56 +97,56 @@ export default function AdminCategoriesPage() {
 
       {/* Form */}
       <form onSubmit={handleSave} className="neu-card p-5 max-w-xl mb-8 space-y-3">
-        <h2 className="font-bold text-gray-900">
+        <h2 className="font-bold font-heading text-foreground">
           {editing ? "Edit Category" : "Add Category"}
         </h2>
         <div className="flex gap-3">
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Name</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Name</label>
             <input
               required
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value, slug: editing ? f.slug : slugify(e.target.value) }))}
-              className="neu-inset w-full px-3 py-2 text-sm focus:outline-none"
+              className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="Electronics"
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Slug</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Slug</label>
             <input
               required
               value={form.slug}
               onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-              className="neu-inset w-full px-3 py-2 text-sm focus:outline-none font-mono"
+              className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none font-mono"
               placeholder="electronics"
             />
           </div>
         </div>
         <div className="flex gap-3">
           <div className="w-20">
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Icon</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Icon</label>
             <input
               value={form.icon}
               onChange={(e) => setForm((f) => ({ ...f, icon: e.target.value }))}
-              className="neu-inset w-full px-3 py-2 text-sm text-center focus:outline-none"
+              className="neu-inset w-full px-3 py-2 text-sm text-center text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="📦"
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Color</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Color</label>
             <input
               value={form.color}
               onChange={(e) => setForm((f) => ({ ...f, color: e.target.value }))}
-              className="neu-inset w-full px-3 py-2 text-sm focus:outline-none font-mono"
+              className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none font-mono"
               placeholder="#64748b"
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-gray-500 mb-1">BG Color</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">BG Color</label>
             <input
               value={form.bg_color}
               onChange={(e) => setForm((f) => ({ ...f, bg_color: e.target.value }))}
-              className="neu-inset w-full px-3 py-2 text-sm focus:outline-none font-mono"
+              className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none font-mono"
               placeholder="#f8fafc"
             />
           </div>
@@ -158,7 +158,7 @@ export default function AdminCategoriesPage() {
               key={dc.color}
               type="button"
               onClick={() => setForm((f) => ({ ...f, color: dc.color, bg_color: dc.bg }))}
-              className="w-6 h-6 rounded-full border border-gray-200"
+              className="w-6 h-6 rounded-full border border-border"
               style={{ backgroundColor: dc.color }}
               title={`${dc.color} / ${dc.bg}`}
             />
@@ -168,12 +168,12 @@ export default function AdminCategoriesPage() {
           <button
             type="submit"
             disabled={saving}
-            className="neu-pill bg-navy text-white font-bold px-5 py-2 text-sm disabled:opacity-60"
+            className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2 text-sm disabled:opacity-60"
           >
             {saving ? "Saving…" : editing ? "Update" : "Add Category"}
           </button>
           {editing && (
-            <button type="button" onClick={resetForm} className="text-sm text-gray-500 hover:text-gray-700">
+            <button type="button" onClick={resetForm} className="text-sm text-muted-foreground hover:text-foreground">
               Cancel
             </button>
           )}
@@ -182,14 +182,14 @@ export default function AdminCategoriesPage() {
 
       {/* List */}
       {loading ? (
-        <p className="text-center text-gray-500 text-sm py-8">Loading…</p>
+        <p className="text-center text-muted-foreground text-sm py-8">Loading…</p>
       ) : cats.length === 0 ? (
-        <p className="text-center text-gray-400 text-sm py-8">No categories yet.</p>
+        <p className="text-center text-muted-foreground text-sm py-8">No categories yet.</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="bg-card border border-border rounded-xl overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-gray-400 text-xs uppercase tracking-wide">
+              <tr className="text-left text-muted-foreground text-xs uppercase tracking-wide">
                 <th className="pb-3 pr-4 font-semibold">Icon</th>
                 <th className="pb-3 pr-4 font-semibold">Name</th>
                 <th className="pb-3 pr-4 font-semibold">Slug</th>
@@ -199,27 +199,27 @@ export default function AdminCategoriesPage() {
             </thead>
             <tbody>
               {cats.map((c) => (
-                <tr key={c.id} className="border-t border-gray-100">
+                <tr key={c.id} className="border-t border-border">
                   <td className="py-3 pr-4 text-xl">{c.icon}</td>
-                  <td className="py-3 pr-4 font-semibold text-gray-900">{c.name}</td>
-                  <td className="py-3 pr-4 text-gray-500 font-mono text-xs">{c.slug}</td>
+                  <td className="py-3 pr-4 font-semibold text-foreground">{c.name}</td>
+                  <td className="py-3 pr-4 text-muted-foreground font-mono text-xs">{c.slug}</td>
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full border" style={{ backgroundColor: c.color }} />
-                      <span className="w-5 h-5 rounded-full border" style={{ backgroundColor: c.bg_color }} />
+                      <span className="w-5 h-5 rounded-full border border-border" style={{ backgroundColor: c.color }} />
+                      <span className="w-5 h-5 rounded-full border border-border" style={{ backgroundColor: c.bg_color }} />
                     </div>
                   </td>
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => startEdit(c)}
-                        className="neu-pill bg-surface text-navy text-xs font-semibold px-3 py-1.5"
+                        className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(c.id)}
-                        className="neu-pill bg-surface text-red-500 text-xs font-semibold px-3 py-1.5"
+                        className="neu-pill bg-destructive text-white text-xs font-semibold px-3 py-1.5"
                       >
                         Delete
                       </button>

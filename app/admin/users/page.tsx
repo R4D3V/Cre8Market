@@ -6,6 +6,7 @@ import {
   fetchUsersAction,
   createUserByAdminAction,
   setUserActiveAction,
+  setUserVerifiedAction,
   updateUserByAdminAction,
   resetUserPasswordByAdminAction,
   deleteUserAction,
@@ -111,6 +112,11 @@ export default function AdminUsersPage() {
     load();
   }
 
+  async function handleToggleVerified(u: AppUser) {
+    await setUserVerifiedAction(u.id, !u.isVerified);
+    load();
+  }
+
   async function handleDelete(id: string) {
     if (
       !confirm(
@@ -125,28 +131,28 @@ export default function AdminUsersPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-extrabold text-gray-900">Users</h1>
-        <Link href="/admin" className="text-sm text-navy font-semibold hover:underline">
+        <h1 className="text-2xl font-extrabold text-foreground font-heading">Users</h1>
+        <Link href="/admin" className="text-sm text-primary font-semibold hover:underline">
           ← Back to Dashboard
         </Link>
       </div>
 
       {/* Add user form */}
       <form onSubmit={handleCreate} className="neu-card p-5 max-w-xl mb-8 space-y-3">
-        <h2 className="font-bold text-gray-900">Add User</h2>
+        <h2 className="font-bold text-foreground font-heading">Add User</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Full Name *</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Full Name *</label>
             <input
               required
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="neu-inset w-full px-3 py-2 text-sm focus:outline-none"
+              className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="Jane Doe"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Phone *</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Phone *</label>
             <PhoneInput
               required
               value={form.phone}
@@ -157,7 +163,7 @@ export default function AdminUsersPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">
               WhatsApp (optional — defaults to phone)
             </label>
             <PhoneInput
@@ -167,7 +173,7 @@ export default function AdminUsersPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">
               Temporary Password *
             </label>
             <input
@@ -175,14 +181,14 @@ export default function AdminUsersPage() {
               type="text"
               value={form.password}
               onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              className="neu-inset w-full px-3 py-2 text-sm focus:outline-none"
+              className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="At least 6 characters"
             />
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">
               4-Digit Reset Pin (optional)
             </label>
             <input
@@ -192,14 +198,14 @@ export default function AdminUsersPage() {
               maxLength={4}
               value={form.pin}
               onChange={(e) => setForm((f) => ({ ...f, pin: e.target.value.replace(/\D/g, "") }))}
-              className="neu-inset w-full px-3 py-2 text-sm focus:outline-none"
+              className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="e.g. 1234"
             />
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+          <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
             {error}
           </div>
         )}
@@ -207,7 +213,7 @@ export default function AdminUsersPage() {
         <button
           type="submit"
           disabled={saving}
-          className="neu-pill bg-navy text-white font-bold px-5 py-2 text-sm disabled:opacity-60"
+          className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2 text-sm disabled:opacity-60"
         >
           {saving ? "Adding…" : "+ Add User"}
         </button>
@@ -215,19 +221,20 @@ export default function AdminUsersPage() {
 
       {/* List */}
       {loading ? (
-        <p className="text-center text-gray-500 text-sm py-8">Loading…</p>
+        <p className="text-center text-muted-foreground text-sm py-8">Loading…</p>
       ) : users.length === 0 ? (
-        <p className="text-center text-gray-400 text-sm py-8">No users yet.</p>
+        <p className="text-center text-muted-foreground text-sm py-8">No users yet.</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-gray-400 text-xs uppercase tracking-wide">
+              <tr className="text-left text-muted-foreground text-xs uppercase tracking-wide">
                 <th className="pb-3 pr-4 font-semibold">Name</th>
                 <th className="pb-3 pr-4 font-semibold">Phone</th>
                 <th className="pb-3 pr-4 font-semibold">WhatsApp</th>
                 <th className="pb-3 pr-4 font-semibold">Products</th>
                 <th className="pb-3 pr-4 font-semibold">Status</th>
+                <th className="pb-3 pr-4 font-semibold">Verified</th>
                 <th className="pb-3 pr-4 font-semibold">Joined</th>
                 <th className="pb-3 pr-4 font-semibold">Actions</th>
               </tr>
@@ -236,17 +243,17 @@ export default function AdminUsersPage() {
               {users.map((u) => {
                 const editing = editingId === u.id;
                 return (
-                  <tr key={u.id} className="border-t border-gray-100 align-top">
-                    <td className="py-3 pr-4 font-semibold text-gray-900">
+                  <tr key={u.id} className="border-t border-border align-top">
+                    <td className="py-3 pr-4 font-semibold text-foreground">
                       {editing ? (
                         <div className="flex items-start gap-2">
                           <input
                             value={editForm.name}
                             onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-                            className="neu-inset w-full px-3 py-1.5 text-sm focus:outline-none"
+                            className="neu-inset w-full px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                           />
                           <div className="flex flex-col items-center gap-1 shrink-0">
-                            <div className="w-9 h-9 rounded-full bg-navy flex items-center justify-center text-white font-bold text-sm overflow-hidden">
+                            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm overflow-hidden">
                               {editForm.avatar ? (
                                 <img
                                   src={editForm.avatar}
@@ -257,7 +264,7 @@ export default function AdminUsersPage() {
                                 (editForm.name || "U")[0].toUpperCase()
                               )}
                             </div>
-                            <label className="text-[10px] font-semibold text-navy cursor-pointer hover:underline">
+                            <label className="text-[10px] font-semibold text-primary cursor-pointer hover:underline">
                               {editForm.avatar ? "Change" : "Add"}
                               <input
                                 type="file"
@@ -270,7 +277,7 @@ export default function AdminUsersPage() {
                               <button
                                 type="button"
                                 onClick={() => setEditForm((f) => ({ ...f, avatar: "" }))}
-                                className="text-[10px] font-semibold text-red-500 hover:underline"
+                                className="text-[10px] font-semibold text-destructive hover:underline"
                               >
                                 Remove
                               </button>
@@ -279,7 +286,7 @@ export default function AdminUsersPage() {
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-navy flex items-center justify-center text-white text-xs font-bold overflow-hidden shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold overflow-hidden shrink-0">
                             {u.avatar ? (
                               <img
                                 src={u.avatar}
@@ -292,14 +299,14 @@ export default function AdminUsersPage() {
                           </div>
                           <span>{u.name}</span>
                           {u.isAdmin && (
-                            <span className="bg-navy text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                            <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded">
                               Admin
                             </span>
                           )}
                         </div>
                       )}
                     </td>
-                    <td className="py-3 pr-4 text-gray-500">
+                    <td className="py-3 pr-4 text-muted-foreground">
                       {editing ? (
                         <PhoneInput
                           required
@@ -310,7 +317,7 @@ export default function AdminUsersPage() {
                         u.phone
                       )}
                     </td>
-                    <td className="py-3 pr-4 text-gray-500">
+                    <td className="py-3 pr-4 text-muted-foreground">
                       {editing ? (
                         <PhoneInput
                           value={editForm.whatsapp}
@@ -322,7 +329,7 @@ export default function AdminUsersPage() {
                           href={`https://wa.me/${u.whatsapp}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-green-600 hover:underline"
+                          className="text-primary hover:underline"
                         >
                           {u.whatsapp}
                         </a>
@@ -333,19 +340,31 @@ export default function AdminUsersPage() {
                     <td className="py-3 pr-4">
                       <Link
                         href={`/admin?user=${u.id}`}
-                        className="text-navy font-semibold hover:underline"
+                        className="text-primary font-semibold hover:underline"
                       >
                         {u.productCount ?? 0}
                       </Link>
                     </td>
                     <td className="py-3 pr-4">
                       {u.isActive ? (
-                        <span className="text-green-600 text-xs font-bold">● Active</span>
+                        <span className="text-primary text-xs font-bold">● Active</span>
                       ) : (
-                        <span className="text-gray-400 text-xs font-bold">● Disabled</span>
+                        <span className="text-muted-foreground text-xs font-bold">● Disabled</span>
                       )}
                     </td>
-                    <td className="py-3 pr-4 text-gray-500">
+                    <td className="py-3 pr-4">
+                      <button
+                        onClick={() => handleToggleVerified(u)}
+                        className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition-all ${
+                          u.isVerified
+                            ? "bg-secondary/10 text-secondary hover:bg-secondary/20"
+                            : "bg-muted text-muted-foreground hover:bg-muted/70"
+                        }`}
+                      >
+                        {u.isVerified ? "✓ Verified" : "○ Not Verified"}
+                      </button>
+                    </td>
+                    <td className="py-3 pr-4 text-muted-foreground">
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
                     <td className="py-3 pr-4">
@@ -359,22 +378,22 @@ export default function AdminUsersPage() {
                             }
                             placeholder="New password (optional)"
                             minLength={6}
-                            className="neu-inset w-40 px-2.5 py-1.5 text-xs focus:outline-none"
+                            className="neu-inset w-40 px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
                           />
                           {editError && (
-                            <span className="text-xs text-red-600">{editError}</span>
+                            <span className="text-xs text-destructive">{editError}</span>
                           )}
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleSaveEdit(u)}
                               disabled={editSaving}
-                              className="neu-pill bg-navy text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
+                              className="neu-pill bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
                             >
                               {editSaving ? "Saving…" : "Save"}
                             </button>
                             <button
                               onClick={() => setEditingId(null)}
-                              className="neu-pill bg-surface text-gray-500 text-xs font-semibold px-3 py-1.5"
+                              className="neu-pill bg-card text-muted-foreground text-xs font-semibold px-3 py-1.5"
                             >
                               Cancel
                             </button>
@@ -384,19 +403,19 @@ export default function AdminUsersPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => startEdit(u)}
-                            className="neu-pill bg-surface text-navy text-xs font-semibold px-3 py-1.5"
+                            className="neu-pill bg-card text-primary text-xs font-semibold px-3 py-1.5"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleToggleActive(u)}
-                            className="neu-pill bg-surface text-navy text-xs font-semibold px-3 py-1.5"
+                            className="neu-pill bg-card text-primary text-xs font-semibold px-3 py-1.5"
                           >
                             {u.isActive ? "Disable" : "Enable"}
                           </button>
                           <button
                             onClick={() => handleDelete(u.id)}
-                            className="neu-pill bg-surface text-red-500 text-xs font-semibold px-3 py-1.5"
+                            className="neu-pill bg-card text-destructive text-xs font-semibold px-3 py-1.5"
                           >
                             Remove
                           </button>

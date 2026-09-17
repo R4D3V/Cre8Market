@@ -148,18 +148,18 @@ export default function EditMyProductPage() {
   }
 
   if (loading) {
-    return <div className="text-center py-12 text-gray-500 text-sm">Loading…</div>;
+    return <div className="text-center py-12 text-muted-foreground text-sm">Loading…</div>;
   }
 
   if (notFoundOrNotOwned) {
     return (
-      <div className="neu-card text-center py-12">
+      <div className="bg-card border border-border rounded-xl text-center py-12">
         <p className="text-4xl mb-3">🚫</p>
-        <h3 className="font-bold text-gray-900 mb-1">Product not found</h3>
-        <p className="text-gray-500 text-sm mb-4">
+        <h3 className="font-bold text-foreground mb-1">Product not found</h3>
+        <p className="text-muted-foreground text-sm mb-4">
           This listing doesn't exist or wasn't added by your account.
         </p>
-        <Link href="/dashboard" className="neu-pill bg-navy text-white font-bold px-5 py-2.5 text-sm inline-block">
+        <Link href="/dashboard" className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm inline-block">
           ← Back to My Products
         </Link>
       </div>
@@ -168,24 +168,24 @@ export default function EditMyProductPage() {
 
   return (
     <div>
-      <Link href="/dashboard" className="text-sm text-navy font-semibold hover:underline mb-4 inline-block">
+      <Link href="/dashboard" className="text-sm text-primary font-semibold hover:underline mb-4 inline-block">
         ← Back to My Products
       </Link>
-      <h1 className="text-2xl font-extrabold text-gray-900 mb-6">Edit Product</h1>
+      <h1 className="font-heading text-2xl font-extrabold text-foreground mb-6">Edit Product</h1>
 
-      <form onSubmit={handleSubmit} className="neu-card p-6 max-w-2xl space-y-4">
+      <form onSubmit={handleSubmit} className="bg-card border border-border rounded-xl p-6 max-w-2xl space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Title *</label>
+          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Title *</label>
           <input
             required
             value={form.title}
             onChange={(e) => update("title", e.target.value)}
-            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-muted-foreground mb-2">
             Product Images (up to 4)
           </label>
           <ProductImagePicker images={images} onFile={handleImageUpload} onRemove={removeImage} />
@@ -193,22 +193,22 @@ export default function EditMyProductPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Price (UGX) *</label>
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Price (UGX) *</label>
             <input
               required
               type="number"
               value={form.price}
               onChange={(e) => update("price", e.target.value)}
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Category *</label>
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Category *</label>
             <select
               required
               value={form.categorySlug}
               onChange={(e) => update("categorySlug", e.target.value)}
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             >
               <option value="">Select…</option>
               {categories.map((c) => (
@@ -222,11 +222,11 @@ export default function EditMyProductPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Condition</label>
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Condition</label>
             <select
               value={form.condition}
               onChange={(e) => update("condition", e.target.value)}
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             >
               <option value="">Select…</option>
               {["New", "Like New", "Used - Good", "Used - Fair", "Refurbished"].map((c) => (
@@ -237,34 +237,34 @@ export default function EditMyProductPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Location</label>
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Location</label>
             <input
               value={form.location}
               onChange={(e) => update("location", e.target.value)}
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
+          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Description</label>
           <textarea
             rows={3}
             value={form.description}
             onChange={(e) => update("description", e.target.value)}
-            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none resize-none"
+            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground resize-none"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
             Specs (one per line — Label: Value)
           </label>
           <textarea
             rows={3}
             value={form.specs}
             onChange={(e) => update("specs", e.target.value)}
-            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none resize-none font-mono"
+            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground resize-none font-mono"
           />
         </div>
 
@@ -273,24 +273,24 @@ export default function EditMyProductPage() {
             type="checkbox"
             checked={form.isDeal}
             onChange={(e) => update("isDeal", e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-navy focus:ring-navy"
+            className="w-4 h-4 rounded border-border bg-card text-primary focus:ring-primary"
           />
-          <span className="text-sm font-semibold text-gray-700">
+          <span className="text-sm font-semibold text-muted-foreground">
             🔥 Mark as a Deal (shows on the Deals page)
           </span>
         </label>
 
         <div className="neu-inset p-4">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">
             Buyers will contact you at
           </p>
-          <p className="text-sm font-semibold text-gray-800">
+          <p className="text-sm font-semibold text-foreground">
             {session?.user?.name} · WhatsApp {session?.user?.whatsapp ?? session?.user?.phone}
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+          <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
             {error}
           </div>
         )}
@@ -299,18 +299,18 @@ export default function EditMyProductPage() {
           <button
             type="submit"
             disabled={saving}
-            className="neu-pill bg-navy hover:bg-navy-hover text-white font-bold px-6 py-2.5 text-sm transition-all disabled:opacity-60"
+            className="neu-pill bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 py-2.5 text-sm transition-all disabled:opacity-60"
           >
             {saving ? "Saving…" : "Save Changes"}
           </button>
           <button
             type="button"
             onClick={handleDelete}
-            className="text-sm text-red-500 hover:text-red-700 transition-colors font-semibold"
+            className="text-sm text-destructive transition-colors font-semibold"
           >
             Delete Product
           </button>
-          <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             Cancel
           </Link>
         </div>

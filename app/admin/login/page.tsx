@@ -33,21 +33,21 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-extrabold text-gray-900 mb-1">
+          <h1 className="text-2xl font-extrabold text-foreground mb-1 font-heading">
             Admin Login
           </h1>
-          <p className="text-gray-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             Sign in to manage your products
           </p>
         </div>
 
-        <div className="neu-card p-7">
+        <div className="neu-card p-7 bg-card border border-border">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                 Email
               </label>
               <input
@@ -56,11 +56,11 @@ export default function AdminLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@cre8market.com"
-                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+                className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                 Password
               </label>
               <input
@@ -69,12 +69,12 @@ export default function AdminLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+                className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+              <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
                 {error}
               </div>
             )}
@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="neu-pill w-full bg-navy hover:bg-navy-hover text-white font-bold py-3 text-sm transition-all disabled:opacity-60"
+              className="neu-pill w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-sm transition-all disabled:opacity-60"
             >
               {loading ? "Signing in…" : "Sign In"}
             </button>
@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
         </div>
 
         <p className="text-center mt-4">
-          <Link href="/admin/reset-password" className="text-sm text-navy font-semibold hover:underline">
+          <Link href="/admin/reset-password" className="text-sm text-primary font-semibold hover:underline">
             Reset Password
           </Link>
         </p>

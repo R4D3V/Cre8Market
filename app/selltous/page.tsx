@@ -39,12 +39,12 @@ export default function SellToUsPage() {
 
       {/* Hero */}
       <ScrollReveal>
-        <div className="bg-surface px-3 sm:px-4 pt-2 pb-2">
+        <div className="bg-background px-3 sm:px-4 pt-2 pb-2">
           <div className="max-w-3xl mx-auto">
-            <div className="neu-dark-card text-white py-12 px-6 text-center">
-            <p className="eyebrow text-accent">We Buy &amp; Sell</p>
-            <h1 className="text-3xl font-extrabold mb-3">Got Something to Sell?</h1>
-            <p className="text-white/60 text-base max-w-xl mx-auto mb-6">
+            <div className="neu-dark-card text-foreground py-12 px-6 text-center">
+            <p className="eyebrow text-primary">We Buy &amp; Sell</p>
+            <h1 className="font-heading text-3xl font-extrabold mb-3">Got Something to Sell?</h1>
+            <p className="text-muted-foreground text-base max-w-xl mx-auto mb-6">
               Send us your item — phone, TV, laptop, appliance, or anything. We'll review it and send you a cash offer on WhatsApp, usually within a day.
             </p>
             <div className="flex justify-center gap-6 flex-wrap">
@@ -53,7 +53,7 @@ export default function SellToUsPage() {
                 { icon: '💵', label: 'Instant cash payment' },
                 { icon: '🤝', label: 'No obligation' },
               ].map((f) => (
-                <div key={f.label} className="flex items-center gap-2 text-sm text-white/70 font-medium">
+                <div key={f.label} className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
                   <span>{f.icon}</span>
                   <span>{f.label}</span>
                 </div>
@@ -68,13 +68,13 @@ export default function SellToUsPage() {
         {submitted ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🎉</div>
-            <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Request Sent!</h2>
-            <p className="text-gray-500 mb-6">
+            <h2 className="font-heading text-2xl font-extrabold text-foreground mb-2">Request Sent!</h2>
+            <p className="text-muted-foreground mb-6">
               We've received your item details via WhatsApp. Expect a cash offer within 24 hours.
             </p>
             <button
               onClick={() => setSubmitted(false)}
-              className="neu-pill bg-navy text-white font-bold px-5 py-2.5 text-sm hover:bg-navy-hover transition-all"
+              className="neu-pill bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-5 py-2.5 text-sm transition-all"
             >
               Submit Another Item
             </button>
@@ -82,42 +82,42 @@ export default function SellToUsPage() {
         ) : (
           <>
             <ScrollReveal>
-              <h2 className="text-xl font-extrabold text-gray-900 mb-6 text-center">Tell us about your item</h2>
+              <h2 className="font-heading text-xl font-extrabold text-foreground mb-6 text-center">Tell us about your item</h2>
             </ScrollReveal>
 
             <ScrollReveal delay={100}>
               <form onSubmit={handleSubmit} className="neu-card p-6 space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Your Name *</label>
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Your Name *</label>
                 <input
                   required
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Full name"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                  className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Item Name *</label>
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Item Name *</label>
                 <input
                   required
                   type="text"
                   value={itemTitle}
                   onChange={(e) => setItemTitle(e.target.value)}
                   placeholder="e.g. Samsung Galaxy S22, LG 43 inch TV"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                  className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Category</label>
+                  <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Category</label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                    className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                   >
                     <option value="">Select…</option>
                     {categories.map((c) => (
@@ -126,11 +126,11 @@ export default function SellToUsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Condition</label>
+                  <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Condition</label>
                   <select
                     value={condition}
                     onChange={(e) => setCondition(e.target.value)}
-                    className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                    className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                   >
                     <option value="">Select…</option>
                     {['New', 'Like New', 'Used - Good', 'Used - Fair', 'For Parts'].map((c) => (
@@ -141,17 +141,17 @@ export default function SellToUsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description / Specs</label>
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Description / Specs</label>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Storage, RAM, model number, accessories included, any defects…"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none resize-none transition-all"
+                  className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none resize-none transition-all"
                 />
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
+              <div className="bg-secondary/10 border border-secondary/40 rounded-xl p-3 text-xs text-secondary">
                 📸 <strong>Tip:</strong> After submitting, send clear photos of your item on WhatsApp for a faster and more accurate offer.
               </div>
 
@@ -171,19 +171,19 @@ export default function SellToUsPage() {
         {/* How it works */}
         <ScrollReveal delay={100}>
           <div className="mt-8 space-y-3">
-            <h3 className="text-base font-extrabold text-gray-900 mb-4">How it works</h3>
+            <h3 className="text-base font-extrabold text-foreground mb-4">How it works</h3>
             {[
               { n: '1', title: 'Submit your item details', desc: 'Fill the form above with your item info and contact number.' },
               { n: '2', title: 'We review & respond', desc: 'Our team evaluates your item and sends a cash offer on WhatsApp within 24 hours.' },
               { n: '3', title: 'Get paid', desc: 'Accept the offer, bring your item to us in Kitoro, Entebbe and receive instant cash payment.' },
             ].map((step) => (
               <div key={step.n} className="neu-card flex items-start gap-4 p-4">
-                <span className="w-8 h-8 rounded-full bg-navy text-white font-bold text-sm flex items-center justify-center shrink-0">
+                <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center shrink-0">
                   {step.n}
                 </span>
                 <div>
-                  <p className="font-bold text-gray-900 text-sm">{step.title}</p>
-                  <p className="text-gray-500 text-sm mt-0.5">{step.desc}</p>
+                  <p className="font-bold text-foreground text-sm">{step.title}</p>
+                  <p className="text-muted-foreground text-sm mt-0.5">{step.desc}</p>
                 </div>
               </div>
             ))}

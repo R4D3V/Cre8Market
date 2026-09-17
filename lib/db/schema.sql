@@ -86,3 +86,6 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT;
 
 -- Migration: 4-digit reset pin (hashed) used as 2-step verification to reset a password.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS pin_hash TEXT;
+
+-- Migration: seller verification — admins mark a user verified so a badge shows on their listings.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false;

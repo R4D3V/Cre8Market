@@ -60,10 +60,10 @@ export default function ResetPasswordPage() {
                 className="w-24 h-24 object-contain mx-auto"
               />
             </Link>
-            <h1 className="text-xl font-extrabold text-gray-900 mt-4 mb-1">
+            <h1 className="font-heading text-xl font-extrabold text-foreground mt-4 mb-1">
               Reset your password
             </h1>
-            <p className="text-gray-500 text-sm">
+            <p className="text-muted-foreground text-sm">
               Enter your phone number and a new password
             </p>
           </div>
@@ -71,7 +71,7 @@ export default function ResetPasswordPage() {
           <div className="neu-card p-7">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                   Phone Number
                 </label>
                 <PhoneInput
@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                   New Password
                 </label>
                 <input
@@ -92,11 +92,11 @@ export default function ResetPasswordPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min 6 characters"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                  className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                   4-Digit Reset Pin
                 </label>
                 <input
@@ -108,21 +108,21 @@ export default function ResetPasswordPage() {
                   value={pin}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
                   placeholder="Pin you set when registering"
-                  className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none transition-all"
+                  className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                 />
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Verification pin set when you created your account.
                 </p>
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+                <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
                   {error}
                 </div>
               )}
 
               {message && (
-                <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+                <div className="bg-primary/10 border border-primary/40 text-primary text-sm rounded-xl px-4 py-3">
                   {message}
                 </div>
               )}
@@ -130,22 +130,22 @@ export default function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="neu-pill w-full bg-navy hover:bg-navy-hover text-white font-bold py-3 text-sm transition-all disabled:opacity-60"
+                className="neu-pill w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold py-3 text-sm transition-all disabled:opacity-60"
               >
                 {loading ? "Resetting…" : "Reset Password"}
               </button>
             </form>
 
-            <div className="mt-5 pt-4 border-t border-gray-100 text-center space-y-2">
-              <p className="text-sm text-gray-500">
+            <div className="mt-5 pt-4 border-t border-border text-center space-y-2">
+              <p className="text-sm text-muted-foreground">
                 Remembered it?{" "}
-                <Link href="/login" className="text-navy font-bold hover:underline">
+                <Link href="/login" className="text-primary font-bold hover:underline">
                   Sign In
                 </Link>
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 New to Cre8Market?{" "}
-                <Link href="/register" className="text-navy font-bold hover:underline">
+                <Link href="/register" className="text-primary font-bold hover:underline">
                   Register Free
                 </Link>
               </p>

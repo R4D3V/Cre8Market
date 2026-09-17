@@ -16,12 +16,12 @@ export default async function DealsPage() {
       <CategoryBar />
 
       {/* Banner */}
-      <div className="bg-surface px-3 sm:px-4 pt-2 pb-2">
+      <div className="bg-background px-3 sm:px-4 pt-2 pb-2">
         <div className="max-w-7xl mx-auto">
-          <div className="neu-dark-card text-white py-10 px-6 text-center">
-            <p className="eyebrow text-accent">Updated Daily</p>
-            <h1 className="text-3xl font-extrabold mb-2">🔥 Hot Deals</h1>
-            <p className="text-white/60 text-sm max-w-md mx-auto">
+          <div className="neu-dark-card text-foreground py-10 px-6 text-center">
+            <p className="eyebrow text-primary">Updated Daily</p>
+            <h1 className="font-heading text-3xl font-extrabold mb-2">🔥 Hot Deals</h1>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
               The best prices on electronics, phones, laptops and more in Uganda
               — refreshed every day.
             </p>
@@ -29,13 +29,13 @@ export default async function DealsPage() {
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 py-8 pb-28 sm:pb-8">
+      <main className="container py-8 pb-28 sm:pb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-extrabold text-gray-900">
+            <h2 className="font-heading text-xl font-extrabold text-foreground">
               Today's Deals
             </h2>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-muted-foreground mt-0.5">
               {deals.length} deals available
             </p>
           </div>
@@ -56,10 +56,10 @@ export default async function DealsPage() {
         {/* WhatsApp CTA */}
         <div className="mt-10 neu-card p-7 text-center">
           <p className="text-2xl mb-2">📲</p>
-          <h3 className="text-lg font-extrabold text-gray-900 mb-1">
+          <h3 className="font-heading text-lg font-extrabold text-foreground mb-1">
             Never miss a deal
           </h3>
-          <p className="text-gray-500 text-sm mb-5">
+          <p className="text-muted-foreground text-sm mb-5">
             Get instant alerts for deals matching your interests
           </p>
           <a

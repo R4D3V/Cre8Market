@@ -87,14 +87,14 @@ export default function AdminUsersPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900">Admins</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
+          <h1 className="text-2xl font-extrabold text-foreground font-heading">Admins</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">
             Add another person to manage the dashboard
           </p>
         </div>
         <Link
           href="/admin"
-          className="neu-pill bg-surface text-navy text-sm font-semibold px-4 py-2 transition-all"
+          className="neu-pill bg-card text-primary text-sm font-semibold px-4 py-2 transition-all"
         >
           ← Back to Dashboard
         </Link>
@@ -102,10 +102,10 @@ export default function AdminUsersPage() {
 
       {/* Add admin */}
       <div className="neu-card p-6 mb-6">
-        <h2 className="font-bold text-gray-900 mb-4">Add a New Admin</h2>
+        <h2 className="font-bold text-foreground mb-4 font-heading">Add a New Admin</h2>
         <form onSubmit={handleCreate} className="space-y-4">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-navy flex items-center justify-center text-white font-bold text-2xl shrink-0 overflow-hidden">
+            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-2xl shrink-0 overflow-hidden">
               {form.avatar ? (
                 <img src={form.avatar} alt="Admin avatar" className="w-full h-full object-cover" />
               ) : (
@@ -113,7 +113,7 @@ export default function AdminUsersPage() {
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <label className="neu-pill bg-surface text-navy text-xs font-semibold px-3 py-1.5 cursor-pointer text-center">
+              <label className="neu-pill bg-card text-primary text-xs font-semibold px-3 py-1.5 cursor-pointer text-center">
                 📷 Upload Photo
                 <input
                   type="file"
@@ -126,7 +126,7 @@ export default function AdminUsersPage() {
                 <button
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, avatar: "" }))}
-                  className="text-xs text-red-500 hover:text-red-700 font-semibold"
+                  className="text-xs text-destructive hover:opacity-80 font-semibold"
                 >
                   Remove Photo
                 </button>
@@ -134,7 +134,7 @@ export default function AdminUsersPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Full Name
             </label>
             <input
@@ -142,11 +142,11 @@ export default function AdminUsersPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="e.g. Sarah Mwesigwa"
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Email (login)
             </label>
             <input
@@ -155,12 +155,12 @@ export default function AdminUsersPage() {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="name@cre8market.com"
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                 Phone Number
               </label>
               <input
@@ -168,11 +168,11 @@ export default function AdminUsersPage() {
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 placeholder="+256 700 000 000"
-                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+                className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                 WhatsApp Number
               </label>
               <input
@@ -180,12 +180,12 @@ export default function AdminUsersPage() {
                 value={form.whatsapp}
                 onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
                 placeholder="+256 700 000 000"
-                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+                className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Password
             </label>
             <input
@@ -195,17 +195,17 @@ export default function AdminUsersPage() {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="Min 6 characters"
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+            <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
               {error}
             </div>
           )}
           {msg && (
-            <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+            <div className="bg-primary/10 border border-primary/40 text-primary text-sm rounded-xl px-4 py-3">
               {msg}
             </div>
           )}
@@ -213,7 +213,7 @@ export default function AdminUsersPage() {
           <button
             type="submit"
             disabled={saving}
-            className="neu-pill w-full bg-navy hover:bg-navy-hover text-white font-bold py-3 text-sm transition-all disabled:opacity-60"
+            className="neu-pill w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-sm transition-all disabled:opacity-60"
           >
             {saving ? "Adding…" : "+ Add Admin"}
           </button>
@@ -222,17 +222,17 @@ export default function AdminUsersPage() {
 
       {/* Existing admins */}
       <div className="neu-card p-6">
-        <h2 className="font-bold text-gray-900 mb-4">Current Admins</h2>
+        <h2 className="font-bold text-foreground mb-4 font-heading">Current Admins</h2>
         {loading ? (
-          <p className="text-gray-500 text-sm">Loading…</p>
+          <p className="text-muted-foreground text-sm">Loading…</p>
         ) : admins.length === 0 ? (
-          <p className="text-gray-500 text-sm">No admins yet.</p>
+          <p className="text-muted-foreground text-sm">No admins yet.</p>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-border">
             {admins.map((a) => (
               <li key={a.id} className="py-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden">
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0 overflow-hidden">
                     {a.avatar ? (
                       <img src={a.avatar} alt={a.name ?? "Admin"} className="w-full h-full object-cover" />
                     ) : (
@@ -240,21 +240,21 @@ export default function AdminUsersPage() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 text-sm truncate">
+                    <p className="font-semibold text-foreground text-sm truncate">
                       {a.name || "Admin"}
                       {session?.user?.email === a.email && (
-                        <span className="ml-2 text-[10px] font-bold text-accent uppercase">
+                        <span className="ml-2 text-[10px] font-bold text-primary uppercase">
                           You
                         </span>
                       )}
                     </p>
-                    <p className="text-gray-500 text-xs truncate">{a.email}</p>
+                    <p className="text-muted-foreground text-xs truncate">{a.email}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => handleDelete(a.id, a.email)}
                   disabled={session?.user?.email === a.email}
-                  className="text-red-500 hover:text-red-700 text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="text-destructive hover:opacity-80 text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Remove
                 </button>

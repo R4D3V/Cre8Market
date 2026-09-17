@@ -125,16 +125,16 @@ function ProductsPageContent() {
       <Navbar />
       <CategoryBar />
 
-      <main className="max-w-7xl mx-auto px-4 py-6 pb-24 sm:pb-8">
+      <main className="container py-6 pb-24 sm:pb-8">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar filters */}
           <aside className="lg:w-56 shrink-0">
             <div className="neu-card p-4 lg:sticky lg:top-24">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold text-gray-900">Filters</h2>
+                <h2 className="font-heading font-bold text-foreground">Filters</h2>
                 <button
                   onClick={resetFilters}
-                  className="text-xs text-navy font-semibold hover:underline"
+                  className="text-xs text-primary font-semibold hover:underline"
                 >
                   Reset
                 </button>
@@ -142,7 +142,7 @@ function ProductsPageContent() {
 
               {/* Search */}
               <div className="mb-4">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
                   Search
                 </label>
                 <input
@@ -153,13 +153,13 @@ function ProductsPageContent() {
                     setPage(1);
                   }}
                   placeholder="Search listings…"
-                  className="neu-inset w-full px-3 py-2 text-sm focus:outline-none"
+                  className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                 />
               </div>
 
               {/* Category */}
               <div className="mb-4">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
                   Category
                 </label>
                 <select
@@ -168,7 +168,7 @@ function ProductsPageContent() {
                     setSelectedCategory(e.target.value);
                     setPage(1);
                   }}
-                  className="neu-inset w-full px-3 py-2 text-sm focus:outline-none"
+                  className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                 >
                   <option value="">All Categories</option>
                   {categories.map((c) => (
@@ -181,7 +181,7 @@ function ProductsPageContent() {
 
               {/* Seller */}
               <div className="mb-4">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
                   Seller
                 </label>
                 <select
@@ -190,7 +190,7 @@ function ProductsPageContent() {
                     setSelectedSeller(e.target.value);
                     setPage(1);
                   }}
-                  className="neu-inset w-full px-3 py-2 text-sm focus:outline-none"
+                  className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                 >
                   <option value="">All Sellers</option>
                   {sellers.map((s) => (
@@ -203,7 +203,7 @@ function ProductsPageContent() {
 
               {/* Price range */}
               <div className="mb-4">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
                   Price (UGX)
                 </label>
                 <div className="flex gap-2">
@@ -215,7 +215,7 @@ function ProductsPageContent() {
                       setPage(1);
                     }}
                     placeholder="Min"
-                    className="neu-inset w-full px-2 py-2 text-sm focus:outline-none"
+                    className="neu-inset w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                   />
                   <input
                     type="number"
@@ -225,7 +225,7 @@ function ProductsPageContent() {
                       setPage(1);
                     }}
                     placeholder="Max"
-                    className="neu-inset w-full px-2 py-2 text-sm focus:outline-none"
+                    className="neu-inset w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                   />
                 </div>
               </div>
@@ -237,14 +237,14 @@ function ProductsPageContent() {
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-xl font-extrabold text-gray-900">
+                <h1 className="font-heading text-xl font-extrabold text-foreground">
                   {featuredParam === "1"
                     ? "⭐ Featured Listings"
                     : sortParam === "latest"
                       ? "🕐 Latest Listings"
                       : "All Listings"}
                 </h1>
-                <p className="text-sm text-gray-500 mt-0.5">
+                <p className="text-sm text-muted-foreground mt-0.5">
                   {filtered.length}{" "}
                   {filtered.length === 1 ? "result" : "results"}
                   {selectedCategory &&
@@ -258,7 +258,7 @@ function ProductsPageContent() {
                   params.set("sort", e.target.value);
                   router.replace(`/products?${params.toString()}`);
                 }}
-                className="neu-inset px-3 py-2 text-sm focus:outline-none"
+                className="neu-inset px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               >
                 <option value="latest">Latest first</option>
                 <option value="price-asc">Price: Low to High</option>
@@ -269,7 +269,7 @@ function ProductsPageContent() {
 
             {/* Grid */}
             {loading ? (
-              <div className="text-center py-20 text-gray-500 text-sm">Loading…</div>
+              <div className="text-center py-20 text-muted-foreground text-sm">Loading…</div>
             ) : paginated.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
                 {paginated.map((p) => (
@@ -279,15 +279,15 @@ function ProductsPageContent() {
             ) : (
               <div className="neu-card text-center py-20">
                 <span className="text-5xl mb-4 block">🔍</span>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                <h3 className="font-heading text-lg font-bold text-foreground mb-2">
                   No listings found
                 </h3>
-                <p className="text-gray-500 text-sm mb-4">
+                <p className="text-muted-foreground text-sm mb-4">
                   Try adjusting your search or filters
                 </p>
                 <button
                   onClick={resetFilters}
-                  className="neu-pill bg-navy text-white font-bold px-5 py-2 text-sm hover:bg-navy-hover transition-all"
+                  className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2 text-sm hover:bg-primary/90 transition-all"
                 >
                   Clear Filters
                 </button>
@@ -300,7 +300,7 @@ function ProductsPageContent() {
                 <button
                   onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                   disabled={page === 1}
-                  className="neu-pill bg-surface px-4 py-2 text-sm font-medium text-gray-600 disabled:opacity-40 transition-all"
+                  className="border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground disabled:opacity-40 transition-all"
                 >
                   ← Previous
                 </button>
@@ -311,8 +311,8 @@ function ProductsPageContent() {
                       onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                       className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${
                         page === n
-                          ? "bg-navy text-white neu-dark-pill"
-                          : "neu-pill bg-surface text-gray-600"
+                          ? "bg-primary text-primary-foreground neu-dark-pill"
+                          : "border border-border bg-card text-muted-foreground"
                       }`}
                     >
                       {n}
@@ -322,7 +322,7 @@ function ProductsPageContent() {
                 <button
                   onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                   disabled={page === totalPages}
-                  className="neu-pill bg-surface px-4 py-2 text-sm font-medium text-gray-600 disabled:opacity-40 transition-all"
+                  className="border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground disabled:opacity-40 transition-all"
                 >
                   Next →
                 </button>

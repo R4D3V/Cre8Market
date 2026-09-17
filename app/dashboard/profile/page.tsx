@@ -75,32 +75,32 @@ export default function ProfilePage() {
   }
 
   if (loading) {
-    return <div className="text-center py-12 text-gray-500 text-sm">Loading…</div>;
+    return <div className="text-center py-12 text-muted-foreground text-sm">Loading…</div>;
   }
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900">My Profile</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
+          <h1 className="font-heading text-2xl font-extrabold text-foreground">My Profile</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">
             Member since {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString("en-UG", { year: "numeric", month: "long" }) : "—"}
           </p>
         </div>
         <Link
           href="/dashboard"
-          className="neu-pill bg-surface text-navy text-sm font-semibold px-4 py-2 transition-all"
+          className="neu-pill bg-background text-primary text-sm font-semibold px-4 py-2 transition-all"
         >
           ← Back to Dashboard
         </Link>
       </div>
 
       {/* Info card */}
-      <div className="neu-card p-6 mb-6">
-        <h2 className="font-bold text-gray-900 mb-4">Account Information</h2>
+      <div className="bg-card border border-border rounded-xl p-6 mb-6">
+        <h2 className="font-bold text-foreground mb-4">Account Information</h2>
         <form onSubmit={handleInfoSubmit} className="space-y-4">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-navy flex items-center justify-center text-white font-bold text-2xl shrink-0 overflow-hidden">
+            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-2xl shrink-0 overflow-hidden">
               {avatar ? (
                 <img src={avatar} alt="Profile avatar" className="w-full h-full object-cover" />
               ) : (
@@ -108,7 +108,7 @@ export default function ProfilePage() {
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <label className="neu-pill bg-surface text-navy text-xs font-semibold px-3 py-1.5 cursor-pointer text-center">
+              <label className="neu-pill bg-background text-primary text-xs font-semibold px-3 py-1.5 cursor-pointer text-center">
                 📷 Upload Photo
                 <input
                   type="file"
@@ -121,7 +121,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setAvatar("")}
-                  className="text-xs text-red-500 hover:text-red-700 font-semibold"
+                  className="text-xs text-destructive font-semibold"
                 >
                   Remove Photo
                 </button>
@@ -129,7 +129,7 @@ export default function ProfilePage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Full Name
             </label>
             <input
@@ -137,25 +137,25 @@ export default function ProfilePage() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Phone Number
             </label>
             <input
               type="tel"
               disabled
               value={profile?.phone ?? ""}
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none opacity-60"
+              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground opacity-60"
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Phone number is your login ID and cannot be changed.
             </p>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               WhatsApp Number
             </label>
             <input
@@ -163,27 +163,27 @@ export default function ProfilePage() {
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
               placeholder="+256 700 000 000"
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Buyers will contact you on this number. Leave blank to use your phone number.
             </p>
           </div>
 
           {infoError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+            <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
               {infoError}
             </div>
           )}
           {infoMsg && (
-            <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+            <div className="bg-primary/10 border border-primary/40 text-primary text-sm rounded-xl px-4 py-3">
               {infoMsg}
             </div>
           )}
 
           <button
             type="submit"
-            className="neu-pill w-full bg-navy hover:bg-navy-hover text-white font-bold py-3 text-sm transition-all"
+            className="neu-pill w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-sm transition-all"
           >
             Save Changes
           </button>
@@ -191,11 +191,11 @@ export default function ProfilePage() {
       </div>
 
       {/* Password card */}
-      <div className="neu-card p-6">
-        <h2 className="font-bold text-gray-900 mb-4">Change Password</h2>
+      <div className="bg-card border border-border rounded-xl p-6">
+        <h2 className="font-bold text-foreground mb-4">Change Password</h2>
         <form onSubmit={handlePasswordSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Current Password
             </label>
             <input
@@ -203,11 +203,11 @@ export default function ProfilePage() {
               required
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               New Password
             </label>
             <input
@@ -217,24 +217,24 @@ export default function ProfilePage() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Min 6 characters"
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           {passError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+            <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
               {passError}
             </div>
           )}
           {passMsg && (
-            <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+            <div className="bg-primary/10 border border-primary/40 text-primary text-sm rounded-xl px-4 py-3">
               {passMsg}
             </div>
           )}
 
           <button
             type="submit"
-            className="neu-pill w-full bg-navy hover:bg-navy-hover text-white font-bold py-3 text-sm transition-all"
+            className="neu-pill w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-sm transition-all"
           >
             Change Password
           </button>

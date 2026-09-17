@@ -4,7 +4,21 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import { Menu, X, LogOut } from "lucide-react";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { fetchMyAdminProfileAction } from "@/lib/actions/admin";
+
+function getPageTitle(pathname: string) {
+  if (pathname === "/admin") return "Dashboard";
+  if (pathname === "/admin/products") return "All Products";
+  if (pathname === "/admin/products/new") return "Add Product";
+  if (/^\/admin\/products\/[^/]+\/edit$/.test(pathname)) return "Edit Product";
+  if (pathname === "/admin/categories") return "Categories";
+  if (pathname === "/admin/users") return "Users";
+  if (pathname === "/admin/admins") return "Admins";
+  if (pathname === "/admin/profile") return "My Profile";
+  return "Admin";
+}
 
 export default function AdminLayout({
   children,
@@ -16,6 +30,7 @@ export default function AdminLayout({
   const { data: session, status } = useSession();
   const [adminName, setAdminName] = useState("");
   const [adminAvatar, setAdminAvatar] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (pathname === "/admin/login" || pathname === "/admin/reset-password") return;
@@ -39,177 +54,134 @@ export default function AdminLayout({
       .catch(() => {});
   }, [status, session]);
 
+  // Close the mobile drawer whenever the route changes.
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
   if (pathname === "/admin/login" || pathname === "/admin/reset-password") return <>{children}</>;
 
   if (status === "loading" || (status === "authenticated" && session?.user?.role !== "admin")) {
     return null;
   }
 
+  const name = adminName || session?.user?.name || "Admin";
+  const email = session?.user?.email ?? "";
+  const initial = (name || email || "A")[0]?.toUpperCase() ?? "A";
+  const pageTitle = getPageTitle(pathname);
+  const handleSignOut = () => signOut({ callbackUrl: "/admin/login" });
+
   return (
-    <div className="min-h-screen bg-surface">
-      <header className="bg-navy text-white sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
-          <div className="flex items-center gap-6">
-            <Link href="/admin" className="font-extrabold text-sm tracking-wide">
-              ⚙ CRE8MARKET Admin
-            </Link>
-            <nav className="hidden sm:flex items-center gap-4 text-sm">
-              <Link
-                href="/admin"
-                className={`transition-colors ${
-                  pathname === "/admin"
-                    ? "text-accent font-semibold"
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/admin/products"
-                className={`transition-colors ${
-                  pathname === "/admin/products"
-                    ? "text-accent font-semibold"
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                All Products
-              </Link>
-              <Link
-                href="/admin/products/new"
-                className={`transition-colors ${
-                  pathname === "/admin/products/new"
-                    ? "text-accent font-semibold"
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                Add Product
-              </Link>
-              <Link
-                href="/admin/categories"
-                className={`transition-colors ${
-                  pathname === "/admin/categories"
-                    ? "text-accent font-semibold"
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                Categories
-              </Link>
-              <Link
-                href="/admin/users"
-                className={`transition-colors ${
-                  pathname === "/admin/users"
-                    ? "text-accent font-semibold"
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                Users
-              </Link>
-              <Link
-                href="/admin/profile"
-                className={`transition-colors ${
-                  pathname === "/admin/profile"
-                    ? "text-accent font-semibold"
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                My Profile
-              </Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center text-white font-bold text-xs overflow-hidden shrink-0">
-                {adminAvatar ? (
-                  <img src={adminAvatar} alt="Admin" className="w-full h-full object-cover" />
-                ) : (
-                  (adminName || session?.user?.name || "A")[0].toUpperCase()
-                )}
-              </div>
-              <span className="hidden sm:inline text-xs text-white/70 max-w-[120px] truncate">
-                {adminName || session?.user?.name}
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Top navbar */}
+      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
+        <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open menu"
+              className="flex size-9 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:text-foreground lg:hidden"
+            >
+              <Menu className="size-5" />
+            </button>
+
+            <Link
+              href="/admin"
+              className="hidden items-center gap-2 font-heading text-sm font-extrabold tracking-wide sm:flex"
+            >
+              <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground text-[10px] font-black">
+                C8
               </span>
-            </div>
+              CRE8<span className="text-primary">MARKET</span>
+            </Link>
+
+            <span className="hidden h-5 w-px bg-border sm:block" />
+
+            <h1 className="truncate font-heading text-sm font-extrabold sm:text-base">
+              {pageTitle}
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/"
-              className="text-white/50 hover:text-white text-xs transition-colors"
+              className="hidden text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:inline"
             >
-              View Site →
+              View site →
             </Link>
+
+            <div className="flex items-center gap-2">
+              <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs font-bold text-muted-foreground">
+                {adminAvatar ? (
+                  <img src={adminAvatar} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  initial
+                )}
+              </span>
+              <span className="hidden max-w-[140px] truncate text-xs text-muted-foreground sm:inline">
+                {name}
+              </span>
+            </div>
+
             <button
-              onClick={() => signOut({ callbackUrl: "/admin/login" })}
-              className="text-white/50 hover:text-white text-xs transition-colors"
+              type="button"
+              onClick={handleSignOut}
+              aria-label="Sign out"
+              className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              Sign Out
+              <LogOut className="size-4" />
+              <span className="hidden sm:inline">Sign Out</span>
             </button>
           </div>
         </div>
-        {/* Mobile nav */}
-        <div className="sm:hidden px-4 pb-3 flex gap-4 text-sm overflow-x-auto">
-          <Link
-            href="/admin"
-            className={`whitespace-nowrap transition-colors ${
-              pathname === "/admin"
-                ? "text-accent font-semibold"
-                : "text-white/70"
-            }`}
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/admin/products"
-            className={`whitespace-nowrap transition-colors ${
-              pathname === "/admin/products"
-                ? "text-accent font-semibold"
-                : "text-white/70"
-            }`}
-          >
-            All Products
-          </Link>
-          <Link
-            href="/admin/products/new"
-            className={`whitespace-nowrap transition-colors ${
-              pathname === "/admin/products/new"
-                ? "text-accent font-semibold"
-                : "text-white/70"
-            }`}
-          >
-            Add Product
-          </Link>
-          <Link
-            href="/admin/categories"
-            className={`whitespace-nowrap transition-colors ${
-              pathname === "/admin/categories"
-                ? "text-accent font-semibold"
-                : "text-white/70"
-            }`}
-          >
-            Categories
-          </Link>
-          <Link
-            href="/admin/users"
-            className={`whitespace-nowrap transition-colors ${
-              pathname === "/admin/users"
-                ? "text-accent font-semibold"
-                : "text-white/70"
-            }`}
-          >
-            Users
-          </Link>
-          <Link
-            href="/admin/profile"
-            className={`whitespace-nowrap transition-colors ${
-              pathname === "/admin/profile"
-                ? "text-accent font-semibold"
-                : "text-white/70"
-            }`}
-          >
-            My Profile
-          </Link>
-        </div>
       </header>
-      <main className="max-w-7xl mx-auto px-4 py-6 pb-24 sm:pb-8">
-        {children}
-      </main>
+
+      <div className="flex gap-4 p-4">
+        {/* Desktop sidebar */}
+        <div className="sticky top-[4.5rem] hidden h-[calc(100vh-5.5rem)] lg:block">
+          <AdminSidebar
+            backHref="/"
+            userName={name}
+            userEmail={email}
+            userAvatar={adminAvatar}
+            onSignOut={handleSignOut}
+          />
+        </div>
+
+        {/* Mobile drawer */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <div
+              className="absolute inset-0 bg-background/70 backdrop-blur-sm"
+              onClick={() => setSidebarOpen(false)}
+            />
+            <div className="absolute inset-y-0 left-0 w-72 max-w-[85%] bg-background p-2 shadow-2xl">
+              <div className="flex justify-end p-1">
+                <button
+                  type="button"
+                  onClick={() => setSidebarOpen(false)}
+                  aria-label="Close menu"
+                  className="flex size-9 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+              <div className="h-[calc(100%-3.25rem)]">
+                <AdminSidebar
+                  backHref="/"
+                  userName={name}
+                  userEmail={email}
+                  userAvatar={adminAvatar}
+                  onSignOut={handleSignOut}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <main className="min-w-0 flex-1">{children}</main>
+      </div>
     </div>
   );
 }

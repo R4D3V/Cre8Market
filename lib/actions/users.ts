@@ -10,6 +10,7 @@ import {
   updateUserProfile,
   updateUserContact,
   updateUserAdminStatus,
+  updateUserVerifiedStatus,
   getUserPasswordHash,
   updateUserPassword,
   deleteUser,
@@ -105,6 +106,16 @@ export async function updateUserByAdminAction(
   });
   revalidatePath("/admin/users");
   revalidatePath("/admin");
+  return user;
+}
+
+// Admin verifies/unverifies a seller (verified sellers show a badge on their listings).
+export async function setUserVerifiedAction(id: string, isVerified: boolean) {
+  await requireAdmin();
+  const user = await updateUserVerifiedStatus(id, isVerified);
+  revalidatePath("/admin/users");
+  revalidatePath("/admin");
+  revalidatePath("/products");
   return user;
 }
 

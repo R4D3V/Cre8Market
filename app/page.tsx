@@ -1,56 +1,59 @@
 import Navbar from "@/components/Navbar";
-import CategoryBar from "@/components/CategoryBar";
-import HeroBanner from "@/components/HeroBanner";
-
-import ListingsSection from "@/components/ListingsSection";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
-import ScrollReveal from "@/components/ScrollReveal";
+import HeroCarousel from "@/components/HeroCarousel";
+import CategoryTiles from "@/components/CategoryTiles";
+import AppleCta from "@/components/AppleCta";
+import TopSellingTabs, { type ProductGroup } from "@/components/TopSellingTabs";
+import Recommendations from "@/components/Recommendations";
+import NewsletterSignup from "@/components/NewsletterSignup";
 import { latestProducts } from "@/lib/data";
-import { getFeaturedProducts } from "@/lib/db/queries";
+import { getProducts, getCategories } from "@/lib/db/queries";
+import type { Product } from "@/lib/types";
 
 // Featured products come from the database, so render on each request instead of at build time.
 export const dynamic = "force-dynamic";
 
+function groupByCategory(products: Product[], limit = 4): ProductGroup[] {
+  const groups = new Map<string, Product[]>();
+  for (const p of products) {
+    const list = groups.get(p.categorySlug) ?? [];
+    list.push(p);
+    groups.set(p.categorySlug, list);
+  }
+
+  return Array.from(groups.values())
+    .sort((a, b) => b.length - a.length)
+    .slice(0, limit)
+    .map((list) => ({
+      name: list[0]?.category ?? "More",
+      products: list,
+    }));
+}
+
 export default async function HomePage() {
-  const featuredProducts = await getFeaturedProducts();
+  const [products, categories] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
+
+  const topGroups = groupByCategory(
+    products.length > 0 ? products : latestProducts,
+  );
 
   return (
-    <>
+    <div className="bg-background text-foreground">
       <Navbar />
-      <CategoryBar />
-      <HeroBanner />
-
-      <main className="max-w-7xl mx-auto px-4 py-8 pb-24 sm:pb-8">
-        {/* Featured listings */}
-        <ScrollReveal>
-          <div className="mb-10">
-            <ListingsSection
-              title="⭐ Featured"
-              eyebrow="Hand-picked"
-              products={featuredProducts}
-              viewAllHref="/products?featured=1"
-              viewAllLabel="View All Featured"
-            />
-          </div>
-        </ScrollReveal>
-
-        {/* Latest listings */}
-        <ScrollReveal delay={100}>
-          <div className="mb-10">
-            <ListingsSection
-              title="🕐 Latest"
-              eyebrow="Fresh on the market"
-              products={latestProducts}
-              viewAllHref="/products?sort=latest"
-              viewAllLabel="View All Latest"
-            />
-          </div>
-        </ScrollReveal>
+      <main className="flex-1">
+        <HeroCarousel />
+        <CategoryTiles categories={categories} />
+        <AppleCta />
+        <TopSellingTabs groups={topGroups} />
+        <Recommendations />
       </main>
-
+      <NewsletterSignup />
       <Footer />
       <MobileBottomNav />
-    </>
+    </div>
   );
 }

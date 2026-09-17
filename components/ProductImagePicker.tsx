@@ -34,14 +34,14 @@ export function ProductImagePicker({
                 onClick={() => onRemove(i)}
                 aria-label={`Remove image ${i + 1}`}
                 title="Remove image"
-                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-navy text-white text-sm leading-none font-bold flex items-center justify-center shadow"
+                className="absolute top-1 right-1 w-6 h-6 rounded-full text-primary-foreground text-sm leading-none font-bold flex items-center justify-center shadow bg-primary border border-border"
               >
                 ×
               </button>
             </div>
           ) : (
-            <label className="neu-inset w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors overflow-hidden">
-              <div className="flex flex-col items-center gap-1 text-gray-400">
+            <label className="neu-inset w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-muted transition-colors overflow-hidden">
+              <div className="flex flex-col items-center gap-1 text-muted-foreground">
                 <span className="text-xl">📷</span>
                 <span className="text-[10px] font-semibold">Image {i + 1}</span>
               </div>

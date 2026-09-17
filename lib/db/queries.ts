@@ -51,10 +51,16 @@ export async function getDeals(): Promise<Product[]> {
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const { rows } = await pool.query(
     `SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
-            u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar
+            u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified,
+            a.avatar AS admin_avatar
      FROM products p
      LEFT JOIN categories c ON c.slug = p.category_slug
      LEFT JOIN users u ON u.id = p.user_id
+     LEFT JOIN admin_users a ON p.user_id IS NULL
+        AND (REPLACE(a.phone, '+', '') = REPLACE(p.seller->>'phone', '+', '')
+          OR REPLACE(a.phone, '+', '') = REPLACE(p.seller->>'whatsapp', '+', '')
+          OR REPLACE(a.whatsapp, '+', '') = REPLACE(p.seller->>'phone', '+', '')
+          OR REPLACE(a.whatsapp, '+', '') = REPLACE(p.seller->>'whatsapp', '+', ''))
      WHERE p.slug = $1`,
     [slug],
   );
@@ -147,7 +153,7 @@ export async function getProductOwnerId(id: string): Promise<string | null> {
 export async function getProductsWithOwners(): Promise<ProductWithOwner[]> {
   const { rows } = await pool.query(`
     SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
-           u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar
+           u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified
     FROM products p
     LEFT JOIN categories c ON c.slug = p.category_slug
     LEFT JOIN users u ON u.id = p.user_id
@@ -159,6 +165,7 @@ export async function getProductsWithOwners(): Promise<ProductWithOwner[]> {
     ownerPhone: (row.owner_phone as string) ?? null,
     ownerWhatsapp: (row.owner_whatsapp as string) ?? null,
     ownerAvatar: (row.owner_avatar as string) ?? null,
+    ownerVerified: (row.owner_verified as boolean) ?? null,
     ownerType: row.user_id ? "user" : "admin",
   }));
 }
@@ -309,7 +316,7 @@ export interface UserRow {
 
 export async function getUsers(): Promise<AppUser[]> {
   const { rows } = await pool.query(`
-    SELECT u.id, u.name, u.phone, u.whatsapp, u.avatar, u.is_active, u.is_admin, u.created_at,
+    SELECT u.id, u.name, u.phone, u.whatsapp, u.avatar, u.is_active, u.is_admin, u.is_verified, u.created_at,
            COUNT(p.id)::int AS product_count
     FROM users u
     LEFT JOIN products p ON p.user_id = u.id
@@ -348,7 +355,7 @@ export async function getSellers(): Promise<{ id: string; name: string; productC
 
 export async function getUserById(id: string): Promise<AppUser | null> {
   const { rows } = await pool.query(
-    "SELECT id, name, phone, whatsapp, avatar, is_active, is_admin, created_at FROM users WHERE id = $1",
+    "SELECT id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at FROM users WHERE id = $1",
     [id],
   );
   return rows[0] ? mapUser(rows[0]) : null;
@@ -379,7 +386,7 @@ export async function createUser(data: {
 }): Promise<AppUser> {
   const { rows } = await pool.query(
     `INSERT INTO users (name, phone, whatsapp, password_hash, pin_hash, is_active)
-     VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, created_at`,
+     VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
     [data.name, data.phone, data.whatsapp ?? null, data.password_hash, data.pin_hash ?? null, data.is_active ?? true],
   );
   return mapUser(rows[0]);
@@ -387,7 +394,7 @@ export async function createUser(data: {
 
 export async function updateUserStatus(id: string, is_active: boolean): Promise<AppUser> {
   const { rows } = await pool.query(
-    `UPDATE users SET is_active = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, created_at`,
+    `UPDATE users SET is_active = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
     [is_active, id],
   );
   return mapUser(rows[0]);
@@ -398,7 +405,7 @@ export async function updateUserProfile(
   data: { name: string; whatsapp?: string; avatar?: string | null },
 ): Promise<AppUser> {
   const { rows } = await pool.query(
-    `UPDATE users SET name = $1, whatsapp = $2, avatar = $3 WHERE id = $4 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, created_at`,
+    `UPDATE users SET name = $1, whatsapp = $2, avatar = $3 WHERE id = $4 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
     [data.name, data.whatsapp ?? null, data.avatar ?? null, id],
   );
   return mapUser(rows[0]);
@@ -409,7 +416,7 @@ export async function updateUserContact(
   data: { name: string; phone: string; whatsapp?: string; avatar?: string | null },
 ): Promise<AppUser> {
   const { rows } = await pool.query(
-    `UPDATE users SET name = $1, phone = $2, whatsapp = $3, avatar = $4 WHERE id = $5 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, created_at`,
+    `UPDATE users SET name = $1, phone = $2, whatsapp = $3, avatar = $4 WHERE id = $5 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
     [data.name, data.phone, data.whatsapp ?? null, data.avatar ?? null, id],
   );
   return mapUser(rows[0]);
@@ -417,8 +424,16 @@ export async function updateUserContact(
 
 export async function updateUserAdminStatus(id: string, is_admin: boolean): Promise<AppUser> {
   const { rows } = await pool.query(
-    `UPDATE users SET is_admin = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, created_at`,
+    `UPDATE users SET is_admin = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
     [is_admin, id],
+  );
+  return mapUser(rows[0]);
+}
+
+export async function updateUserVerifiedStatus(id: string, is_verified: boolean): Promise<AppUser> {
+  const { rows } = await pool.query(
+    `UPDATE users SET is_verified = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
+    [is_verified, id],
   );
   return mapUser(rows[0]);
 }
@@ -446,6 +461,7 @@ function mapUser(row: Record<string, unknown>): AppUser {
     avatar: (row.avatar as string) ?? null,
     isActive: row.is_active as boolean,
     isAdmin: (row.is_admin as boolean) ?? false,
+    isVerified: (row.is_verified as boolean) ?? false,
     createdAt: row.created_at as string,
     productCount: row.product_count !== undefined ? Number(row.product_count) : undefined,
   };
@@ -484,6 +500,7 @@ function mapProductWithOwner(row: Record<string, unknown>): Product {
     ownerName: (row.owner_name as string) ?? null,
     ownerPhone: (row.owner_phone as string) ?? null,
     ownerWhatsapp: (row.owner_whatsapp as string) ?? null,
-    ownerAvatar: (row.owner_avatar as string) ?? null,
+    ownerAvatar: (row.owner_avatar as string) ?? (row.admin_avatar as string) ?? null,
+    ownerVerified: (row.owner_verified as boolean) ?? null,
   };
 }

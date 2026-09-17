@@ -113,28 +113,28 @@ export default function InstallPopup() {
         className="absolute inset-0 bg-black/30 pointer-events-auto"
         onClick={handleDismiss}
       />
-      <div className="relative pointer-events-auto neu-dark-card text-white mx-3 sm:mx-auto sm:max-w-md w-full p-5 rounded-2xl mb-4 sm:mb-0 animate-slide-up">
+      <div className="relative pointer-events-auto neu-dark-card mx-3 sm:mx-auto sm:max-w-md w-full p-5 rounded-2xl mb-4 sm:mb-0 animate-slide-up">
         <div className="flex items-start gap-3">
           <span className="text-3xl shrink-0 leading-none">📲</span>
           <div className="min-w-0 flex-1">
-            <p className="font-extrabold text-sm">Install CRE8MARKET ENTEBBE</p>
-            <p className="text-white/55 text-xs mt-0.5">
+            <p className="font-extrabold text-sm text-foreground">Install CRE8MARKET ENTEBBE</p>
+            <p className="text-muted-foreground text-xs mt-0.5">
               Get faster access, offline browsing, and notifications.
             </p>
             {notifStatus === "granted" && (
-              <p className="text-accent text-xs mt-1 font-semibold">
+              <p className="text-primary text-xs mt-1 font-semibold">
                 ✓ Notifications enabled
               </p>
             )}
             {notifStatus === "denied" && (
-              <p className="text-amber-400 text-xs mt-1">
+              <p className="text-secondary text-xs mt-1">
                 Notifications blocked — enable in browser settings
               </p>
             )}
           </div>
           <button
             onClick={handleDismiss}
-            className="text-white/40 hover:text-white transition-colors text-lg leading-none shrink-0"
+            className="text-muted-foreground hover:text-foreground transition-colors text-lg leading-none shrink-0"
             aria-label="Close"
           >
             ✕
@@ -144,13 +144,13 @@ export default function InstallPopup() {
           <button
             onClick={handleInstall}
             disabled={installing}
-            className="neu-dark-pill bg-accent hover:bg-accent-dark text-navy font-bold text-sm px-5 py-2.5 transition-all flex-1 disabled:opacity-60"
+            className="neu-dark-pill bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm px-5 py-2.5 transition-all flex-1 disabled:opacity-60"
           >
             {installing ? "Installing…" : "📲 Install App"}
           </button>
           <button
             onClick={handleDismiss}
-            className="text-white/50 hover:text-white text-xs font-medium transition-colors"
+            className="text-muted-foreground hover:text-foreground text-xs font-medium transition-colors"
           >
             Not now
           </button>

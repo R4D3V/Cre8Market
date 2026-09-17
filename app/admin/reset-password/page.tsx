@@ -32,21 +32,21 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-extrabold text-gray-900 mb-1">
+          <h1 className="text-2xl font-extrabold text-foreground mb-1 font-heading">
             Reset Admin Password
           </h1>
-          <p className="text-gray-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             Enter your email and new password
           </p>
         </div>
 
-        <div className="neu-card p-7">
+        <div className="neu-card p-7 bg-card border border-border">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                 Admin Email
               </label>
               <input
@@ -55,11 +55,11 @@ export default function ResetPasswordPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@cre8market.com"
-                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+                className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                 New Password
               </label>
               <input
@@ -69,12 +69,12 @@ export default function ResetPasswordPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Min 6 characters"
-                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+                className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                 Backup Pin
               </label>
               <input
@@ -85,18 +85,18 @@ export default function ResetPasswordPage() {
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 placeholder="Enter backup pin"
-                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none"
+                className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+              <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
                 {error}
               </div>
             )}
 
             {message && (
-              <div className="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+              <div className="bg-primary/10 border border-primary/40 text-primary text-sm rounded-xl px-4 py-3">
                 {message}
               </div>
             )}
@@ -104,7 +104,7 @@ export default function ResetPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="neu-pill w-full bg-navy hover:bg-navy-hover text-white font-bold py-3 text-sm transition-all disabled:opacity-60"
+              className="neu-pill w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-sm transition-all disabled:opacity-60"
             >
               {loading ? "Resetting…" : "Reset Password"}
             </button>
@@ -112,7 +112,7 @@ export default function ResetPasswordPage() {
         </div>
 
         <p className="text-center mt-4">
-          <Link href="/admin/login" className="text-sm text-navy font-semibold hover:underline">
+          <Link href="/admin/login" className="text-sm text-primary font-semibold hover:underline">
             ← Back to Login
           </Link>
         </p>

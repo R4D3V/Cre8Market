@@ -185,14 +185,14 @@ export default function InstallPage() {
   return (
     <>
       <Navbar />
-      <main className="max-w-3xl mx-auto px-4 py-8 pb-28 sm:pb-8">
-        <Link href="/" className="text-sm text-navy font-semibold hover:underline mb-6 inline-block">← Home</Link>
+      <main className="container py-8 pb-28 sm:pb-8">
+        <Link href="/" className="text-sm text-primary font-semibold hover:underline mb-6 inline-block">← Home</Link>
 
         <ScrollReveal>
-          <div className="neu-dark-card text-white text-center py-12 px-6 mb-8">
+          <div className="neu-dark-card text-foreground text-center py-12 px-6 mb-8">
             <span className="text-5xl block mb-4">📲</span>
-            <h1 className="text-3xl font-extrabold mb-3">Install the App</h1>
-            <p className="text-white/70 text-base max-w-lg mx-auto">
+            <h1 className="font-heading text-3xl font-extrabold mb-3">Install the App</h1>
+            <p className="text-muted-foreground text-base max-w-lg mx-auto">
               Install CRE8MARKET ENTEBBE on your phone for a faster, app-like experience — directly from your browser, no Play Store or App Store needed.
             </p>
           </div>
@@ -201,7 +201,7 @@ export default function InstallPage() {
         {/* Why install */}
         <ScrollReveal delay={80}>
           <div className="neu-card p-6 sm:p-8 mb-6">
-            <h2 className="text-lg font-extrabold text-gray-900 mb-3">Why Install?</h2>
+            <h2 className="font-heading text-lg font-extrabold text-foreground mb-3">Why Install?</h2>
             <div className="grid sm:grid-cols-3 gap-4">
               {[
                 { icon: '⚡', title: 'Faster Access', desc: 'Open the app directly from your home screen — no typing a URL.' },
@@ -210,8 +210,8 @@ export default function InstallPage() {
               ].map((f) => (
                 <div key={f.title} className="neu-card p-4 text-center">
                   <span className="text-3xl block mb-2">{f.icon}</span>
-                  <h3 className="font-bold text-gray-900 text-sm mb-1">{f.title}</h3>
-                  <p className="text-gray-500 text-xs">{f.desc}</p>
+                  <h3 className="font-bold text-foreground text-sm mb-1">{f.title}</h3>
+                  <p className="text-muted-foreground text-xs">{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -223,9 +223,9 @@ export default function InstallPage() {
           <div className="neu-card p-6 sm:p-8 mb-6">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-3xl">🤖</span>
-              <h2 className="text-xl font-extrabold text-gray-900">Install on Android</h2>
+              <h2 className="font-heading text-xl font-extrabold text-foreground">Install on Android</h2>
             </div>
-            <p className="text-gray-600 text-sm mb-5">
+            <p className="text-muted-foreground text-sm mb-5">
               Android devices (Chrome browser) support adding this website to your home screen as an app. Follow the steps below:
             </p>
 
@@ -233,17 +233,17 @@ export default function InstallPage() {
             <div className="grid sm:grid-cols-2 gap-6 mb-8">
               <div className="neu-inset p-4 text-center">
                 <p className="eyebrow text-center !mb-2">Steps 1 – 3</p>
-                <p className="text-xs text-gray-500 mb-3">Open in Chrome → Tap the menu → Select "Install app"</p>
+                <p className="text-xs text-muted-foreground mb-3">Open in Chrome → Tap the menu → Select "Install app"</p>
                 <AndroidPhoneSvg />
               </div>
               <div className="neu-inset p-4 text-center">
                 <p className="eyebrow text-center !mb-2">Step 4</p>
-                <p className="text-xs text-gray-500 mb-3">Tap "Install" to confirm</p>
+                <p className="text-xs text-muted-foreground mb-3">Tap "Install" to confirm</p>
                 <ConfirmInstallSvg />
               </div>
             </div>
 
-            <ol className="space-y-4">
+            <ol className="grid sm:grid-cols-2 gap-4">
               {[
                 { step: '1', title: 'Open in Chrome', desc: 'Make sure you are viewing this site in the Google Chrome browser on your Android phone or tablet.' },
                 { step: '2', title: 'Tap the Menu', desc: 'Tap the three-dot menu icon (⋮) in the top-right corner of the Chrome browser.' },
@@ -252,12 +252,12 @@ export default function InstallPage() {
                 { step: '5', title: 'Launch the App', desc: 'Find the CRE8MARKET ENTEBBE icon on your home screen and tap it to open. It will launch like a native app, with no browser address bar.' },
               ].map((s) => (
                 <li key={s.step} className="flex gap-4">
-                  <span className="w-8 h-8 rounded-full bg-navy text-white font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">
                     {s.step}
                   </span>
                   <div>
-                    <p className="font-bold text-gray-900 text-sm">{s.title}</p>
-                    <p className="text-gray-500 text-sm mt-0.5">{s.desc}</p>
+                    <p className="font-bold text-foreground text-sm">{s.title}</p>
+                    <p className="text-muted-foreground text-sm mt-0.5">{s.desc}</p>
                   </div>
                 </li>
               ))}
@@ -270,20 +270,20 @@ export default function InstallPage() {
           <div className="neu-card p-6 sm:p-8 mb-6">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-3xl">🍎</span>
-              <h2 className="text-xl font-extrabold text-gray-900">Install on iPhone / iPad (iOS)</h2>
+              <h2 className="font-heading text-xl font-extrabold text-foreground">Install on iPhone / iPad (iOS)</h2>
             </div>
-            <p className="text-gray-600 text-sm mb-5">
+            <p className="text-muted-foreground text-sm mb-5">
               Safari on iOS supports adding websites to your home screen, making them work just like apps.
             </p>
 
             {/* Visual for iOS */}
             <div className="neu-inset p-4 text-center mb-8">
               <p className="eyebrow text-center !mb-2">Steps 2 – 3</p>
-              <p className="text-xs text-gray-500 mb-3">Tap the Share button → Scroll down → Tap "Add to Home Screen"</p>
+              <p className="text-xs text-muted-foreground mb-3">Tap the Share button → Scroll down → Tap "Add to Home Screen"</p>
               <IPhoneSvg />
             </div>
 
-            <ol className="space-y-4">
+            <ol className="grid sm:grid-cols-2 gap-4">
               {[
                 { step: '1', title: 'Open in Safari', desc: 'Open this site in the Safari browser on your iPhone or iPad. Other browsers may not support this feature.' },
                 { step: '2', title: 'Tap the Share Button', desc: 'Tap the Share icon (a square with an arrow pointing up) at the bottom of the Safari screen.' },
@@ -292,12 +292,12 @@ export default function InstallPage() {
                 { step: '5', title: 'Launch the App', desc: 'Tap the CRE8MARKET ENTEBBE icon on your home screen. It will open in a full-screen, app-like experience without browser tabs or address bars.' },
               ].map((s) => (
                 <li key={s.step} className="flex gap-4">
-                  <span className="w-8 h-8 rounded-full bg-navy text-white font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">
                     {s.step}
                   </span>
                   <div>
-                    <p className="font-bold text-gray-900 text-sm">{s.title}</p>
-                    <p className="text-gray-500 text-sm mt-0.5">{s.desc}</p>
+                    <p className="font-bold text-foreground text-sm">{s.title}</p>
+                    <p className="text-muted-foreground text-sm mt-0.5">{s.desc}</p>
                   </div>
                 </li>
               ))}
@@ -310,9 +310,9 @@ export default function InstallPage() {
           <div className="neu-card p-6 sm:p-8 mb-6">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-3xl">🏠</span>
-              <h2 className="text-xl font-extrabold text-gray-900">Final Result</h2>
+              <h2 className="font-heading text-xl font-extrabold text-foreground">Final Result</h2>
             </div>
-            <p className="text-gray-600 text-sm mb-5">
+            <p className="text-muted-foreground text-sm mb-5">
               Once installed, the app icon appears on your home screen just like any other app. Tap it to launch directly — no browser needed.
             </p>
             <div className="max-w-xs mx-auto">
@@ -323,9 +323,9 @@ export default function InstallPage() {
 
         {/* Tips */}
         <ScrollReveal delay={200}>
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-            <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-3">💡 Tips</p>
-            <ul className="space-y-2 text-sm text-amber-800">
+          <div className="bg-secondary/10 border border-secondary/40 rounded-2xl p-5">
+            <p className="text-xs font-bold text-secondary uppercase tracking-wide mb-3">💡 Tips</p>
+            <ul className="space-y-2 text-sm text-secondary">
               <li>• Make sure your browser is up to date for the best install experience.</li>
               <li>• On Android, you may need to dismiss the install banner if you want to use the menu method.</li>
               <li>• On iOS, the "Add to Home Screen" option only appears in Safari, not Chrome or Firefox.</li>

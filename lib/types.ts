@@ -33,6 +33,7 @@ export interface Product {
   ownerPhone?: string | null;
   ownerWhatsapp?: string | null;
   ownerAvatar?: string | null;
+  ownerVerified?: boolean | null;
   categoryIcon?: string;
   categoryColor?: string;
   categoryBg?: string;
@@ -56,6 +57,7 @@ export interface AppUser {
   avatar?: string | null;
   isActive: boolean;
   isAdmin: boolean;
+  isVerified: boolean;
   createdAt: string;
   productCount?: number;
 }

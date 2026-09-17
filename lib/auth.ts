@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { getAdminUserByEmail, getUserByPhone } from "./db/queries";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.AUTH_SECRET,
   providers: [
     Credentials({
       id: "admin-credentials",

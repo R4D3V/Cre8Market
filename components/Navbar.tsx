@@ -1,204 +1,288 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { fetchCategoriesAction } from "@/lib/actions/categories";
-import type { CategoryDB } from "@/lib/types";
 
 export default function Navbar() {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [categories, setCategories] = useState<CategoryDB[]>([]);
-  const router = useRouter();
-  const { data: session, status } = useSession();
-  const isUser = status === "authenticated" && session?.user?.role === "user";
-
-  useEffect(() => {
-    fetchCategoriesAction().then((data) => setCategories(data ?? []));
-  }, []);
-
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (search.trim()) params.set("q", search.trim());
-    if (category && category !== "All") params.set("category", category);
-    const qs = params.toString();
-    router.push(qs ? `/products?${qs}` : "/products");
-  }
+  const { data: session } = useSession();
+  const isUser = session?.user != null;
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="bg-surface sticky top-0 z-50 pt-3 pb-2 px-3 sm:px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="neu-dark-card px-4 sm:px-6">
-          {/* Top bar */}
-          <div className="flex items-center justify-between py-2.5 gap-4">
-            {/* Logo */}
-            <Link href="/" className="shrink-0 flex items-center">
-              <Image
-                src="/brand/logo.webp"
-                alt="Cre8 Market"
-                width={1080}
-                height={720}
-                priority
-                className="h-9 sm:h-11 w-auto object-contain"
-              />
-            </Link>
+    <header className="sticky top-0 z-50 bg-background shadow-lg lg:shadow-none">
+      <div className="container flex items-center justify-between gap-x-4 py-3">
+        <Link
+          href="/"
+          className="flex items-center gap-x-1 text-h5 font-black font-heading"
+        >
+          Cre8<span className="text-primary">Market</span>
+        </Link>
 
-            {/* Search bar */}
-            <form
-              onSubmit={handleSearch}
-              className="flex-1 max-w-2xl hidden sm:flex"
+        <form
+          action="/products"
+          method="get"
+          className="relative hidden flex-1 max-w-xl lg:block"
+        >
+          <input
+            type="search"
+            name="q"
+            placeholder="Search products…"
+            autoComplete="off"
+            className="w-full rounded-md border border-border bg-card px-4 py-2.5 pr-11 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
+          />
+          <button
+            type="submit"
+            aria-label="Search"
+            className="absolute right-0 top-0 grid h-full w-10 place-items-center rounded-r-md text-muted-foreground transition hover:bg-primary hover:text-background"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-4"
             >
-              <div className="neu-dark-inset flex w-full rounded-full overflow-hidden">
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="bg-transparent text-white/80 text-sm pl-4 pr-2 py-2.5 focus:outline-none cursor-pointer"
-                >
-                  <option value="All" className="text-gray-900">
-                    All
-                  </option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.slug} className="text-gray-900">
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search listings…"
-                  className="flex-1 bg-transparent text-white px-3 py-2.5 text-sm focus:outline-none placeholder:text-white/40"
-                />
-                <button
-                  type="submit"
-                  className="neu-dark-pill bg-accent text-navy px-5 py-2 m-1 font-bold text-sm transition-all"
-                >
-                  Search
-                </button>
-              </div>
-            </form>
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.3-4.3"></path>
+            </svg>
+          </button>
+        </form>
 
-            {/* Mobile actions (visible on small screens) */}
-            <div className="flex items-center gap-2 shrink-0 sm:hidden">
-              {isUser ? (
-                <>
-                  <button
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-2 py-1.5"
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-2 py-1.5"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-2 py-1.5"
-                  >
-                    Register
-                  </Link>
-                </>
-              )}
+        <div className="flex items-center gap-x-3">
+          {isUser ? (
+            <>
               <Link
-                href="/selltous"
-                className="neu-dark-pill bg-accent hover:bg-accent-dark text-navy font-bold text-xs px-3 py-1.5 transition-all flex items-center gap-1"
+                href="/dashboard"
+                className="hidden items-center gap-x-1.5 text-sm font-semibold text-foreground sm:flex"
               >
-                Sell to Us
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-5"
+                >
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span className="hidden sm:inline">Dashboard</span>
               </Link>
-            </div>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="text-sm font-semibold text-muted-foreground transition hover:text-foreground"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              aria-label="Sign in"
+              className="flex items-center gap-x-1.5 text-sm font-semibold text-foreground"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-5"
+              >
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span className="hidden sm:inline">Account</span>
+            </Link>
+          )}
 
-            {/* Desktop actions (hidden on small screens) */}
-            <div className="hidden sm:flex items-center gap-2 shrink-0">
-              {isUser ? (
-                <>
-                  <Link
-                    href="/dashboard"
-                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-3 py-2"
-                  >
-                    My Dashboard
-                  </Link>
-                  <button
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-3 py-2"
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-3 py-2"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="text-white/70 hover:text-white text-sm font-medium transition-colors px-3 py-2"
-                  >
-                    Register Free
-                  </Link>
-                </>
-              )}
-              <Link
-                href="/selltous"
-                className="neu-dark-pill bg-accent hover:bg-accent-dark text-navy font-bold text-sm px-4 py-2 transition-all flex items-center gap-1"
+          <Link
+            href="/selltous"
+            className="hidden button bg-primary px-4 py-2 text-sm text-primary-foreground md:inline-flex"
+          >
+            Sell to Us
+          </Link>
+
+          <button
+            className="lg:hidden"
+            aria-label="Open menu"
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-6 text-foreground"
+            >
+              <line x1="4" x2="20" y1="12" y2="12"></line>
+              <line x1="4" x2="20" y1="6" y2="6"></line>
+              <line x1="4" x2="20" y1="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <nav className="hidden bg-primary text-primary-foreground lg:block">
+        <div className="container flex items-center justify-between py-2.5 text-sm font-semibold">
+          <div className="flex items-center gap-x-6">
+            <span className="flex cursor-pointer items-center gap-x-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-4"
               >
-                Sell to Us
-              </Link>
-            </div>
+                <line x1="4" x2="20" y1="12" y2="12"></line>
+                <line x1="4" x2="20" y1="6" y2="6"></line>
+                <line x1="4" x2="20" y1="18" y2="18"></line>
+              </svg>
+              <Link href="/products">All Categories</Link>
+            </span>
+            <Link className="hover:underline" href="/products">
+              Products
+            </Link>
+            <Link className="hover:underline" href="/deals">
+              Deals
+            </Link>
+            <Link className="hover:underline" href="/contact">
+              Contact
+            </Link>
           </div>
+          <div className="flex items-center gap-x-6">
+            <Link className="hover:underline" href="/products">
+              Limited Sale 🔥
+            </Link>
+            <Link className="hover:underline" href="/products?sort=latest">
+              New Arrivals
+            </Link>
+            <Link className="hover:underline" href="/selltous">
+              Sell to Us
+            </Link>
+          </div>
+        </div>
+      </nav>
 
-          {/* Mobile search */}
-          <form onSubmit={handleSearch} className="sm:hidden pb-3">
-            <div className="neu-dark-inset flex rounded-full overflow-hidden">
+      {mobileOpen && (
+        <div className="border-t border-border bg-background lg:hidden">
+          <div className="container flex flex-col py-2">
+            <form
+              action="/products"
+              method="get"
+              className="relative mb-2 flex"
+            >
               <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search listings…"
-                className="flex-1 bg-transparent text-white px-4 py-2.5 text-sm focus:outline-none placeholder:text-white/40"
+                type="search"
+                name="q"
+                placeholder="Search products…"
+                autoComplete="off"
+                className="w-full rounded-md border border-border bg-card px-4 py-2.5 pr-11 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
               />
               <button
                 type="submit"
-                className="neu-dark-pill bg-accent text-navy px-4 py-2 m-1 font-bold text-sm"
+                aria-label="Search"
+                className="absolute right-0 top-0 grid h-full w-10 place-items-center rounded-r-md text-muted-foreground"
               >
-                Search
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-4"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </svg>
               </button>
-            </div>
-          </form>
-
-          {/* Nav links */}
-          <nav className="flex items-center justify-center gap-2 sm:gap-3 overflow-x-auto scrollbar-none py-2.5 px-1">
-            {[
-              { href: "/products", label: "Browse" },
-              { href: "/deals", label: "Hot 🔥" },
-
-              { href: "/install", label: "Install App" },
-              { href: "/selltous", label: "Sell to Us" },
-            ].map((item) => (
+            </form>
+            <div className="flex flex-col divide-y divide-border">
               <Link
-                key={item.href}
-                href={item.href}
-                className="text-white/70 hover:text-white text-sm font-medium px-3.5 py-1.5 rounded-full hover:bg-white/5 whitespace-nowrap transition-colors min-w-fit"
+                href="/products"
+                className="py-2.5 text-sm font-semibold text-foreground"
               >
-                {item.label}
+                All Categories
               </Link>
-            ))}
-          </nav>
+              <Link
+                href="/products"
+                className="py-2.5 text-sm font-semibold text-foreground"
+              >
+                Products
+              </Link>
+              <Link
+                href="/deals"
+                className="py-2.5 text-sm font-semibold text-foreground"
+              >
+                Limited Sale 🔥
+              </Link>
+              <Link
+                href="/products?sort=latest"
+                className="py-2.5 text-sm font-semibold text-foreground"
+              >
+                New Arrivals
+              </Link>
+              <Link
+                href="/contact"
+                className="py-2.5 text-sm font-semibold text-foreground"
+              >
+                Contact
+              </Link>
+              <Link
+                href="/selltous"
+                className="py-2.5 text-sm font-semibold text-foreground"
+              >
+                Sell to Us
+              </Link>
+              {isUser ? (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="py-2.5 text-sm font-semibold text-foreground"
+                >
+                  My Dashboard
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="py-2.5 text-sm font-semibold text-foreground"
+                >
+                  Login / Register
+                </Link>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }
