@@ -72,17 +72,13 @@ export default function ProductCard({
         >
           {product.category}
         </span>
-        <p
-          className={`text-sm font-semibold line-clamp-2 leading-snug ${
-            dark ? "text-foreground" : "text-gray-900"
-          }`}
-        >
+        <p className="text-sm font-semibold line-clamp-2 leading-snug text-foreground">
           {product.title}
         </p>
         <div className="flex items-center justify-between mt-auto pt-2">
           <span
             className={`font-bold text-sm ${
-              dark ? "text-primary" : "text-navy"
+              dark ? "text-primary" : "text-foreground"
             }`}
           >
             {formatPrice(product.price)}
@@ -101,7 +97,7 @@ export default function ProductCard({
       <div className="px-3.5 pb-3.5">
         <span
           className={`text-xs font-medium group-hover:underline ${
-            dark ? "text-primary" : "text-navy"
+            dark ? "text-primary" : "text-foreground"
           }`}
         >
           View Product →

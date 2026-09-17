@@ -18,6 +18,26 @@ import type { CategoryDB } from "@/lib/types";
 
 const ITEMS_PER_PAGE = 16;
 
+function ProductCardSkeleton() {
+  return (
+    <div className="neu-card overflow-hidden flex flex-col">
+      <div className="relative aspect-[4/3] rounded-t-3xl bg-muted animate-pulse" />
+      <div className="p-3.5 flex flex-col gap-2 flex-1">
+        <div className="h-2.5 w-16 rounded-full bg-muted animate-pulse" />
+        <div className="h-3 w-3/4 rounded-full bg-muted animate-pulse" />
+        <div className="h-3 w-1/2 rounded-full bg-muted animate-pulse" />
+        <div className="flex items-center justify-between mt-auto pt-2">
+          <div className="h-3.5 w-20 rounded-full bg-muted animate-pulse" />
+          <div className="h-2.5 w-12 rounded-full bg-muted animate-pulse" />
+        </div>
+      </div>
+      <div className="px-3.5 pb-3.5">
+        <div className="h-3 w-24 rounded-full bg-muted animate-pulse" />
+      </div>
+    </div>
+  );
+}
+
 export default function ProductsPage() {
   return (
     <Suspense fallback={null}>
@@ -285,8 +305,10 @@ function ProductsPageContent() {
 
             {/* Grid */}
             {loading ? (
-              <div className="text-center py-20 text-muted-foreground text-sm">
-                Loading…
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <ProductCardSkeleton key={i} />
+                ))}
               </div>
             ) : paginated.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
