@@ -88,7 +88,7 @@ export default function ProductDetailPage() {
   return (
     <>
       <Navbar />
-      <main className="max-w-5xl mx-auto px-4 py-6 pb-28 sm:pb-8">
+      <main className="container py-6 pb-28 sm:pb-8">
         {/* Back */}
         <Link
           href="/products"
@@ -179,26 +179,21 @@ export default function ProductDetailPage() {
             )}
 
             {/* specs */}
-            <div className="neu-card p-4">
-              <div className="grid grid-cols-2 gap-3">
-                {" "}
-                {product.specs && product.specs.length > 0 && (
-                  <div className="neu-inset p-5">
-                    <p className="eyebrow mb-4">SPECS</p>
-                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-                      {product.specs.map((s) => (
-                        <div key={s.label}>
-                          <dt className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                            {s.label}
-                          </dt>
-                          <dd className="mt-0.5 text-sm text-foreground">{s.value}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </div>
-                )}
+            {product.specs && product.specs.length > 0 && (
+              <div className="neu-card p-4">
+                <p className="eyebrow mb-4">SPECS</p>
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                  {product.specs.map((s) => (
+                    <div key={s.label}>
+                      <dt className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                        {s.label}
+                      </dt>
+                      <dd className="text-base font-semibold text-foreground mt-0.5">{s.value}</dd>
+                    </div>
+                  ))}
+                </dl>
               </div>
-            </div>
+            )}
 
             {/* Meta */}
             <div className="neu-card p-4">

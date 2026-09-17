@@ -6,7 +6,7 @@ export default function TermsPage() {
   return (
     <>
       <Navbar />
-      <main className="max-w-2xl mx-auto px-4 py-10 pb-28 sm:pb-10">
+      <main className="container py-10 pb-28 sm:pb-10">
         <Link href="/" className="text-sm text-primary font-semibold hover:underline mb-6 inline-block">← Home</Link>
         <h1 className="text-2xl font-extrabold font-heading text-foreground mb-6">Terms of Service</h1>
         <div className="neu-card p-6 sm:p-8 prose prose-sm text-muted-foreground space-y-4">

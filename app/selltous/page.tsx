@@ -64,7 +64,7 @@ export default function SellToUsPage() {
         </div>
       </ScrollReveal>
 
-      <main className="max-w-xl mx-auto px-4 py-8 pb-28 sm:pb-8">
+      <main className="container py-8 pb-28 sm:pb-8">
         {submitted ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🎉</div>
@@ -85,7 +85,8 @@ export default function SellToUsPage() {
               <h2 className="font-heading text-xl font-extrabold text-foreground mb-6 text-center">Tell us about your item</h2>
             </ScrollReveal>
 
-            <ScrollReveal delay={100}>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+            <ScrollReveal delay={100} className="lg:col-span-3">
               <form onSubmit={handleSubmit} className="neu-card p-6 space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Your Name *</label>
@@ -165,30 +166,31 @@ export default function SellToUsPage() {
               </button>
             </form>
             </ScrollReveal>
+
+            {/* How it works */}
+            <ScrollReveal delay={100} className="lg:col-span-2">
+              <div className="space-y-3">
+                <h3 className="text-base font-extrabold text-foreground mb-4">How it works</h3>
+                {[
+                  { n: '1', title: 'Submit your item details', desc: 'Fill the form above with your item info and contact number.' },
+                  { n: '2', title: 'We review & respond', desc: 'Our team evaluates your item and sends a cash offer on WhatsApp within 24 hours.' },
+                  { n: '3', title: 'Get paid', desc: 'Accept the offer, bring your item to us in Kitoro, Entebbe and receive instant cash payment.' },
+                ].map((step) => (
+                  <div key={step.n} className="neu-card flex items-start gap-4 p-4">
+                    <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center shrink-0">
+                      {step.n}
+                    </span>
+                    <div>
+                      <p className="font-bold text-foreground text-sm">{step.title}</p>
+                      <p className="text-muted-foreground text-sm mt-0.5">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollReveal>
+            </div>
           </>
         )}
-
-        {/* How it works */}
-        <ScrollReveal delay={100}>
-          <div className="mt-8 space-y-3">
-            <h3 className="text-base font-extrabold text-foreground mb-4">How it works</h3>
-            {[
-              { n: '1', title: 'Submit your item details', desc: 'Fill the form above with your item info and contact number.' },
-              { n: '2', title: 'We review & respond', desc: 'Our team evaluates your item and sends a cash offer on WhatsApp within 24 hours.' },
-              { n: '3', title: 'Get paid', desc: 'Accept the offer, bring your item to us in Kitoro, Entebbe and receive instant cash payment.' },
-            ].map((step) => (
-              <div key={step.n} className="neu-card flex items-start gap-4 p-4">
-                <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center shrink-0">
-                  {step.n}
-                </span>
-                <div>
-                  <p className="font-bold text-foreground text-sm">{step.title}</p>
-                  <p className="text-muted-foreground text-sm mt-0.5">{step.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </ScrollReveal>
       </main>
       <Footer />
     </>

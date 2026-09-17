@@ -7,6 +7,7 @@ import Link from "next/link";
 import { createMyProductAction, checkSlugAction } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import { compressImage } from "@/lib/imageCompress";
+import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { CategoryDB } from "@/lib/types";
 
 export default function NewMyProductPage() {
@@ -112,13 +113,19 @@ export default function NewMyProductPage() {
   }
 
   return (
-    <div>
-      <Link href="/dashboard" className="text-sm text-primary font-semibold hover:underline mb-4 inline-block">
-        ← Back to My Products
-      </Link>
-      <h1 className="font-heading text-2xl font-extrabold text-foreground mb-6">Add New Product</h1>
-
-      <form onSubmit={handleSubmit} className="bg-card border border-border rounded-xl p-6 max-w-2xl space-y-4">
+    <DashboardPanel
+      title="Add New Product"
+      description="List a new item for sale"
+      action={
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 rounded-xl bg-background px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+        >
+          ← Back to My Products
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Title *</label>
           <input
@@ -284,6 +291,6 @@ export default function NewMyProductPage() {
           </Link>
         </div>
       </form>
-    </div>
+    </DashboardPanel>
   );
 }

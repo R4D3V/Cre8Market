@@ -9,6 +9,7 @@ import {
   changeMyPasswordAction,
 } from "@/lib/actions/users";
 import { compressImage } from "@/lib/imageCompress";
+import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { AppUser } from "@/lib/types";
 
 export default function ProfilePage() {
@@ -79,22 +80,22 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-heading text-2xl font-extrabold text-foreground">My Profile</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Member since {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString("en-UG", { year: "numeric", month: "long" }) : "—"}
-          </p>
-        </div>
+    <DashboardPanel
+      title="My Profile"
+      description={
+        profile?.createdAt
+          ? `Member since ${new Date(profile.createdAt).toLocaleDateString("en-UG", { year: "numeric", month: "long" })}`
+          : undefined
+      }
+      action={
         <Link
           href="/dashboard"
-          className="neu-pill bg-background text-primary text-sm font-semibold px-4 py-2 transition-all"
+          className="inline-flex items-center gap-2 rounded-xl bg-background px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
         >
           ← Back to Dashboard
         </Link>
-      </div>
-
+      }
+    >
       {/* Info card */}
       <div className="bg-card border border-border rounded-xl p-6 mb-6">
         <h2 className="font-bold text-foreground mb-4">Account Information</h2>
@@ -240,6 +241,6 @@ export default function ProfilePage() {
           </button>
         </form>
       </div>
-    </div>
+    </DashboardPanel>
   );
 }

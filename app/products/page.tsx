@@ -3,12 +3,15 @@
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import CategoryBar from "@/components/CategoryBar";
+// import CategoryBar from "@/components/CategoryBar";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import ProductCard from "@/components/ProductCard";
 import { formatPrice } from "@/lib/data";
-import { fetchProductsAction, fetchSellersAction } from "@/lib/actions/products";
+import {
+  fetchProductsAction,
+  fetchSellersAction,
+} from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import type { Product } from "@/lib/types";
 import type { CategoryDB } from "@/lib/types";
@@ -33,7 +36,9 @@ function ProductsPageContent() {
 
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<CategoryDB[]>([]);
-  const [sellers, setSellers] = useState<{ id: string; name: string; productCount: number }[]>([]);
+  const [sellers, setSellers] = useState<
+    { id: string; name: string; productCount: number }[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState(qParam);
@@ -103,7 +108,16 @@ function ProductsPageContent() {
     if (maxPrice) list = list.filter((p) => p.price <= Number(maxPrice));
 
     return list;
-  }, [search, selectedCategory, selectedSeller, minPrice, maxPrice, featuredParam, sortParam, allProducts]);
+  }, [
+    search,
+    selectedCategory,
+    selectedSeller,
+    minPrice,
+    maxPrice,
+    featuredParam,
+    sortParam,
+    allProducts,
+  ]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(
@@ -123,7 +137,7 @@ function ProductsPageContent() {
   return (
     <>
       <Navbar />
-      <CategoryBar />
+      {/* <CategoryBar /> */}
 
       <main className="container py-6 pb-24 sm:pb-8">
         <div className="flex flex-col lg:flex-row gap-6">
@@ -131,7 +145,9 @@ function ProductsPageContent() {
           <aside className="lg:w-56 shrink-0">
             <div className="neu-card p-4 lg:sticky lg:top-24">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-heading font-bold text-foreground">Filters</h2>
+                <h2 className="font-heading font-bold text-foreground">
+                  Filters
+                </h2>
                 <button
                   onClick={resetFilters}
                   className="text-xs text-primary font-semibold hover:underline"
@@ -269,7 +285,9 @@ function ProductsPageContent() {
 
             {/* Grid */}
             {loading ? (
-              <div className="text-center py-20 text-muted-foreground text-sm">Loading…</div>
+              <div className="text-center py-20 text-muted-foreground text-sm">
+                Loading…
+              </div>
             ) : paginated.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
                 {paginated.map((p) => (
@@ -298,7 +316,10 @@ function ProductsPageContent() {
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-8">
                 <button
-                  onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  onClick={() => {
+                    setPage((p) => Math.max(1, p - 1));
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
                   disabled={page === 1}
                   className="border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground disabled:opacity-40 transition-all"
                 >
@@ -308,7 +329,10 @@ function ProductsPageContent() {
                   (n) => (
                     <button
                       key={n}
-                      onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                      onClick={() => {
+                        setPage(n);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
                       className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${
                         page === n
                           ? "bg-primary text-primary-foreground neu-dark-pill"
@@ -320,7 +344,10 @@ function ProductsPageContent() {
                   ),
                 )}
                 <button
-                  onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  onClick={() => {
+                    setPage((p) => Math.min(totalPages, p + 1));
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
                   disabled={page === totalPages}
                   className="border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground disabled:opacity-40 transition-all"
                 >

@@ -6,14 +6,21 @@ import { useSession } from "next-auth/react";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
+  const role = session?.user?.role;
+
+  const addProductHref = !isLoggedIn
+    ? "/login"
+    : role === "admin"
+      ? "/admin/products/new"
+      : "/dashboard/products/new";
 
   const navItems = [
     { href: "/", label: "Home", icon: "🏠" },
     { href: "/products", label: "Shop", icon: "🛒" },
     {
-      href: isLoggedIn ? "/dashboard/products/new" : "/login",
+      href: addProductHref,
       label: "Add Product",
       icon: "➕",
     },

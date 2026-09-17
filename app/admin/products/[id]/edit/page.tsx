@@ -9,6 +9,7 @@ import {
 } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import { ProductImagePicker } from "@/components/ProductImagePicker";
+import { AdminPanel } from "@/components/admin/AdminPanel";
 import type { CategoryDB } from "@/lib/types";
 
 export default function EditProductPage() {
@@ -142,18 +143,19 @@ export default function EditProductPage() {
   }
 
   return (
-    <div>
-      <Link
-        href="/admin"
-        className="text-sm text-primary font-semibold hover:underline mb-4 inline-block"
-      >
-        ← Back to Dashboard
-      </Link>
-      <h1 className="text-2xl font-extrabold font-heading text-foreground mb-6">
-        Edit Product
-      </h1>
-
-      <form onSubmit={handleSubmit} className="neu-card p-6 max-w-2xl space-y-4">
+    <AdminPanel
+      title="Edit Product"
+      description={form.title || "Update this listing"}
+      action={
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-2 rounded-xl bg-background px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+        >
+          ← Back to Dashboard
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
             Title *
@@ -336,6 +338,6 @@ export default function EditProductPage() {
           </Link>
         </div>
       </form>
-    </div>
+    </AdminPanel>
   );
 }

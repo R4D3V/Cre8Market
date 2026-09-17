@@ -9,6 +9,7 @@ import {
 } from "@/lib/actions/admin";
 import type { AdminUserRow } from "@/lib/db/queries";
 import { compressImage } from "@/lib/imageCompress";
+import { AdminPanel } from "@/components/admin/AdminPanel";
 
 export default function AdminProfilePage() {
   const [profile, setProfile] = useState<AdminUserRow | null>(null);
@@ -84,20 +85,18 @@ export default function AdminProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-extrabold text-foreground font-heading">My Profile</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">{profile?.email}</p>
-        </div>
+    <AdminPanel
+      title="My Profile"
+      description={profile?.email}
+      action={
         <Link
           href="/admin"
-          className="neu-pill bg-card text-primary text-sm font-semibold px-4 py-2 transition-all"
+          className="inline-flex items-center gap-2 rounded-xl bg-card px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
         >
           ← Back to Dashboard
         </Link>
-      </div>
-
+      }
+    >
       {/* Info card */}
       <div className="neu-card p-6 mb-6">
         <h2 className="font-bold text-foreground mb-4 font-heading">Account Information</h2>
@@ -254,6 +253,6 @@ export default function AdminProfilePage() {
           </button>
         </form>
       </div>
-    </div>
+    </AdminPanel>
   );
 }

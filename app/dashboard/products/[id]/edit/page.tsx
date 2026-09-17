@@ -8,6 +8,7 @@ import { fetchMyProductsAction, updateMyProductAction, deleteMyProductAction } f
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import { compressImage } from "@/lib/imageCompress";
 import { ProductImagePicker } from "@/components/ProductImagePicker";
+import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { CategoryDB } from "@/lib/types";
 
 export default function EditMyProductPage() {
@@ -167,13 +168,19 @@ export default function EditMyProductPage() {
   }
 
   return (
-    <div>
-      <Link href="/dashboard" className="text-sm text-primary font-semibold hover:underline mb-4 inline-block">
-        ← Back to My Products
-      </Link>
-      <h1 className="font-heading text-2xl font-extrabold text-foreground mb-6">Edit Product</h1>
-
-      <form onSubmit={handleSubmit} className="bg-card border border-border rounded-xl p-6 max-w-2xl space-y-4">
+    <DashboardPanel
+      title="Edit Product"
+      description={form.title || "Update your listing"}
+      action={
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 rounded-xl bg-background px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+        >
+          ← Back to My Products
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Title *</label>
           <input
@@ -315,6 +322,6 @@ export default function EditMyProductPage() {
           </Link>
         </div>
       </form>
-    </div>
+    </DashboardPanel>
   );
 }
