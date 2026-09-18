@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { auth } from "@/lib/auth";
 import {
   getUsers,
+  getPublicUsers,
   getUserById,
   createUser,
   updateUserStatus,
@@ -37,6 +38,15 @@ async function requireUser() {
 export async function fetchUsersAction() {
   await requireAdmin();
   return getUsers();
+}
+
+// Public: sellers directory (no auth) — active users with listings.
+export async function fetchPublicUsersAction() {
+  return getPublicUsers();
+}
+
+export async function fetchPublicUserAction(id: string) {
+  return getUserById(id);
 }
 
 export async function fetchUserByIdAction(id: string) {

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { createMyProductAction, checkSlugAction } from "@/lib/actions/products";
+import { createMyProductAction, checkSlugAction, fetchMyListingLimitAction } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import { compressImage } from "@/lib/imageCompress";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
@@ -27,9 +27,17 @@ export default function NewMyProductPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [categories, setCategories] = useState<CategoryDB[]>([]);
+  const [limit, setLimit] = useState<{
+    productCount: number;
+    isVerified: boolean;
+    limit: number;
+  } | null>(null);
 
   useEffect(() => {
     fetchCategoriesAction().then((data) => setCategories(data ?? []));
+    fetchMyListingLimitAction()
+      .then(setLimit)
+      .catch(() => {});
   }, []);
 
   async function handleImageUpload(index: number, file: File | null) {
@@ -125,7 +133,37 @@ export default function NewMyProductPage() {
         </Link>
       }
     >
+      {limit && !limit.isVerified && limit.productCount >= limit.limit ? (
+        <div className="bg-card border border-border rounded-xl p-8 text-center">
+          <p className="text-5xl mb-4">🔒</p>
+          <h2 className="font-heading text-xl font-bold text-foreground mb-2">
+            Listing limit reached
+          </h2>
+          <p className="text-muted-foreground text-sm mb-1">
+            You've reached the limit of {limit.limit} listings as an unverified
+            seller.
+          </p>
+          <p className="text-muted-foreground text-sm mb-6">
+            Contact the admin to get verified so you can post more items.
+          </p>
+          <a
+            href="https://wa.me/256751621506?text=Hi+I+would+like+to+get+verified+so+I+can+post+more+listings"
+            target="_blank"
+            rel="noreferrer"
+            className="neu-pill inline-flex items-center gap-2 bg-wa hover:bg-wa-dark text-white font-bold px-6 py-3 text-sm transition-all"
+          >
+            Contact Admin on WhatsApp
+          </a>
+        </div>
+      ) : (
       <form onSubmit={handleSubmit} className="space-y-4">
+        {limit && !limit.isVerified && (
+          <div className="bg-primary/10 border border-primary/40 text-primary text-xs font-semibold rounded-xl px-4 py-3">
+            Unverified sellers can post up to {limit.limit} listings. You've
+            used {limit.productCount} of {limit.limit}. Get verified to post
+            more.
+          </div>
+        )}
         <div>
           <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Title *</label>
           <input
@@ -291,6 +329,7 @@ export default function NewMyProductPage() {
           </Link>
         </div>
       </form>
+      )}
     </DashboardPanel>
   );
 }

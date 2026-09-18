@@ -145,6 +145,11 @@ export default function Footer() {
               </Link>
             </li>
             <li>
+              <Link className="hover:text-primary" href="/sellers">
+                Our Sellers
+              </Link>
+            </li>
+            <li>
               <Link className="hover:text-primary" href="/admin">
                 Admin Portal
               </Link>

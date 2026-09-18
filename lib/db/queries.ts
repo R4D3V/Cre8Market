@@ -145,7 +145,23 @@ export async function getProductOwnerIds(ids: string[]): Promise<Record<string, 
 
 export async function getProductOwnerId(id: string): Promise<string | null> {
   const { rows } = await pool.query("SELECT user_id FROM products WHERE id = $1", [id]);
-  return (rows[0]?.user_id as string) ?? null;
+  return rows[0]?.user_id ?? null;
+}
+
+// Public: all listings added by a specific registered user, joined with their
+// profile so the buyer-facing UI can show the avatar / verified badge.
+export async function getUserProductsWithOwner(userId: string): Promise<Product[]> {
+  const { rows } = await pool.query(
+    `SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
+            u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified
+     FROM products p
+     LEFT JOIN categories c ON c.slug = p.category_slug
+     INNER JOIN users u ON u.id = p.user_id
+     WHERE p.user_id = $1
+     ORDER BY p.created_at DESC`,
+    [userId],
+  );
+  return rows.map(mapProductWithOwner);
 }
 
 // Products joined with the registered user who added them — powers the admin dashboard's
@@ -322,6 +338,20 @@ export async function getUsers(): Promise<AppUser[]> {
     LEFT JOIN products p ON p.user_id = u.id
     GROUP BY u.id
     ORDER BY u.created_at DESC
+  `);
+  return rows.map(mapUser);
+}
+
+// Public sellers directory: active registered users who currently have listings.
+export async function getPublicUsers(): Promise<AppUser[]> {
+  const { rows } = await pool.query(`
+    SELECT u.id, u.name, u.phone, u.whatsapp, u.avatar, u.is_active, u.is_admin, u.is_verified, u.created_at,
+           COUNT(p.id)::int AS product_count
+    FROM users u
+    LEFT JOIN products p ON p.user_id = u.id
+    GROUP BY u.id
+    HAVING COUNT(p.id) > 0 AND u.is_active = true
+    ORDER BY u.name ASC
   `);
   return rows.map(mapUser);
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { formatPrice } from "@/lib/data";
-import { fetchMyProductsAction, deleteMyProductsAction } from "@/lib/actions/products";
+import { fetchMyProductsAction, deleteMyProductsAction, duplicateMyProductsAction } from "@/lib/actions/products";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { Product } from "@/lib/types";
 
@@ -14,6 +14,7 @@ export default function MyProductsPage() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchMyProductsAction().then((data) => {
@@ -58,6 +59,39 @@ export default function MyProductsPage() {
     setBusy(false);
   }
 
+  async function refreshProducts() {
+    const data = await fetchMyProductsAction();
+    setProducts(data);
+  }
+
+  async function handleDuplicate(id: string) {
+    setBusy(true);
+    setError("");
+    try {
+      await duplicateMyProductsAction([id]);
+      await refreshProducts();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to duplicate product");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleBulkDuplicate() {
+    if (selectedIds.length === 0) return;
+    setBusy(true);
+    setError("");
+    try {
+      await duplicateMyProductsAction(selectedIds);
+      await refreshProducts();
+      setSelected(new Set());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to duplicate products");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <DashboardPanel
       title="My Products"
@@ -92,11 +126,23 @@ export default function MyProductsPage() {
       </div>
 
       {/* Bulk delete */}
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm font-semibold rounded-xl px-4 py-3 mb-4">
+          {error}
+        </div>
+      )}
       {selectedIds.length > 0 && (
         <div className="bg-card border border-border rounded-xl p-3 mb-4 flex flex-wrap items-center gap-3">
           <span className="text-sm font-bold text-foreground">
             {selectedIds.length} selected
           </span>
+          <button
+            onClick={() => handleBulkDuplicate()}
+            disabled={busy}
+            className="neu-pill bg-background text-primary text-xs font-semibold px-3 py-1.5 transition-all disabled:opacity-60"
+          >
+            Duplicate Selected
+          </button>
           <button
             onClick={() => handleBulkDelete()}
             disabled={busy}
@@ -181,6 +227,13 @@ export default function MyProductsPage() {
                       >
                         Edit
                       </Link>
+                      <button
+                        onClick={() => handleDuplicate(p.id)}
+                        disabled={busy}
+                        className="neu-pill bg-background text-primary text-xs font-semibold px-3 py-1.5 transition-all disabled:opacity-60"
+                      >
+                        Duplicate
+                      </button>
                       <button
                         onClick={() => handleDelete(p.id)}
                         className="neu-pill bg-background text-destructive text-xs font-semibold px-3 py-1.5 transition-all"

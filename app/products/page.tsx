@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import ProductCard from "@/components/ProductCard";
 import ScrollReveal from "@/components/ScrollReveal";
+import { ChevronUp } from "lucide-react";
 // import { formatPrice } from "@/lib/data";
 import {
   fetchProductsAction,
@@ -68,6 +69,7 @@ function ProductsPageContent() {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [page, setPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(true);
 
   useEffect(() => {
     setSelectedCategory(categoryParam);
@@ -165,17 +167,35 @@ function ProductsPageContent() {
           {/* Sidebar filters */}
           <aside className="lg:w-56 shrink-0">
             <div className="neu-card p-4 lg:sticky lg:top-24">
-              <div className="flex items-center justify-between mb-4">
+              <div
+                className={`flex items-center justify-between ${filtersOpen ? "mb-4" : "mb-0 lg:mb-4"}`}
+              >
                 <h2 className="font-heading font-bold text-foreground">
                   Filters
                 </h2>
-                <button
-                  onClick={resetFilters}
-                  className="text-xs text-primary font-semibold hover:underline"
-                >
-                  Reset
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={resetFilters}
+                    className="text-xs text-primary font-semibold hover:underline"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFiltersOpen((o) => !o)}
+                    aria-expanded={filtersOpen}
+                    className="lg:hidden flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                  >
+                    {filtersOpen ? "Hide filters" : "Show filters"}
+                    <ChevronUp
+                      className={`size-4 transition-transform duration-300 ${filtersOpen ? "" : "rotate-180"}`}
+                    />
+                  </button>
+                </div>
               </div>
+
+              {/* Collapsible on mobile — always expanded on lg+ */}
+              <div className={filtersOpen ? "block" : "hidden lg:block"}>
 
               {/* Search */}
               <div className="mb-4">
@@ -265,6 +285,7 @@ function ProductsPageContent() {
                     className="neu-inset w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                   />
                 </div>
+              </div>
               </div>
             </div>
           </aside>

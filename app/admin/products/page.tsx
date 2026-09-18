@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { formatPrice } from "@/lib/data";
-import { fetchProductsWithOwnersAction, deleteProductsAction, setProductsFeaturedAction } from "@/lib/actions/products";
+import { fetchProductsWithOwnersAction, deleteProductsAction, setProductsFeaturedAction, duplicateProductsAction } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import type { ProductWithOwner } from "@/lib/types";
 import type { CategoryDB } from "@/lib/types";
@@ -120,6 +120,33 @@ function AdminProductsPageInner() {
     setBusy(false);
   }
 
+  async function refreshProducts() {
+    const data = await fetchProductsWithOwnersAction();
+    setProducts(data);
+  }
+
+  async function handleDuplicate(id: string) {
+    setBusy(true);
+    try {
+      await duplicateProductsAction([id]);
+      await refreshProducts();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleBulkDuplicate() {
+    if (selectedIds.length === 0) return;
+    setBusy(true);
+    try {
+      await duplicateProductsAction(selectedIds);
+      await refreshProducts();
+      setSelected(new Set());
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -205,6 +232,13 @@ function AdminProductsPageInner() {
             className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
           >
             Unmark Featured
+          </button>
+          <button
+            onClick={() => handleBulkDuplicate()}
+            disabled={busy}
+            className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
+          >
+            Duplicate Selected
           </button>
           <button
             onClick={() => handleBulkDelete()}
@@ -308,6 +342,13 @@ function AdminProductsPageInner() {
                       >
                         Edit
                       </Link>
+                      <button
+                        onClick={() => handleDuplicate(p.id)}
+                        disabled={busy}
+                        className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 transition-all disabled:opacity-60"
+                      >
+                        Duplicate
+                      </button>
                       <button
                         onClick={() => handleDelete(p.id)}
                         className="neu-pill bg-destructive text-white text-xs font-semibold px-3 py-1.5 transition-all"

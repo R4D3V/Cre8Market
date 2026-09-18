@@ -170,25 +170,28 @@ export default function Navbar() {
                 <line x1="4" x2="20" y1="6" y2="6"></line>
                 <line x1="4" x2="20" y1="18" y2="18"></line>
               </svg>
-              <Link href="/products">All Categories</Link>
+              <Link href="/products">All Products</Link>
             </span>
-            <Link className="hover:underline" href="/products">
+            {/* <Link className="hover:underline" href="/products">
               Products
-            </Link>
+            </Link> */}
             <Link className="hover:underline" href="/deals">
               Deals
             </Link>
-            <Link className="hover:underline" href="/contact">
-              Contact
+            <Link className="hover:underline" href="/sellers">
+              Sellers
             </Link>
+            {/* <Link className="hover:underline" href="/contact">
+              Contact
+            </Link> */}
           </div>
           <div className="flex items-center gap-x-6">
-            <Link className="hover:underline" href="/products">
+            {/* <Link className="hover:underline" href="/products">
               Limited Sale 🔥
             </Link>
             <Link className="hover:underline" href="/products?sort=latest">
               New Arrivals
-            </Link>
+            </Link> */}
             <Link className="hover:underline" href="/selltous">
               Sell to Us
             </Link>
@@ -251,6 +254,13 @@ export default function Navbar() {
                 className="py-2.5 text-sm font-semibold text-foreground"
               >
                 Limited Sale 🔥
+              </Link>
+              <Link
+                href="/sellers"
+                onClick={() => setMobileOpen(false)}
+                className="py-2.5 text-sm font-semibold text-foreground"
+              >
+                Sellers
               </Link>
               <Link
                 href="/products?sort=latest"
