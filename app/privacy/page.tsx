@@ -1,15 +1,19 @@
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import ScrollReveal from '@/components/ScrollReveal'
 
 export default function PrivacyPage() {
   return (
     <>
       <Navbar />
       <main className="container py-10 pb-28 sm:pb-10">
-        <Link href="/" className="text-sm text-primary font-semibold hover:underline mb-6 inline-block">← Home</Link>
-        <h1 className="text-2xl font-extrabold font-heading text-foreground mb-6">Privacy Policy</h1>
-        <div className="neu-card p-6 sm:p-8 prose prose-sm text-muted-foreground space-y-4">
+        <ScrollReveal>
+          <Link href="/" className="text-sm text-primary font-semibold hover:underline mb-6 inline-block">← Home</Link>
+          <h1 className="text-2xl font-extrabold font-heading text-foreground mb-6">Privacy Policy</h1>
+        </ScrollReveal>
+        <ScrollReveal delay={100}>
+          <div className="neu-card p-6 sm:p-8 prose prose-sm text-muted-foreground space-y-4">
           <p>Last updated: January 2025</p>
           <p>CRE8MARKET ENTEBBE ("we", "us", or "our") operates the cre8market.com website. This page informs you of our policies regarding the collection, use, and disclosure of personal information we receive from users of the Site.</p>
           <h2 className="text-base font-bold text-foreground mt-6">Information We Collect</h2>
@@ -21,6 +25,7 @@ export default function PrivacyPage() {
           <h2 className="text-base font-bold text-foreground mt-6">Contact Us</h2>
           <p>If you have any questions about this Privacy Policy, contact us at raymonjohns@gmail.com</p>
         </div>
+        </ScrollReveal>
       </main>
       <Footer />
     </>

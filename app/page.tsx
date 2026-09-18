@@ -2,11 +2,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import HeroCarousel from "@/components/HeroCarousel";
-import CategoryTiles from "@/components/CategoryTiles";
+// import CategoryTiles from "@/components/CategoryTiles";
 import AppleCta from "@/components/AppleCta";
 import TopSellingTabs, { type ProductGroup } from "@/components/TopSellingTabs";
 import Recommendations from "@/components/Recommendations";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import ScrollReveal from "@/components/ScrollReveal";
 import { latestProducts } from "@/lib/data";
 import { getProducts, getCategories } from "@/lib/db/queries";
 import type { Product } from "@/lib/types";
@@ -45,11 +46,19 @@ export default async function HomePage() {
     <div className="bg-background text-foreground">
       <Navbar />
       <main className="flex-1">
-        <HeroCarousel />
-        <CategoryTiles categories={categories} />
-        <AppleCta />
-        <TopSellingTabs groups={topGroups} />
-        <Recommendations />
+        <ScrollReveal>
+          <HeroCarousel />
+        </ScrollReveal>
+        <ScrollReveal delay={100}>
+          <TopSellingTabs groups={topGroups} />
+        </ScrollReveal>
+        {/* <CategoryTiles categories={categories} /> */}
+        <ScrollReveal delay={150}>
+          <AppleCta />
+        </ScrollReveal>
+        <ScrollReveal delay={200}>
+          <Recommendations />
+        </ScrollReveal>
       </main>
       <NewsletterSignup />
       <Footer />

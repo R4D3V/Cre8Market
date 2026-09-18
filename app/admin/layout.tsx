@@ -16,6 +16,7 @@ function getPageTitle(pathname: string) {
   if (/^\/admin\/products\/[^/]+\/edit$/.test(pathname)) return "Edit Product";
   if (pathname === "/admin/categories") return "Categories";
   if (pathname === "/admin/users") return "Users";
+  if (/^\/admin\/users\/[^/]+\/edit$/.test(pathname)) return "Edit User";
   if (pathname === "/admin/admins") return "Admins";
   if (pathname === "/admin/profile") return "My Profile";
   return "Admin";

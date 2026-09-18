@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
+import ScrollReveal from "@/components/ScrollReveal";
 import {
   formatPrice,
 } from "@/lib/data";
@@ -90,14 +91,16 @@ export default function ProductDetailPage() {
       <Navbar />
       <main className="container py-6 pb-28 sm:pb-8">
         {/* Back */}
-        <Link
-          href="/products"
-          className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold mb-5 hover:underline"
-        >
-          ← Back to Listings
-        </Link>
+        <ScrollReveal>
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold mb-5 hover:underline"
+          >
+            ← Back to Listings
+          </Link>
+        </ScrollReveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+        <ScrollReveal className="grid grid-cols-1 md:grid-cols-5 gap-6">
           {/* Left - Image + Info */}
           <div className="md:col-span-3 space-y-4">
             {/* Image Gallery */}
@@ -384,11 +387,11 @@ export default function ProductDetailPage() {
               </ul>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* Related products */}
         {related.length > 0 && (
-          <div className="mt-10">
+          <ScrollReveal className="mt-10">
             <h2 className="font-heading text-xl font-extrabold text-foreground mb-4">
               Similar Listings
             </h2>
@@ -397,7 +400,7 @@ export default function ProductDetailPage() {
                 <ProductCard key={`${p.id}-${p.slug}`} product={p} />
               ))}
             </div>
-          </div>
+          </ScrollReveal>
         )}
       </main>
       <Footer />

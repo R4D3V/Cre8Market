@@ -39,6 +39,11 @@ export async function fetchUsersAction() {
   return getUsers();
 }
 
+export async function fetchUserByIdAction(id: string) {
+  await requireAdmin();
+  return getUserById(id);
+}
+
 // Admin directly creates a user account (e.g. onboarding a seller who can't self-register).
 export async function createUserByAdminAction(data: {
   name: string;
@@ -80,6 +85,7 @@ export async function setUserActiveAction(id: string, isActive: boolean) {
   await requireAdmin();
   const user = await updateUserStatus(id, isActive);
   revalidatePath("/admin/users");
+  revalidatePath(`/admin/users/${id}/edit`);
   return user;
 }
 
@@ -105,6 +111,7 @@ export async function updateUserByAdminAction(
     avatar: data.avatar,
   });
   revalidatePath("/admin/users");
+  revalidatePath(`/admin/users/${id}/edit`);
   revalidatePath("/admin");
   return user;
 }
@@ -124,6 +131,7 @@ export async function setUserAdminAction(id: string, isAdmin: boolean) {
   await requireAdmin();
   const user = await updateUserAdminStatus(id, isAdmin);
   revalidatePath("/admin/users");
+  revalidatePath(`/admin/users/${id}/edit`);
   revalidatePath("/admin");
   return user;
 }
@@ -137,6 +145,7 @@ export async function resetUserPasswordByAdminAction(id: string, newPassword: st
   const passwordHash = await bcrypt.hash(newPassword, 12);
   await updateUserPassword(id, passwordHash);
   revalidatePath("/admin/users");
+  revalidatePath(`/admin/users/${id}/edit`);
   return { success: true };
 }
 

@@ -1,20 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Montserrat, Playfair_Display } from "next/font/google";
+import { Inter, Sora } from "next/font/google";
 import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import Providers from "@/components/Providers";
 
-const montserrat = Montserrat({
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-montserrat",
+  variable: "--font-inter",
 });
 
-const playfair = Playfair_Display({
+const sora = Sora({
   subsets: ["latin"],
-  weight: ["600", "700", "800", "900"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
-  variable: "--font-playfair",
+  variable: "--font-sora",
 });
 
 export const metadata: Metadata = {
@@ -59,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${montserrat.variable} ${playfair.variable}`}
+      className={`${inter.variable} ${sora.variable}`}
       data-scroll-behavior="smooth"
     >
       <body className="min-h-screen bg-background font-body antialiased">

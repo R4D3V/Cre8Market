@@ -1,13 +1,14 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export default function NotFound() {
   return (
     <>
       <Navbar />
       <main className="min-h-[70vh] flex items-center justify-center px-4 py-16 pb-28 sm:pb-16">
-        <div className="text-center max-w-sm">
+        <ScrollReveal className="text-center max-w-sm">
           <div className="neu-dark-card text-foreground inline-flex items-center justify-center w-24 h-24 rounded-2xl mb-6 mx-auto">
             <span className="text-5xl">🔍</span>
           </div>
@@ -23,7 +24,7 @@ export default function NotFound() {
           >
             Back to Home
           </Link>
-        </div>
+        </ScrollReveal>
       </main>
       <Footer />
     </>

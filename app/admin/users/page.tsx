@@ -7,13 +7,10 @@ import {
   createUserByAdminAction,
   setUserActiveAction,
   setUserVerifiedAction,
-  updateUserByAdminAction,
-  resetUserPasswordByAdminAction,
   deleteUserAction,
 } from "@/lib/actions/users";
 import type { AppUser } from "@/lib/types";
-import { PhoneInput, toLocalPart, toFullNumber } from "@/components/PhoneInput";
-import { compressImage } from "@/lib/imageCompress";
+import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -21,16 +18,6 @@ export default function AdminUsersPage() {
   const [form, setForm] = useState({ name: "", phone: "", whatsapp: "", password: "", pin: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({
-    name: "",
-    phone: "",
-    whatsapp: "",
-    avatar: "",
-    newPassword: "",
-  });
-  const [editSaving, setEditSaving] = useState(false);
-  const [editError, setEditError] = useState("");
 
   const load = useCallback(async () => {
     const data = await fetchUsersAction();
@@ -41,50 +28,6 @@ export default function AdminUsersPage() {
   useEffect(() => {
     load();
   }, [load]);
-
-  function startEdit(u: AppUser) {
-    setEditingId(u.id);
-    setEditForm({
-      name: u.name,
-      phone: toLocalPart(u.phone),
-      whatsapp: toLocalPart(u.whatsapp ?? ""),
-      avatar: u.avatar ?? "",
-      newPassword: "",
-    });
-    setEditError("");
-  }
-
-  async function handleAvatarUpload(file: File | null) {
-    if (!file) return;
-    try {
-      const dataUrl = await compressImage(file, 400, 0.7);
-      setEditForm((f) => ({ ...f, avatar: dataUrl }));
-    } catch {
-      setEditError("Could not read that image. Please try a different file.");
-    }
-  }
-
-  async function handleSaveEdit(u: AppUser) {
-    setEditSaving(true);
-    setEditError("");
-    try {
-      await updateUserByAdminAction(u.id, {
-        name: editForm.name,
-        phone: toFullNumber(editForm.phone),
-        whatsapp: editForm.whatsapp ? toFullNumber(editForm.whatsapp) : undefined,
-        avatar: editForm.avatar || null,
-      });
-      if (editForm.newPassword) {
-        await resetUserPasswordByAdminAction(u.id, editForm.newPassword);
-      }
-      setEditingId(null);
-      await load();
-    } catch (err: unknown) {
-      setEditError(err instanceof Error ? err.message : "Failed to save user");
-    } finally {
-      setEditSaving(false);
-    }
-  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -240,191 +183,96 @@ export default function AdminUsersPage() {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => {
-                const editing = editingId === u.id;
-                return (
-                  <tr key={u.id} className="border-t border-border align-top">
-                    <td className="py-3 pr-4 font-semibold text-foreground">
-                      {editing ? (
-                        <div className="flex items-start gap-2">
-                          <input
-                            value={editForm.name}
-                            onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-                            className="neu-inset w-full px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-                          />
-                          <div className="flex flex-col items-center gap-1 shrink-0">
-                            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm overflow-hidden">
-                              {editForm.avatar ? (
-                                <img
-                                  src={editForm.avatar}
-                                  alt="Avatar"
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                (editForm.name || "U")[0].toUpperCase()
-                              )}
-                            </div>
-                            <label className="text-[10px] font-semibold text-primary cursor-pointer hover:underline">
-                              {editForm.avatar ? "Change" : "Add"}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => handleAvatarUpload(e.target.files?.[0] ?? null)}
-                              />
-                            </label>
-                            {editForm.avatar && (
-                              <button
-                                type="button"
-                                onClick={() => setEditForm((f) => ({ ...f, avatar: "" }))}
-                                className="text-[10px] font-semibold text-destructive hover:underline"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold overflow-hidden shrink-0">
-                            {u.avatar ? (
-                              <img
-                                src={u.avatar}
-                                alt={u.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              u.name[0].toUpperCase()
-                            )}
-                          </div>
-                          <span>{u.name}</span>
-                          {u.isAdmin && (
-                            <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded">
-                              Admin
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                    <td className="py-3 pr-4 text-muted-foreground">
-                      {editing ? (
-                        <PhoneInput
-                          required
-                          value={editForm.phone}
-                          onChange={(v) => setEditForm((f) => ({ ...f, phone: v }))}
-                        />
-                      ) : (
-                        u.phone
-                      )}
-                    </td>
-                    <td className="py-3 pr-4 text-muted-foreground">
-                      {editing ? (
-                        <PhoneInput
-                          value={editForm.whatsapp}
-                          onChange={(v) => setEditForm((f) => ({ ...f, whatsapp: v }))}
-                          placeholder={editForm.phone}
-                        />
-                      ) : u.whatsapp ? (
-                        <a
-                          href={`https://wa.me/${u.whatsapp}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-primary hover:underline"
-                        >
-                          {u.whatsapp}
-                        </a>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td className="py-3 pr-4">
+              {users.map((u) => (
+                <tr key={u.id} className="border-t border-border align-middle">
+                  <td className="py-3 pr-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold overflow-hidden shrink-0">
+                        {u.avatar ? (
+                          <img src={u.avatar} alt={u.name} className="w-full h-full object-cover" />
+                        ) : (
+                          u.name[0].toUpperCase()
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-foreground truncate">{u.name}</p>
+                        {u.isAdmin && (
+                          <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded">
+                            Admin
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3 pr-4 text-muted-foreground">{u.phone}</td>
+                  <td className="py-3 pr-4 text-muted-foreground">
+                    {u.whatsapp ? (
+                      <a
+                        href={`https://wa.me/${u.whatsapp}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {u.whatsapp}
+                      </a>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td className="py-3 pr-4">
+                    <Link
+                      href={`/admin?user=${u.id}`}
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      {u.productCount ?? 0}
+                    </Link>
+                  </td>
+                  <td className="py-3 pr-4">
+                    {u.isActive ? (
+                      <span className="text-primary text-xs font-bold">● Active</span>
+                    ) : (
+                      <span className="text-muted-foreground text-xs font-bold">● Disabled</span>
+                    )}
+                  </td>
+                  <td className="py-3 pr-4">
+                    <button
+                      onClick={() => handleToggleVerified(u)}
+                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition-all ${
+                        u.isVerified
+                          ? "bg-secondary/10 text-secondary hover:bg-secondary/20"
+                          : "bg-muted text-muted-foreground hover:bg-muted/70"
+                      }`}
+                    >
+                      {u.isVerified ? "✓ Verified" : "○ Not Verified"}
+                    </button>
+                  </td>
+                  <td className="py-3 pr-4 text-muted-foreground">
+                    {new Date(u.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="py-3 pr-4">
+                    <div className="flex items-center gap-2">
                       <Link
-                        href={`/admin?user=${u.id}`}
-                        className="text-primary font-semibold hover:underline"
+                        href={`/admin/users/${u.id}/edit`}
+                        className="neu-pill bg-card text-primary text-xs font-semibold px-3 py-1.5"
                       >
-                        {u.productCount ?? 0}
+                        Edit
                       </Link>
-                    </td>
-                    <td className="py-3 pr-4">
-                      {u.isActive ? (
-                        <span className="text-primary text-xs font-bold">● Active</span>
-                      ) : (
-                        <span className="text-muted-foreground text-xs font-bold">● Disabled</span>
-                      )}
-                    </td>
-                    <td className="py-3 pr-4">
                       <button
-                        onClick={() => handleToggleVerified(u)}
-                        className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition-all ${
-                          u.isVerified
-                            ? "bg-secondary/10 text-secondary hover:bg-secondary/20"
-                            : "bg-muted text-muted-foreground hover:bg-muted/70"
-                        }`}
+                        onClick={() => handleToggleActive(u)}
+                        className="neu-pill bg-card text-primary text-xs font-semibold px-3 py-1.5"
                       >
-                        {u.isVerified ? "✓ Verified" : "○ Not Verified"}
+                        {u.isActive ? "Disable" : "Enable"}
                       </button>
-                    </td>
-                    <td className="py-3 pr-4 text-muted-foreground">
-                      {new Date(u.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 pr-4">
-                      {editing ? (
-                        <div className="flex flex-col items-start gap-2">
-                          <input
-                            type="text"
-                            value={editForm.newPassword}
-                            onChange={(e) =>
-                              setEditForm((f) => ({ ...f, newPassword: e.target.value }))
-                            }
-                            placeholder="New password (optional)"
-                            minLength={6}
-                            className="neu-inset w-40 px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
-                          />
-                          {editError && (
-                            <span className="text-xs text-destructive">{editError}</span>
-                          )}
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleSaveEdit(u)}
-                              disabled={editSaving}
-                              className="neu-pill bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
-                            >
-                              {editSaving ? "Saving…" : "Save"}
-                            </button>
-                            <button
-                              onClick={() => setEditingId(null)}
-                              className="neu-pill bg-card text-muted-foreground text-xs font-semibold px-3 py-1.5"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => startEdit(u)}
-                            className="neu-pill bg-card text-primary text-xs font-semibold px-3 py-1.5"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleToggleActive(u)}
-                            className="neu-pill bg-card text-primary text-xs font-semibold px-3 py-1.5"
-                          >
-                            {u.isActive ? "Disable" : "Enable"}
-                          </button>
-                          <button
-                            onClick={() => handleDelete(u.id)}
-                            className="neu-pill bg-card text-destructive text-xs font-semibold px-3 py-1.5"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
+                      <button
+                        onClick={() => handleDelete(u.id)}
+                        className="neu-pill bg-card text-destructive text-xs font-semibold px-3 py-1.5"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

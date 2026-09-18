@@ -40,8 +40,8 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
 
-  --font-body: var(--font-montserrat), Montserrat, Arial, sans-serif;
-  --font-heading: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --font-body: var(--font-inter), Inter, system-ui, Arial, sans-serif;
+  --font-heading: var(--font-sora), Sora, system-ui, Arial, sans-serif;
 }
 
 * {

@@ -1,7 +1,8 @@
 import Navbar from "@/components/Navbar";
-import CategoryBar from "@/components/CategoryBar";
+// import CategoryBar from "@/components/CategoryBar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
+import ScrollReveal from "@/components/ScrollReveal";
 import { getDeals } from "@/lib/db/queries";
 
 // Deals come from the database, so render on each request instead of at build time.
@@ -13,48 +14,57 @@ export default async function DealsPage() {
   return (
     <>
       <Navbar />
-      <CategoryBar />
+      {/* <CategoryBar /> */}
 
       {/* Banner */}
-      <div className="bg-background px-3 sm:px-4 pt-2 pb-2">
-        <div className="max-w-7xl mx-auto">
-          <div className="neu-dark-card text-foreground py-10 px-6 text-center">
-            <p className="eyebrow text-primary">Updated Daily</p>
-            <h1 className="font-heading text-3xl font-extrabold mb-2">🔥 Hot Deals</h1>
-            <p className="text-muted-foreground text-sm max-w-md mx-auto">
-              The best prices on electronics, phones, laptops and more in Uganda
-              — refreshed every day.
-            </p>
+      <ScrollReveal>
+        <div className="bg-background px-3 sm:px-4 pt-2 pb-2">
+          <div className="max-w-7xl mx-auto">
+            <div className="neu-dark-card text-foreground py-10 px-6 text-center">
+              <p className="eyebrow text-primary">Updated Daily</p>
+              <h1 className="font-heading text-3xl font-extrabold mb-2">
+                🔥 Hot Deals
+              </h1>
+              <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                The best prices on electronics, phones, laptops and more in Uganda
+                — refreshed every day.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       <main className="container py-8 pb-28 sm:pb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="font-heading text-xl font-extrabold text-foreground">
-              Today's Deals
-            </h2>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {deals.length} deals available
-            </p>
+        <ScrollReveal>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="font-heading text-xl font-extrabold text-foreground">
+                Today's Deals
+              </h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {deals.length} deals available
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-featured animate-pulse" />
+              <span className="text-xs font-semibold text-featured">
+                Live · Updates daily
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-featured animate-pulse" />
-            <span className="text-xs font-semibold text-featured">
-              Live · Updates daily
-            </span>
-          </div>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
-          {deals.map((p) => (
-            <ProductCard key={`${p.id}-${p.slug}`} product={p} />
-          ))}
-        </div>
+        <ScrollReveal delay={100}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
+            {deals.map((p) => (
+              <ProductCard key={`${p.id}-${p.slug}`} product={p} />
+            ))}
+          </div>
+        </ScrollReveal>
 
         {/* WhatsApp CTA */}
-        <div className="mt-10 neu-card p-7 text-center">
+        <ScrollReveal delay={200}>
+          <div className="mt-10 neu-card p-7 text-center">
           <p className="text-2xl mb-2">📲</p>
           <h3 className="font-heading text-lg font-extrabold text-foreground mb-1">
             Never miss a deal
@@ -73,7 +83,8 @@ export default async function DealsPage() {
             </svg>
             Get Deals on WhatsApp
           </a>
-        </div>
+          </div>
+        </ScrollReveal>
       </main>
 
       <Footer />

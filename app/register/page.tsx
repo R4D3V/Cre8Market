@@ -9,6 +9,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { registerUserAction } from '@/lib/actions/auth'
 import { PhoneInput, toFullNumber } from '@/components/PhoneInput'
+import ScrollReveal from '@/components/ScrollReveal'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -67,7 +68,7 @@ export default function RegisterPage() {
       <>
         <Navbar />
         <main className="min-h-[70vh] flex items-center justify-center px-4 py-12">
-          <div className="text-center max-w-sm">
+          <ScrollReveal className="text-center max-w-sm">
             <div className="text-6xl mb-4">🎉</div>
             <h1 className="font-heading text-2xl font-extrabold text-foreground mb-2">Welcome, {name}!</h1>
             <p className="text-muted-foreground mb-6">Your account has been created. You can now post listings and contact sellers.</p>
@@ -79,7 +80,7 @@ export default function RegisterPage() {
                 Browse Listings
               </Link>
             </div>
-          </div>
+          </ScrollReveal>
         </main>
         <Footer />
       </>
@@ -90,7 +91,7 @@ export default function RegisterPage() {
     <>
       <Navbar />
       <main className="min-h-[70vh] flex items-center justify-center px-4 py-12 pb-28 sm:pb-12">
-        <div className="w-full max-w-sm">
+        <ScrollReveal className="w-full max-w-sm">
           <div className="text-center mb-8">
             <Link href="/" className="inline-block">
               <Image
@@ -216,7 +217,7 @@ export default function RegisterPage() {
               </p>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </main>
       <Footer />
     </>

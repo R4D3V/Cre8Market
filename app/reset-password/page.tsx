@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { resetUserPasswordAction } from "@/lib/actions/auth";
 import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -49,7 +50,7 @@ export default function ResetPasswordPage() {
     <>
       <Navbar />
       <main className="min-h-[70vh] flex items-center justify-center px-4 py-12 pb-28 sm:pb-12">
-        <div className="w-full max-w-sm">
+        <ScrollReveal className="w-full max-w-sm">
           <div className="text-center mb-8">
             <Link href="/" className="inline-block">
               <Image
@@ -151,7 +152,7 @@ export default function ResetPasswordPage() {
               </p>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </main>
       <Footer />
     </>

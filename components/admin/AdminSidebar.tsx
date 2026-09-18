@@ -57,7 +57,7 @@ export function AdminSidebar({
     >
       <div className="flex flex-col gap-2">
         {/* Brand */}
-        <Link
+        {/* <Link
           href="/admin"
           className="flex items-center gap-2 px-3 py-2 font-heading text-sm font-extrabold tracking-wide text-foreground"
         >
@@ -65,7 +65,7 @@ export function AdminSidebar({
             C8
           </span>
           CRE8<span className="text-primary">MARKET</span>
-        </Link>
+        </Link> */}
 
         {/* Back to website */}
         <Link
@@ -105,7 +105,11 @@ export function AdminSidebar({
         <div className="flex items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
           <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs font-bold text-muted-foreground">
             {userAvatar ? (
-              <img src={userAvatar} alt="" className="h-full w-full object-cover" />
+              <img
+                src={userAvatar}
+                alt=""
+                className="h-full w-full object-cover"
+              />
             ) : (
               initial
             )}

@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { PhoneInput, toFullNumber } from '@/components/PhoneInput'
+import ScrollReveal from '@/components/ScrollReveal'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -46,7 +47,7 @@ export default function LoginPage() {
     <>
       <Navbar />
       <main className="min-h-[70vh] flex items-center justify-center px-4 py-12 pb-28 sm:pb-12">
-        <div className="w-full max-w-sm">
+        <ScrollReveal className="w-full max-w-sm">
           {/* Logo */}
           <div className="text-center mb-8">
             <Link href="/" className="inline-block">
@@ -129,7 +130,7 @@ export default function LoginPage() {
               Chat with us on WhatsApp
             </a>
           </div>
-        </div>
+        </ScrollReveal>
       </main>
       <Footer />
     </>

@@ -7,7 +7,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import ProductCard from "@/components/ProductCard";
-import { formatPrice } from "@/lib/data";
+import ScrollReveal from "@/components/ScrollReveal";
+// import { formatPrice } from "@/lib/data";
 import {
   fetchProductsAction,
   fetchSellersAction,
@@ -160,7 +161,7 @@ function ProductsPageContent() {
       {/* <CategoryBar /> */}
 
       <main className="container py-6 pb-24 sm:pb-8">
-        <div className="flex flex-col lg:flex-row gap-6">
+        <ScrollReveal className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar filters */}
           <aside className="lg:w-56 shrink-0">
             <div className="neu-card p-4 lg:sticky lg:top-24">
@@ -378,7 +379,7 @@ function ProductsPageContent() {
               </div>
             )}
           </div>
-        </div>
+        </ScrollReveal>
       </main>
 
       <Footer />

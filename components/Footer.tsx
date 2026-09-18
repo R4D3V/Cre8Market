@@ -144,6 +144,11 @@ export default function Footer() {
                 Become a Seller
               </Link>
             </li>
+            <li>
+              <Link className="hover:text-primary" href="/admin">
+                Admin Portal
+              </Link>
+            </li>
           </ul>
         </nav>
 

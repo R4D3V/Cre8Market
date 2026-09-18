@@ -1,15 +1,19 @@
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import ScrollReveal from '@/components/ScrollReveal'
 
 export default function TermsPage() {
   return (
     <>
       <Navbar />
       <main className="container py-10 pb-28 sm:pb-10">
-        <Link href="/" className="text-sm text-primary font-semibold hover:underline mb-6 inline-block">← Home</Link>
-        <h1 className="text-2xl font-extrabold font-heading text-foreground mb-6">Terms of Service</h1>
-        <div className="neu-card p-6 sm:p-8 prose prose-sm text-muted-foreground space-y-4">
+        <ScrollReveal>
+          <Link href="/" className="text-sm text-primary font-semibold hover:underline mb-6 inline-block">← Home</Link>
+          <h1 className="text-2xl font-extrabold font-heading text-foreground mb-6">Terms of Service</h1>
+        </ScrollReveal>
+        <ScrollReveal delay={100}>
+          <div className="neu-card p-6 sm:p-8 prose prose-sm text-muted-foreground space-y-4">
           <p>Last updated: January 2025</p>
           <p>By using CRE8MARKET ENTEBBE, you agree to these terms. Please read them carefully.</p>
           <h2 className="text-base font-bold text-foreground mt-6">Marketplace Rules</h2>
@@ -23,6 +27,7 @@ export default function TermsPage() {
           <h2 className="text-base font-bold text-foreground mt-6">Contact</h2>
           <p>For questions about these Terms, contact us at raymonjohns@gmail.com or visit our office at Kitoro Entebbe Uganda.</p>
         </div>
+        </ScrollReveal>
       </main>
       <Footer />
     </>
