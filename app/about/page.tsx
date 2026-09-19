@@ -31,7 +31,7 @@ export default function AboutPage() {
               About CRE8MARKET ENTEBBE
             </h1>
             <p className="text-muted-foreground text-base max-w-lg mx-auto relative z-10">
-              Uganda&apos;s trusted marketplace — buy, sell, and connect
+              Entebbe&apos;s trusted marketplace — buy, sell, and connect
               directly.
             </p>
           </div>
@@ -132,7 +132,9 @@ export default function AboutPage() {
                 <p className="text-2xl font-extrabold text-primary">
                   {stat.number}
                 </p>
-                <p className="text-muted-foreground text-xs mt-1">{stat.label}</p>
+                <p className="text-muted-foreground text-xs mt-1">
+                  {stat.label}
+                </p>
               </div>
             ))}
           </div>
@@ -164,7 +166,9 @@ export default function AboutPage() {
                 },
               ].map((item) => (
                 <li key={item.title} className="flex items-start gap-3">
-                  <span className="text-primary text-lg shrink-0 mt-0.5">✓</span>
+                  <span className="text-primary text-lg shrink-0 mt-0.5">
+                    ✓
+                  </span>
                   <div>
                     <p className="font-bold text-foreground text-sm">
                       {item.title}
