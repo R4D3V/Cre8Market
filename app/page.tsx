@@ -64,9 +64,9 @@ export default async function HomePage() {
         <ScrollReveal delay={100}>
           <TopSellingTabs groups={topGroups} />
         </ScrollReveal>
-        <ScrollReveal>
+        {/* <ScrollReveal>
           <HeroCarousel />
-        </ScrollReveal>
+        </ScrollReveal> */}
         {/* <CategoryTiles categories={categories} /> */}
         <ScrollReveal delay={200}>
           <Recommendations />

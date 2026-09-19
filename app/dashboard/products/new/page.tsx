@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { createMyProductAction, checkSlugAction, fetchMyListingLimitAction } from "@/lib/actions/products";
+import {
+  createMyProductAction,
+  checkSlugAction,
+  fetchMyListingLimitAction,
+} from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import { compressImage } from "@/lib/imageCompress";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
@@ -26,6 +30,8 @@ export default function NewMyProductPage() {
   const [images, setImages] = useState<string[]>(["", "", "", ""]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
   const [categories, setCategories] = useState<CategoryDB[]>([]);
   const [limit, setLimit] = useState<{
     productCount: number;
@@ -61,6 +67,50 @@ export default function NewMyProductPage() {
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
       .trim();
+  }
+
+  async function generateProductDetails() {
+    const title = form.title.trim();
+    if (!title) {
+      setAiError("Enter the product name first so the AI can suggest details.");
+      return;
+    }
+
+    setAiLoading(true);
+    setAiError("");
+
+    try {
+      const res = await fetch("/api/ai-product-fill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data?.error || "AI could not generate product details.",
+        );
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        categorySlug: data.categorySlug || prev.categorySlug,
+        condition: data.condition || prev.condition,
+        description: data.description || prev.description,
+        specs: data.specs || prev.specs,
+        price: data.price || prev.price,
+      }));
+    } catch (err: unknown) {
+      setAiError(
+        err instanceof Error
+          ? err.message
+          : "Failed to generate product details.",
+      );
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -156,179 +206,226 @@ export default function NewMyProductPage() {
           </a>
         </div>
       ) : (
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {limit && !limit.isVerified && (
-          <div className="bg-primary/10 border border-primary/40 text-primary text-xs font-semibold rounded-xl px-4 py-3">
-            Unverified sellers can post up to {limit.limit} listings. You've
-            used {limit.productCount} of {limit.limit}. Get verified to post
-            more.
-          </div>
-        )}
-        <div>
-          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Title *</label>
-          <input
-            required
-            value={form.title}
-            onChange={(e) => update("title", e.target.value)}
-            placeholder="e.g. Samsung Galaxy S24 Ultra"
-            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
-          />
-        </div>
-
-        {/* Images */}
-        <div>
-          <label className="block text-sm font-semibold text-muted-foreground mb-2">
-            Product Images (up to 4)
-          </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[0, 1, 2, 3].map((i) => (
-              <label
-                key={i}
-                className="neu-inset aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-muted transition-colors overflow-hidden"
-              >
-                {images[i] ? (
-                  <img src={images[i]} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                    <span className="text-xl">📷</span>
-                    <span className="text-[10px] font-semibold">Image {i + 1}</span>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleImageUpload(i, e.target.files?.[0] ?? null)}
-                />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {limit && !limit.isVerified && (
+            <div className="bg-primary/10 border border-primary/40 text-primary text-xs font-semibold rounded-xl px-4 py-3">
+              Unverified sellers can post up to {limit.limit} listings. You've
+              used {limit.productCount} of {limit.limit}. Get verified to post
+              more.
+            </div>
+          )}
+          <div>
+            <div className="flex items-center justify-between gap-3 mb-1.5">
+              <label className="block text-sm font-semibold text-muted-foreground">
+                Title *
               </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Price (UGX) *</label>
+              <button
+                type="button"
+                onClick={generateProductDetails}
+                disabled={aiLoading || !form.title.trim()}
+                className="inline-flex items-center justify-center rounded-full border border-primary/40 bg-primary/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {aiLoading ? "Generating..." : "AI fill"}
+              </button>
+            </div>
             <input
               required
-              type="number"
-              value={form.price}
-              onChange={(e) => update("price", e.target.value)}
-              placeholder="e.g. 1200000"
+              value={form.title}
+              onChange={(e) => update("title", e.target.value)}
+              placeholder="e.g. Samsung Galaxy S24 Ultra"
               className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
           </div>
-          <div>
-            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Category *</label>
-            <select
-              required
-              value={form.categorySlug}
-              onChange={(e) => update("categorySlug", e.target.value)}
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
-            >
-              <option value="">Select…</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.slug}>
-                  {c.icon} {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {aiError && (
+            <div className="bg-destructive/10 border border-destructive/40 text-destructive text-xs rounded-xl px-3 py-2">
+              {aiError}
+            </div>
+          )}
+
+          {/* Images */}
           <div>
-            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Condition</label>
-            <select
-              value={form.condition}
-              onChange={(e) => update("condition", e.target.value)}
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
-            >
-              <option value="">Select…</option>
-              {["New", "Like New", "Used - Good", "Used - Fair", "Refurbished"].map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
+            <label className="block text-sm font-semibold text-muted-foreground mb-2">
+              Product Images (up to 4)
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[0, 1, 2, 3].map((i) => (
+                <label
+                  key={i}
+                  className="neu-inset aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-muted transition-colors overflow-hidden"
+                >
+                  {images[i] ? (
+                    <img
+                      src={images[i]}
+                      alt={`Image ${i + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                      <span className="text-xl">📷</span>
+                      <span className="text-[10px] font-semibold">
+                        Image {i + 1}
+                      </span>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) =>
+                      handleImageUpload(i, e.target.files?.[0] ?? null)
+                    }
+                  />
+                </label>
               ))}
-            </select>
+            </div>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+                Price (UGX) *
+              </label>
+              <input
+                required
+                type="number"
+                value={form.price}
+                onChange={(e) => update("price", e.target.value)}
+                placeholder="e.g. 1200000"
+                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+                Category *
+              </label>
+              <select
+                required
+                value={form.categorySlug}
+                onChange={(e) => update("categorySlug", e.target.value)}
+                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
+              >
+                <option value="">Select…</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.slug}>
+                    {c.icon} {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+                Condition
+              </label>
+              <select
+                value={form.condition}
+                onChange={(e) => update("condition", e.target.value)}
+                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
+              >
+                <option value="">Select…</option>
+                {[
+                  "New",
+                  "Like New",
+                  "Used - Good",
+                  "Used - Fair",
+                  "Refurbished",
+                ].map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+                Location
+              </label>
+              <input
+                value={form.location}
+                onChange={(e) => update("location", e.target.value)}
+                placeholder="Kitoro, Entebbe"
+                className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Location</label>
-            <input
-              value={form.location}
-              onChange={(e) => update("location", e.target.value)}
-              placeholder="Kitoro, Entebbe"
-              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+              Description
+            </label>
+            <textarea
+              rows={3}
+              value={form.description}
+              onChange={(e) => update("description", e.target.value)}
+              placeholder="Describe the product, its condition, what's included…"
+              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground resize-none"
             />
           </div>
-        </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Description</label>
-          <textarea
-            rows={3}
-            value={form.description}
-            onChange={(e) => update("description", e.target.value)}
-            placeholder="Describe the product, its condition, what's included…"
-            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground resize-none"
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+              Specs (one per line — Label: Value)
+            </label>
+            <textarea
+              rows={3}
+              value={form.specs}
+              onChange={(e) => update("specs", e.target.value)}
+              placeholder={"Storage: 256GB\nRAM: 8GB\nColor: Phantom Black"}
+              className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground resize-none font-mono"
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
-            Specs (one per line — Label: Value)
+          <label className="flex items-center gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.isDeal}
+              onChange={(e) => update("isDeal", e.target.checked)}
+              className="w-4 h-4 rounded border-border bg-card text-primary focus:ring-primary"
+            />
+            <span className="text-sm font-semibold text-muted-foreground">
+              🔥 Mark as a Deal (shows on the Deals page)
+            </span>
           </label>
-          <textarea
-            rows={3}
-            value={form.specs}
-            onChange={(e) => update("specs", e.target.value)}
-            placeholder={"Storage: 256GB\nRAM: 8GB\nColor: Phantom Black"}
-            className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground resize-none font-mono"
-          />
-        </div>
 
-        <label className="flex items-center gap-2.5 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.isDeal}
-            onChange={(e) => update("isDeal", e.target.checked)}
-            className="w-4 h-4 rounded border-border bg-card text-primary focus:ring-primary"
-          />
-          <span className="text-sm font-semibold text-muted-foreground">
-            🔥 Mark as a Deal (shows on the Deals page)
-          </span>
-        </label>
-
-        <div className="neu-inset p-4">
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">
-            Buyers will contact you at
-          </p>
-          <p className="text-sm font-semibold text-foreground">
-            {session?.user?.name} · WhatsApp {session?.user?.whatsapp ?? session?.user?.phone}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            This comes from your account — update your WhatsApp number in your profile if it changes.
-          </p>
-        </div>
-
-        {error && (
-          <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
-            {error}
+          <div className="neu-inset p-4">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">
+              Buyers will contact you at
+            </p>
+            <p className="text-sm font-semibold text-foreground">
+              {session?.user?.name} · WhatsApp{" "}
+              {session?.user?.whatsapp ?? session?.user?.phone}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              This comes from your account — update your WhatsApp number in your
+              profile if it changes.
+            </p>
           </div>
-        )}
 
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            type="submit"
-            disabled={saving}
-            className="neu-pill bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 py-2.5 text-sm transition-all disabled:opacity-60"
-          >
-            {saving ? "Saving…" : "Save Product"}
-          </button>
-          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Cancel
-          </Link>
-        </div>
-      </form>
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
+              {error}
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              type="submit"
+              disabled={saving}
+              className="neu-pill bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 py-2.5 text-sm transition-all disabled:opacity-60"
+            >
+              {saving ? "Saving…" : "Save Product"}
+            </button>
+            <Link
+              href="/dashboard"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Cancel
+            </Link>
+          </div>
+        </form>
       )}
     </DashboardPanel>
   );

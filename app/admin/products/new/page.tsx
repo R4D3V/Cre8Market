@@ -3,10 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  createProductAction,
-  checkSlugAction,
-} from "@/lib/actions/products";
+import { createProductAction, checkSlugAction } from "@/lib/actions/products";
 import { fetchMyAdminProfileAction } from "@/lib/actions/admin";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import { AdminPanel } from "@/components/admin/AdminPanel";
@@ -30,6 +27,8 @@ export default function NewProductPage() {
   });
   const [images, setImages] = useState<string[]>(["", "", "", ""]);
   const [saving, setSaving] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
   const [categories, setCategories] = useState<CategoryDB[]>([]);
 
   useEffect(() => {
@@ -70,6 +69,50 @@ export default function NewProductPage() {
       .trim();
   }
 
+  async function generateProductDetails() {
+    const title = form.title.trim();
+    if (!title) {
+      setAiError("Enter the product name first so the AI can suggest details.");
+      return;
+    }
+
+    setAiLoading(true);
+    setAiError("");
+
+    try {
+      const res = await fetch("/api/ai-product-fill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data?.error || "AI could not generate product details.",
+        );
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        categorySlug: data.categorySlug || prev.categorySlug,
+        condition: data.condition || prev.condition,
+        description: data.description || prev.description,
+        specs: data.specs || prev.specs,
+        price: data.price || prev.price,
+      }));
+    } catch (err: unknown) {
+      setAiError(
+        err instanceof Error
+          ? err.message
+          : "Failed to generate product details.",
+      );
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -97,10 +140,13 @@ export default function NewProductPage() {
         featured: form.featured,
         isDeal: form.isDeal,
         specs: form.specs
-          ? form.specs.split("\n").filter(Boolean).map((line) => {
-              const [label, value] = line.split(":").map((s) => s.trim());
-              return { label: label || "", value: value || "" };
-            })
+          ? form.specs
+              .split("\n")
+              .filter(Boolean)
+              .map((line) => {
+                const [label, value] = line.split(":").map((s) => s.trim());
+                return { label: label || "", value: value || "" };
+              })
           : [],
         seller: {
           name: form.sellerName || undefined,
@@ -114,7 +160,10 @@ export default function NewProductPage() {
 
       router.push("/admin");
     } catch (err: unknown) {
-      alert("Error saving: " + (err instanceof Error ? err.message : "Unknown error"));
+      alert(
+        "Error saving: " +
+          (err instanceof Error ? err.message : "Unknown error"),
+      );
       setSaving(false);
     }
   }
@@ -138,9 +187,19 @@ export default function NewProductPage() {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
-            Title *
-          </label>
+          <div className="flex items-center justify-between gap-3 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground">
+              Title *
+            </label>
+            <button
+              type="button"
+              onClick={generateProductDetails}
+              disabled={aiLoading || !form.title.trim()}
+              className="inline-flex items-center justify-center rounded-full border border-primary/40 bg-primary/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {aiLoading ? "Generating..." : "AI fill"}
+            </button>
+          </div>
           <input
             required
             value={form.title}
@@ -149,6 +208,12 @@ export default function NewProductPage() {
             className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
         </div>
+
+        {aiError && (
+          <div className="bg-destructive/10 border border-destructive/40 text-destructive text-xs rounded-xl px-3 py-2">
+            {aiError}
+          </div>
+        )}
 
         {/* Images */}
         <div>
@@ -170,14 +235,18 @@ export default function NewProductPage() {
                 ) : (
                   <div className="flex flex-col items-center gap-1 text-muted-foreground">
                     <span className="text-xl">📷</span>
-                    <span className="text-[10px] font-semibold">Image {i + 1}</span>
+                    <span className="text-[10px] font-semibold">
+                      Image {i + 1}
+                    </span>
                   </div>
                 )}
                 <input
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => handleImageUpload(i, e.target.files?.[0] ?? null)}
+                  onChange={(e) =>
+                    handleImageUpload(i, e.target.files?.[0] ?? null)
+                  }
                 />
               </label>
             ))}
@@ -229,13 +298,17 @@ export default function NewProductPage() {
               className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             >
               <option value="">Select…</option>
-              {["New", "Like New", "Used - Good", "Used - Fair", "Refurbished"].map(
-                (c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ),
-              )}
+              {[
+                "New",
+                "Like New",
+                "Used - Good",
+                "Used - Fair",
+                "Refurbished",
+              ].map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </div>
           <div>
@@ -282,12 +355,15 @@ export default function NewProductPage() {
             Seller (from your profile)
           </p>
           <p className="text-sm font-semibold text-foreground">
-            {form.sellerName || "—"} · Phone {form.sellerPhone || "—"} · WhatsApp{" "}
-            {form.sellerWhatsapp || "—"}
+            {form.sellerName || "—"} · Phone {form.sellerPhone || "—"} ·
+            WhatsApp {form.sellerWhatsapp || "—"}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             This is taken from your admin profile. Update it in{" "}
-            <Link href="/admin/profile" className="text-primary hover:underline">
+            <Link
+              href="/admin/profile"
+              className="text-primary hover:underline"
+            >
               My Profile
             </Link>{" "}
             if it changes.
