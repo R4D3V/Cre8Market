@@ -94,7 +94,7 @@ export default function HeroCarousel() {
                 alt={s.alt}
                 fill
                 priority={s.priority}
-                sizes="100vw"
+                sizes="(max-width: 1023px) 0px, 480px"
                 className="rounded-xl object-cover"
               />
             </div>

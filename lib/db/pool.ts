@@ -2,11 +2,21 @@ import { Pool, type QueryResult, type QueryResultRow } from "pg";
 
 const globalForPool = globalThis as unknown as { pool: Pool };
 
+// Append 'sslmode=verify-full' to the connection string exactly as recommended
+// by the pg deprecation warning, so pg-connection-string parses the SSL mode
+// explicitly and emits no warning.
+function buildConnectionString(): string {
+  const base = process.env.DATABASE_URL ?? "";
+  // Avoid duplicating the param if the env already includes it.
+  if (base.includes("sslmode=")) return base;
+  const separator = base.includes("?") ? "&" : "?";
+  return `${base}${separator}sslmode=verify-full`;
+}
+
 const basePool =
   globalForPool.pool ??
   new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    connectionString: buildConnectionString(),
     // Neon free-tier can take 30-40 s on a cold start; give it enough runway.
     connectionTimeoutMillis: 30000,
     query_timeout: 40000,

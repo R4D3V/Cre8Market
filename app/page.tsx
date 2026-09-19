@@ -44,9 +44,11 @@ export default async function HomePage() {
   } catch (err) {
     // Neon free-tier cold-start timeout — fall back to static data so the page
     // still renders instead of showing a 500 error.
-    console.error("DB unavailable on homepage load, using fallback data:", (err as Error).message);
+    console.error(
+      "DB unavailable on homepage load, using fallback data:",
+      (err as Error).message,
+    );
   }
-
 
   const topGroups = groupByCategory(
     products.length > 0 ? products : latestProducts,
@@ -56,16 +58,16 @@ export default async function HomePage() {
     <div className="bg-background text-foreground">
       <Navbar />
       <main className="flex-1">
-        <ScrollReveal>
-          <HeroCarousel />
+        <ScrollReveal delay={150}>
+          <AppleCta />
         </ScrollReveal>
         <ScrollReveal delay={100}>
           <TopSellingTabs groups={topGroups} />
         </ScrollReveal>
-        {/* <CategoryTiles categories={categories} /> */}
-        <ScrollReveal delay={150}>
-          <AppleCta />
+        <ScrollReveal>
+          <HeroCarousel />
         </ScrollReveal>
+        {/* <CategoryTiles categories={categories} /> */}
         <ScrollReveal delay={200}>
           <Recommendations />
         </ScrollReveal>

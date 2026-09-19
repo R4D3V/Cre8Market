@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -65,7 +64,6 @@ export default function AppleCta() {
   const prev = () => goTo(current - 1);
   const next = useCallback(() => goTo(current + 1), [current, goTo]);
 
-  // Auto-advance every 5 seconds
   useEffect(() => {
     const timer = setInterval(next, 5000);
     return () => clearInterval(timer);
@@ -75,116 +73,41 @@ export default function AppleCta() {
 
   return (
     <section className="border-y border-border overflow-hidden">
-      {/* ── Mobile: full-bleed background image with overlay ── */}
+      {/* Full-bleed background image — all screen sizes */}
       <div
-        key={brand.id + "-bg"}
-        className="relative lg:hidden"
+        key={brand.id}
+        className="relative min-h-[340px] lg:min-h-[420px]"
         style={{
           backgroundImage: `url('${brand.image}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          animation: "ctaFadeIn 0.45s ease both",
+          animation: "ctaFadeIn 0.5s ease both",
         }}
       >
-        {/* Dark gradient overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/20" />
+        {/* Gradient overlay — stronger at bottom so controls stay legible */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/25" />
 
-        {/* Text content on top of the background */}
-        <div className="relative z-10 px-6 py-16 text-white">
-          <p className="text-sm font-semibold uppercase tracking-wide text-white/80">
-            {brand.label}
-          </p>
-          <h2 className="mt-3 text-h2-sm sm:text-h2 font-heading text-white drop-shadow">
-            {brand.heading}
-          </h2>
-          <Link
-            href={brand.href}
-            className="button mt-6 inline-block bg-white px-8 py-3 text-black font-semibold hover:bg-primary hover:text-primary-foreground"
-          >
-            {brand.cta}
-          </Link>
-
-          {/* Controls inside the card on mobile */}
-          <div className="mt-8 flex items-center justify-between">
-            <div className="flex gap-2">
-              {brands.map((b, i) => (
-                <button
-                  key={b.id}
-                  onClick={() => goTo(i)}
-                  aria-label={`Go to ${b.label}`}
-                  style={{
-                    width: i === current ? "24px" : "8px",
-                    height: "8px",
-                    borderRadius: "9999px",
-                    background:
-                      i === current ? "#fff" : "rgba(255,255,255,0.4)",
-                    transition: "all 0.3s",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 0,
-                  }}
-                />
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={prev}
-                aria-label="Previous brand"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/20 text-white backdrop-blur-sm transition hover:bg-white hover:text-black"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
-                onClick={next}
-                aria-label="Next brand"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/20 text-white backdrop-blur-sm transition hover:bg-white hover:text-black"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Desktop: two-column grid layout ── */}
-      <div className="category-tint-2 hidden lg:block">
-        <div className="container relative py-14">
-          <div
-            key={brand.id + "-desktop"}
-            style={{ animation: "ctaFadeIn 0.45s ease both" }}
-            className="grid items-center gap-x-10 lg:grid-cols-2"
-          >
-            {/* Text side */}
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-                {brand.label}
-              </p>
-              <h2 className="mt-3 text-h2-sm sm:text-h2 font-heading">
-                {brand.heading}
-              </h2>
-              <Link
-                href={brand.href}
-                className="button mt-6 inline-block bg-primary px-8 py-3 text-primary-foreground hover:bg-background hover:text-primary"
-              >
-                {brand.cta}
-              </Link>
-            </div>
-
-            {/* Image side */}
-            <div className="relative mx-auto aspect-[616/409] w-full max-w-[616px]">
-              <Image
-                src={brand.image}
-                alt={brand.alt}
-                fill
-                sizes="616px"
-                className="rounded-xl object-cover"
-                priority={brand.id === "apple"}
-              />
-            </div>
+        {/* Content */}
+        <div className="relative z-10 flex h-full flex-col justify-between px-6 py-12 lg:px-16 lg:py-16">
+          {/* Text block */}
+          <div className="max-w-xl">
+            <p className="text-sm font-semibold uppercase tracking-widest text-white/70">
+              {brand.label}
+            </p>
+            <h2 className="mt-3 text-h2-sm font-heading text-white drop-shadow-md sm:text-h2">
+              {brand.heading}
+            </h2>
+            <Link
+              href={brand.href}
+              className="button mt-6 inline-block bg-white px-8 py-3 font-semibold text-black transition hover:bg-primary hover:text-primary-foreground"
+            >
+              {brand.cta}
+            </Link>
           </div>
 
           {/* Controls row */}
-          <div className="mt-8 flex items-center justify-between">
+          <div className="mt-10 flex items-center justify-between">
+            {/* Dot indicators */}
             <div className="flex gap-2">
               {brands.map((b, i) => (
                 <button
@@ -196,9 +119,7 @@ export default function AppleCta() {
                     height: "8px",
                     borderRadius: "9999px",
                     background:
-                      i === current
-                        ? "var(--color-primary, #000)"
-                        : "var(--color-border, #ccc)",
+                      i === current ? "#fff" : "rgba(255,255,255,0.35)",
                     transition: "all 0.3s",
                     border: "none",
                     cursor: "pointer",
@@ -207,18 +128,20 @@ export default function AppleCta() {
                 />
               ))}
             </div>
+
+            {/* Prev / Next */}
             <div className="flex gap-2">
               <button
                 onClick={prev}
                 aria-label="Previous brand"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground transition hover:bg-primary hover:text-primary-foreground"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/20 text-white backdrop-blur-sm transition hover:bg-white hover:text-black"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
                 onClick={next}
                 aria-label="Next brand"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground transition hover:bg-primary hover:text-primary-foreground"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/20 text-white backdrop-blur-sm transition hover:bg-white hover:text-black"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -229,10 +152,11 @@ export default function AppleCta() {
 
       <style>{`
         @keyframes ctaFadeIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: scale(1.015); }
+          to   { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </section>
   );
 }
+
