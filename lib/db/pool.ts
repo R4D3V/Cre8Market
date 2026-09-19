@@ -7,8 +7,9 @@ const basePool =
   new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
-    connectionTimeoutMillis: 15000,
-    query_timeout: 20000,
+    // Neon free-tier can take 30-40 s on a cold start; give it enough runway.
+    connectionTimeoutMillis: 30000,
+    query_timeout: 40000,
     max: 10,
     idleTimeoutMillis: 30000,
   });
@@ -26,6 +27,8 @@ function isRetryable(err: unknown): boolean {
     msg.includes("Connection terminated due to connection timeout") ||
     msg.includes("Connection terminated unexpectedly") ||
     msg.includes("timeout expired") ||
+    msg.includes("Query read timeout") ||
+    msg.includes("read timeout") ||
     msg.includes("ETIMEDOUT") ||
     msg.includes("ECONNRESET") ||
     msg.includes("server is not accepting connections") ||
@@ -37,7 +40,7 @@ function isRetryable(err: unknown): boolean {
 async function queryWithRetry(
   text: string,
   params?: unknown[],
-  retries = 3,
+  retries = 4,
 ): Promise<QueryResult<QueryResultRow>> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -46,12 +49,15 @@ async function queryWithRetry(
     } catch (err) {
       lastError = err;
       if (!isRetryable(err) || attempt === retries) break;
-      // Neon cold-start wake-up can take 15-30s; back off between retries.
-      await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+      // Exponential back-off: 2s, 4s, 8s, 16s — gives Neon time to wake up.
+      const delay = 2000 * Math.pow(2, attempt);
+      console.warn(`DB query failed (attempt ${attempt + 1}), retrying in ${delay}ms:`, (err as Error).message);
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
   throw lastError;
 }
+
 
 export const pool = new Proxy(basePool, {
   get(target, prop, receiver) {

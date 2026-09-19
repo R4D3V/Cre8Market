@@ -9,7 +9,7 @@ import NewsletterSignup from "@/components/NewsletterSignup";
 import ScrollReveal from "@/components/ScrollReveal";
 import { latestProducts } from "@/lib/data";
 import { getProducts, getCategories } from "@/lib/db/queries";
-import type { Product } from "@/lib/types";
+import type { Product, CategoryDB } from "@/lib/types";
 
 // Featured products come from the database, so render on each request instead of at build time.
 export const dynamic = "force-dynamic";
@@ -32,10 +32,21 @@ function groupByCategory(products: Product[], limit = 4): ProductGroup[] {
 }
 
 export default async function HomePage() {
-  const [products, categories] = await Promise.all([
-    getProducts(),
-    getCategories(),
-  ]);
+  let products: Product[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let categories: CategoryDB[] = [];
+
+  try {
+    [products, categories] = await Promise.all([
+      getProducts(),
+      getCategories(),
+    ]);
+  } catch (err) {
+    // Neon free-tier cold-start timeout — fall back to static data so the page
+    // still renders instead of showing a 500 error.
+    console.error("DB unavailable on homepage load, using fallback data:", (err as Error).message);
+  }
+
 
   const topGroups = groupByCategory(
     products.length > 0 ? products : latestProducts,
