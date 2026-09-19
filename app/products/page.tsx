@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 // import CategoryBar from "@/components/CategoryBar";
 import Footer from "@/components/Footer";
-import MobileBottomNav from "@/components/MobileBottomNav";
 import ProductCard from "@/components/ProductCard";
 import ScrollReveal from "@/components/ScrollReveal";
 import { ChevronUp } from "lucide-react";
@@ -404,7 +403,6 @@ function ProductsPageContent() {
       </main>
 
       <Footer />
-      <MobileBottomNav />
     </>
   );
 }

@@ -1,6 +1,5 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import MobileBottomNav from "@/components/MobileBottomNav";
 import HeroCarousel from "@/components/HeroCarousel";
 // import CategoryTiles from "@/components/CategoryTiles";
 import AppleCta from "@/components/AppleCta";
@@ -62,7 +61,6 @@ export default async function HomePage() {
       </main>
       <NewsletterSignup />
       <Footer />
-      <MobileBottomNav />
     </div>
   );
 }
