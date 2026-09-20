@@ -20,7 +20,7 @@ export default function NewProductPage() {
     location: "Entebbe",
     featured: false,
     isDeal: false,
-    specs: "",
+    specs: [{ label: "", value: "" }],
     sellerName: "",
     sellerPhone: "",
     sellerWhatsapp: "",
@@ -69,6 +69,45 @@ export default function NewProductPage() {
       .trim();
   }
 
+  function normalizeSpecs(raw: unknown) {
+    if (Array.isArray(raw)) {
+      const items = raw
+        .filter(
+          (item): item is { label?: string; value?: string } =>
+            !!item && typeof item === "object" && "label" in item,
+        )
+        .map((item) => ({
+          label: typeof item.label === "string" ? item.label : "",
+          value: typeof item.value === "string" ? item.value : "",
+        }));
+
+      return items.length ? items : [{ label: "", value: "" }];
+    }
+
+    if (typeof raw !== "string") {
+      return [{ label: "", value: "" }];
+    }
+
+    const parsed = raw
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const idx = line.indexOf(":");
+        if (idx === -1) {
+          return { label: "", value: line };
+        }
+
+        return {
+          label: line.slice(0, idx).trim(),
+          value: line.slice(idx + 1).trim(),
+        };
+      })
+      .filter((item) => item.label || item.value);
+
+    return parsed.length ? parsed : [{ label: "", value: "" }];
+  }
+
   async function generateProductDetails() {
     const title = form.title.trim();
     if (!title) {
@@ -99,7 +138,7 @@ export default function NewProductPage() {
         categorySlug: data.categorySlug || prev.categorySlug,
         condition: data.condition || prev.condition,
         description: data.description || prev.description,
-        specs: data.specs || prev.specs,
+        specs: normalizeSpecs(data.specs ?? prev.specs),
         price: data.price || prev.price,
       }));
     } catch (err: unknown) {
@@ -111,6 +150,31 @@ export default function NewProductPage() {
     } finally {
       setAiLoading(false);
     }
+  }
+
+  function updateSpec(index: number, field: "label" | "value", value: string) {
+    setForm((prev) => {
+      const nextSpecs = [...prev.specs];
+      nextSpecs[index] = { ...nextSpecs[index], [field]: value };
+      return { ...prev, specs: nextSpecs };
+    });
+  }
+
+  function addSpecRow() {
+    setForm((prev) => ({
+      ...prev,
+      specs: [...prev.specs, { label: "", value: "" }],
+    }));
+  }
+
+  function removeSpecRow(index: number) {
+    setForm((prev) => {
+      const nextSpecs = prev.specs.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        specs: nextSpecs.length ? nextSpecs : [{ label: "", value: "" }],
+      };
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -140,14 +204,11 @@ export default function NewProductPage() {
         featured: form.featured,
         isDeal: form.isDeal,
         specs: form.specs
-          ? form.specs
-              .split("\n")
-              .filter(Boolean)
-              .map((line) => {
-                const [label, value] = line.split(":").map((s) => s.trim());
-                return { label: label || "", value: value || "" };
-              })
-          : [],
+          .filter((spec) => spec.label.trim() || spec.value.trim())
+          .map((spec) => ({
+            label: spec.label.trim(),
+            value: spec.value.trim(),
+          })),
         seller: {
           name: form.sellerName || undefined,
           phone: form.sellerPhone || undefined,
@@ -338,16 +399,47 @@ export default function NewProductPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
-            Specs (one per line — Label: Value)
-          </label>
-          <textarea
-            rows={3}
-            value={form.specs}
-            onChange={(e) => update("specs", e.target.value)}
-            placeholder={"Storage: 256GB\nRAM: 8GB\nColor: Phantom Black"}
-            className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none resize-none font-mono"
-          />
+          <div className="flex items-center justify-between gap-2 mb-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground">
+              Specs
+            </label>
+            <button
+              type="button"
+              onClick={addSpecRow}
+              className="text-xs font-semibold text-primary hover:underline"
+            >
+              + Add spec
+            </button>
+          </div>
+          <div className="space-y-2">
+            {form.specs.map((spec, index) => (
+              <div
+                key={index}
+                className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1.2fr_auto]"
+              >
+                <input
+                  value={spec.label}
+                  onChange={(e) => updateSpec(index, "label", e.target.value)}
+                  placeholder="Label"
+                  className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                />
+                <input
+                  value={spec.value}
+                  onChange={(e) => updateSpec(index, "value", e.target.value)}
+                  placeholder="Value"
+                  className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeSpecRow(index)}
+                  className="text-xs font-semibold text-muted-foreground hover:text-destructive"
+                  disabled={form.specs.length === 1}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="neu-inset p-4">
