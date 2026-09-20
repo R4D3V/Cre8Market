@@ -206,7 +206,7 @@ export default function AboutPage() {
                 Email Us
               </a>
               <a
-                href="https://wa.me/256751621506"
+                href="https://wa.me/256767155113"
                 target="_blank"
                 rel="noreferrer"
                 className="neu-dark-pill text-foreground font-bold px-5 py-2.5 transition-all"

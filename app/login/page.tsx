@@ -139,7 +139,7 @@ export default function LoginPage() {
               Prefer to buy or sell via WhatsApp?
             </p>
             <a
-              href="https://wa.me/256751621506"
+              href="https://wa.me/256767155113"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 text-wa font-bold text-sm hover:underline"

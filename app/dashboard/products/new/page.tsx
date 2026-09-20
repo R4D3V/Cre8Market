@@ -197,7 +197,7 @@ export default function NewMyProductPage() {
             Contact the admin to get verified so you can post more items.
           </p>
           <a
-            href="https://wa.me/256751621506?text=Hi+I+would+like+to+get+verified+so+I+can+post+more+listings"
+            href="https://wa.me/256767155113?text=Hi+I+would+like+to+get+verified+so+I+can+post+more+listings"
             target="_blank"
             rel="noreferrer"
             className="neu-pill inline-flex items-center gap-2 bg-wa hover:bg-wa-dark text-white font-bold px-6 py-3 text-sm transition-all"

@@ -169,8 +169,8 @@ export default function Footer() {
           <h3 className="mb-3 mt-5 text-lg font-semibold">Contact Info</h3>
           <ul className="space-y-2.5 text-sm text-muted-foreground">
             <li>
-              <a href="tel:+256751621506" className="hover:text-primary">
-                +256 751 621 506
+              <a href="tel:+256767155113" className="hover:text-primary">
+                +256 767 155 113
               </a>
             </li>
             <li>
@@ -183,7 +183,7 @@ export default function Footer() {
             </li>
             <li>
               <a
-                href="https://wa.me/256751621506"
+                href="https://wa.me/256767155113"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-primary"

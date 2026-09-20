@@ -82,7 +82,7 @@ export default async function DealsPage() {
               Get instant alerts for deals matching your interests
             </p>
             <a
-              href="https://wa.me/256751621506?text=Hi+I+want+to+subscribe+for+deal+alerts"
+              href="https://wa.me/256767155113?text=Hi+I+want+to+subscribe+for+deal+alerts"
               target="_blank"
               rel="noreferrer"
               className="neu-pill inline-flex items-center gap-2 bg-wa hover:bg-wa-dark text-white font-bold px-6 py-3 transition-all"
