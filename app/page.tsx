@@ -12,6 +12,7 @@ import { latestProducts } from "@/lib/data";
 import { getProducts, getCategories } from "@/lib/db/queries";
 import type { Product, CategoryDB } from "@/lib/types";
 import Laptops from "@/components/Laptops";
+import Gaming from "@/components/Gaming";
 
 export const metadata: Metadata = {
   title: "CRE8MARKET Entebbe | Trusted Marketplace for Local Deals",
@@ -76,6 +77,9 @@ export default async function HomePage() {
         </ScrollReveal>
         <ScrollReveal delay={150}>
           <Laptops />
+        </ScrollReveal>
+        <ScrollReveal delay={150}>
+          <Gaming />
         </ScrollReveal>
         {/* <ScrollReveal>
           <HeroCarousel />
