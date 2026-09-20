@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { formatPrice } from "@/lib/data";
-import { fetchMyProductsAction, deleteMyProductsAction, duplicateMyProductsAction } from "@/lib/actions/products";
+import {
+  fetchMyProductsAction,
+  deleteMyProductsAction,
+  duplicateMyProductsAction,
+} from "@/lib/actions/products";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { Product } from "@/lib/types";
 
@@ -51,7 +55,12 @@ export default function MyProductsPage() {
 
   async function handleBulkDelete() {
     if (selectedIds.length === 0) return;
-    if (!confirm(`Delete ${selectedIds.length} product${selectedIds.length !== 1 ? "s" : ""}?`)) return;
+    if (
+      !confirm(
+        `Delete ${selectedIds.length} product${selectedIds.length !== 1 ? "s" : ""}?`,
+      )
+    )
+      return;
     setBusy(true);
     await deleteMyProductsAction(selectedIds);
     setProducts((p) => p.filter((x) => !selected.has(x.id)));
@@ -114,7 +123,9 @@ export default function MyProductsPage() {
             <p className="font-bold text-foreground text-sm">
               Welcome back, {session?.user?.name?.split(" ")[0] ?? "there"}!
             </p>
-            <p className="text-muted-foreground text-xs">Manage your profile and listings</p>
+            <p className="text-muted-foreground text-xs">
+              Manage your profile and listings
+            </p>
           </div>
         </div>
         <Link
@@ -160,12 +171,18 @@ export default function MyProductsPage() {
       )}
 
       {loading ? (
-        <div className="text-center py-12 text-muted-foreground text-sm">Loading…</div>
+        <div className="text-center py-12 text-muted-foreground text-sm">
+          Loading…
+        </div>
       ) : products.length === 0 ? (
         <div className="bg-card border border-border rounded-xl text-center py-12">
           <p className="text-4xl mb-3">📦</p>
-          <h3 className="font-bold text-foreground mb-1">You haven't added any products yet</h3>
-          <p className="text-muted-foreground text-sm mb-4">List your first item to start selling.</p>
+          <h3 className="font-bold text-foreground mb-1">
+            You haven't added any products yet
+          </h3>
+          <p className="text-muted-foreground text-sm mb-4">
+            List your first item to start selling.
+          </p>
           <Link
             href="/dashboard/products/new"
             className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm inline-block"
@@ -181,7 +198,10 @@ export default function MyProductsPage() {
                 <th className="pb-3 pr-4 font-semibold">
                   <input
                     type="checkbox"
-                    checked={selectedIds.length === products.length && products.length > 0}
+                    checked={
+                      selectedIds.length === products.length &&
+                      products.length > 0
+                    }
                     onChange={toggleAll}
                     className="w-4 h-4 rounded border-border bg-card text-primary cursor-pointer"
                   />
@@ -216,9 +236,15 @@ export default function MyProductsPage() {
                       {p.title}
                     </Link>
                   </td>
-                  <td className="py-3 pr-4 text-muted-foreground">{p.category}</td>
-                  <td className="py-3 pr-4 text-primary font-bold">{formatPrice(p.price)}</td>
-                  <td className="py-3 pr-4 text-muted-foreground">{p.timeAgo}</td>
+                  <td className="py-3 pr-4 text-muted-foreground">
+                    {p.category}
+                  </td>
+                  <td className="py-3 pr-4 text-primary font-bold">
+                    {formatPrice(p.price)}
+                  </td>
+                  <td className="py-3 pr-4 text-muted-foreground">
+                    {p.timeAgo}
+                  </td>
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-2">
                       <Link

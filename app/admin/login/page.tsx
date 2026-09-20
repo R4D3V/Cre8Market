@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn } from "@/lib/auth-client";
 import Link from "next/link";
 
 export default function AdminLoginPage() {
@@ -17,7 +17,7 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError("");
 
-    const result = await signIn("admin-credentials", {
+    const result = await signIn({
       email,
       password,
       redirect: false,
@@ -90,7 +90,10 @@ export default function AdminLoginPage() {
         </div>
 
         <p className="text-center mt-4">
-          <Link href="/admin/reset-password" className="text-sm text-primary font-semibold hover:underline">
+          <Link
+            href="/admin/reset-password"
+            className="text-sm text-primary font-semibold hover:underline"
+          >
             Reset Password
           </Link>
         </p>

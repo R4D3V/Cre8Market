@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
-import { fetchMyProductsAction, updateMyProductAction, deleteMyProductAction } from "@/lib/actions/products";
+import {
+  fetchMyProductsAction,
+  updateMyProductAction,
+  deleteMyProductAction,
+} from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import { compressImage } from "@/lib/imageCompress";
 import { ProductImagePicker } from "@/components/ProductImagePicker";
@@ -149,7 +153,11 @@ export default function EditMyProductPage() {
   }
 
   if (loading) {
-    return <div className="text-center py-12 text-muted-foreground text-sm">Loading…</div>;
+    return (
+      <div className="text-center py-12 text-muted-foreground text-sm">
+        Loading…
+      </div>
+    );
   }
 
   if (notFoundOrNotOwned) {
@@ -160,7 +168,10 @@ export default function EditMyProductPage() {
         <p className="text-muted-foreground text-sm mb-4">
           This listing doesn't exist or wasn't added by your account.
         </p>
-        <Link href="/dashboard" className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm inline-block">
+        <Link
+          href="/dashboard"
+          className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm inline-block"
+        >
           ← Back to My Products
         </Link>
       </div>
@@ -182,7 +193,9 @@ export default function EditMyProductPage() {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Title *</label>
+          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+            Title *
+          </label>
           <input
             required
             value={form.title}
@@ -195,12 +208,18 @@ export default function EditMyProductPage() {
           <label className="block text-sm font-semibold text-muted-foreground mb-2">
             Product Images (up to 4)
           </label>
-          <ProductImagePicker images={images} onFile={handleImageUpload} onRemove={removeImage} />
+          <ProductImagePicker
+            images={images}
+            onFile={handleImageUpload}
+            onRemove={removeImage}
+          />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Price (UGX) *</label>
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+              Price (UGX) *
+            </label>
             <input
               required
               type="number"
@@ -210,7 +229,9 @@ export default function EditMyProductPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Category *</label>
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+              Category *
+            </label>
             <select
               required
               value={form.categorySlug}
@@ -229,14 +250,22 @@ export default function EditMyProductPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Condition</label>
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+              Condition
+            </label>
             <select
               value={form.condition}
               onChange={(e) => update("condition", e.target.value)}
               className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             >
               <option value="">Select…</option>
-              {["New", "Like New", "Used - Good", "Used - Fair", "Refurbished"].map((c) => (
+              {[
+                "New",
+                "Like New",
+                "Used - Good",
+                "Used - Fair",
+                "Refurbished",
+              ].map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -244,7 +273,9 @@ export default function EditMyProductPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Location</label>
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+              Location
+            </label>
             <input
               value={form.location}
               onChange={(e) => update("location", e.target.value)}
@@ -254,7 +285,9 @@ export default function EditMyProductPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Description</label>
+          <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+            Description
+          </label>
           <textarea
             rows={3}
             value={form.description}
@@ -292,7 +325,8 @@ export default function EditMyProductPage() {
             Buyers will contact you at
           </p>
           <p className="text-sm font-semibold text-foreground">
-            {session?.user?.name} · WhatsApp {session?.user?.whatsapp ?? session?.user?.phone}
+            {session?.user?.name} · WhatsApp{" "}
+            {session?.user?.whatsapp ?? session?.user?.phone}
           </p>
         </div>
 
@@ -317,7 +351,10 @@ export default function EditMyProductPage() {
           >
             Delete Product
           </button>
-          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            href="/dashboard"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
             Cancel
           </Link>
         </div>

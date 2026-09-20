@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@/lib/auth-client";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, LogOut } from "lucide-react";
@@ -12,7 +12,8 @@ import { fetchMyProfileAction } from "@/lib/actions/users";
 function getPageTitle(pathname: string) {
   if (pathname === "/dashboard") return "My Products";
   if (pathname === "/dashboard/products/new") return "Add Product";
-  if (/^\/dashboard\/products\/[^/]+\/edit$/.test(pathname)) return "Edit Product";
+  if (/^\/dashboard\/products\/[^/]+\/edit$/.test(pathname))
+    return "Edit Product";
   if (pathname === "/dashboard/profile") return "My Profile";
   return "Dashboard";
 }
@@ -53,7 +54,10 @@ export default function DashboardLayout({
     setSidebarOpen(false);
   }, [pathname]);
 
-  if (status === "loading" || (status === "authenticated" && session?.user?.role !== "user")) {
+  if (
+    status === "loading" ||
+    (status === "authenticated" && session?.user?.role !== "user")
+  ) {
     return null;
   }
   if (status === "unauthenticated") return null;
@@ -62,7 +66,7 @@ export default function DashboardLayout({
   const contact = session?.user?.phone ?? "";
   const initial = (name || "U")[0]?.toUpperCase() ?? "U";
   const pageTitle = getPageTitle(pathname);
-  const handleSignOut = () => signOut({ callbackUrl: "/login" });
+  const handleSignOut = () => signOut().then(() => router.push("/login"));
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -111,7 +115,11 @@ export default function DashboardLayout({
             <div className="flex items-center gap-2">
               <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs font-bold text-muted-foreground">
                 {userAvatar ? (
-                  <img src={userAvatar} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={userAvatar}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   initial
                 )}

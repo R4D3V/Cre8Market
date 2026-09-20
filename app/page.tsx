@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HeroCarousel from "@/components/HeroCarousel";
@@ -11,8 +12,16 @@ import { latestProducts } from "@/lib/data";
 import { getProducts, getCategories } from "@/lib/db/queries";
 import type { Product, CategoryDB } from "@/lib/types";
 
-// Featured products come from the database, so render on each request instead of at build time.
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "CRE8MARKET Entebbe | Trusted Marketplace for Local Deals",
+  description:
+    "Discover verified deals, local listings, and trusted sellers across Entebbe with CRE8MARKET.",
+  alternates: {
+    canonical: "/",
+  },
+};
+
+export const revalidate = 60;
 
 function groupByCategory(products: Product[], limit = 4): ProductGroup[] {
   const groups = new Map<string, Product[]>();

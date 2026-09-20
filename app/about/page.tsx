@@ -1,8 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
+
+export const metadata: Metadata = {
+  title: "About CRE8MARKET Entebbe | Trusted Local Marketplace",
+  description:
+    "Learn about CRE8MARKET Entebbe, a trusted local marketplace connecting buyers and sellers directly across Uganda.",
+  alternates: {
+    canonical: "/about",
+  },
+};
 
 export default function AboutPage() {
   return (

@@ -18,15 +18,26 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "CRE8MARKET ENTEBBE — Entebbe's #1 Marketplace",
+  metadataBase: new URL("https://cre8market.com"),
+  title: {
+    default: "CRE8MARKET Entebbe | Buy & Sell in Uganda",
+    template: "%s | CRE8MARKET Entebbe",
+  },
   description:
-    "CRE8MARKET ENTEBBE — Buy and sell secondhand electronics, phones and more in Entebbe.",
+    "Buy and sell phones, laptops, appliances, and local deals in Entebbe with CRE8MARKET — trusted, direct, and easy to use.",
   openGraph: {
-    title: "CRE8MARKET ENTEBBE",
+    title: "CRE8MARKET Entebbe | Buy & Sell in Uganda",
     description:
-      "Buy and sell secondhand electronics, phones and more in Entebbe.",
+      "Buy and sell phones, laptops, appliances, and local deals in Entebbe with CRE8MARKET — trusted, direct, and easy to use.",
     url: "https://cre8market.com",
+    siteName: "CRE8MARKET Entebbe",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CRE8MARKET Entebbe | Buy & Sell in Uganda",
+    description:
+      "Buy and sell phones, laptops, appliances, and local deals in Entebbe with CRE8MARKET — trusted, direct, and easy to use.",
   },
   manifest: "/manifest.json",
   appleWebApp: {
@@ -39,9 +50,7 @@ export const metadata: Metadata = {
       { url: "/icon.png", sizes: "32x32", type: "image/png" },
       { url: "/icon.png", sizes: "192x192", type: "image/png" },
     ],
-    apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
-    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 

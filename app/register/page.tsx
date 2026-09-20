@@ -1,36 +1,42 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { signIn } from 'next-auth/react'
-import Link from 'next/link'
-import Image from 'next/image'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import { registerUserAction } from '@/lib/actions/auth'
-import { PhoneInput, toFullNumber } from '@/components/PhoneInput'
-import ScrollReveal from '@/components/ScrollReveal'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "@/lib/auth-client";
+import Link from "next/link";
+import Image from "next/image";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { registerUserAction } from "@/lib/actions/auth";
+import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export default function RegisterPage() {
-  const router = useRouter()
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [whatsapp, setWhatsapp] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirm, setConfirm] = useState('')
-  const [pin, setPin] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState('')
-  const [accountExists, setAccountExists] = useState(false)
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [pin, setPin] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [accountExists, setAccountExists] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (password !== confirm) { setError('Passwords do not match'); return }
-    if (!/^\d{4}$/.test(pin)) { setError('Reset pin must be a 4-digit code'); return }
-    setLoading(true)
-    setError('')
-    setAccountExists(false)
+    e.preventDefault();
+    if (password !== confirm) {
+      setError("Passwords do not match");
+      return;
+    }
+    if (!/^\d{4}$/.test(pin)) {
+      setError("Reset pin must be a 4-digit code");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    setAccountExists(false);
 
     try {
       await registerUserAction({
@@ -39,27 +45,30 @@ export default function RegisterPage() {
         whatsapp: whatsapp ? toFullNumber(whatsapp) : undefined,
         password,
         pin,
-      })
+      });
 
       // Registration succeeded — sign the new account in right away.
-      const result = await signIn('user-credentials', {
+      const result = await signIn({
         phone: toFullNumber(phone),
         password,
         redirect: false,
-      })
+      });
       if (result?.error) {
         // Account was created but auto sign-in failed for some reason; send them to log in manually.
-        router.push('/login')
-        return
+        router.push("/login");
+        return;
       }
 
-      setSuccess(true)
+      setSuccess(true);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
-      setError(message)
-      if (message.includes('already exists')) setAccountExists(true)
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.";
+      setError(message);
+      if (message.includes("already exists")) setAccountExists(true);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -70,13 +79,24 @@ export default function RegisterPage() {
         <main className="min-h-[70vh] flex items-center justify-center px-4 py-12">
           <ScrollReveal className="text-center max-w-sm">
             <div className="text-6xl mb-4">🎉</div>
-            <h1 className="font-heading text-2xl font-extrabold text-foreground mb-2">Welcome, {name}!</h1>
-            <p className="text-muted-foreground mb-6">Your account has been created. You can now post listings and contact sellers.</p>
+            <h1 className="font-heading text-2xl font-extrabold text-foreground mb-2">
+              Welcome, {name}!
+            </h1>
+            <p className="text-muted-foreground mb-6">
+              Your account has been created. You can now post listings and
+              contact sellers.
+            </p>
             <div className="flex gap-3 justify-center">
-              <Link href="/dashboard/products/new" className="neu-pill bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-5 py-2.5 text-sm transition-all">
+              <Link
+                href="/dashboard/products/new"
+                className="neu-pill bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-5 py-2.5 text-sm transition-all"
+              >
                 Add a Listing
               </Link>
-              <Link href="/products" className="neu-pill border border-border bg-card text-foreground font-bold px-5 py-2.5 text-sm transition-all">
+              <Link
+                href="/products"
+                className="neu-pill border border-border bg-card text-foreground font-bold px-5 py-2.5 text-sm transition-all"
+              >
                 Browse Listings
               </Link>
             </div>
@@ -84,7 +104,7 @@ export default function RegisterPage() {
         </main>
         <Footer />
       </>
-    )
+    );
   }
 
   return (
@@ -102,14 +122,20 @@ export default function RegisterPage() {
                 className="w-24 h-24 object-contain mx-auto"
               />
             </Link>
-            <h1 className="font-heading text-xl font-extrabold text-foreground mt-4 mb-1">Create a free account</h1>
-            <p className="text-muted-foreground text-sm">Buy, sell and get the best deals in Uganda</p>
+            <h1 className="font-heading text-xl font-extrabold text-foreground mt-4 mb-1">
+              Create a free account
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Buy, sell and get the best deals in Uganda
+            </p>
           </div>
 
           <div className="neu-card p-7">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Full Name</label>
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+                  Full Name
+                </label>
                 <input
                   type="text"
                   required
@@ -120,7 +146,9 @@ export default function RegisterPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Phone / WhatsApp Number</label>
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+                  Phone / WhatsApp Number
+                </label>
                 <PhoneInput
                   required
                   value={phone}
@@ -139,7 +167,9 @@ export default function RegisterPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Password</label>
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+                  Password
+                </label>
                 <input
                   type="password"
                   required
@@ -151,7 +181,9 @@ export default function RegisterPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">Confirm Password</label>
+                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+                  Confirm Password
+                </label>
                 <input
                   type="password"
                   required
@@ -177,7 +209,8 @@ export default function RegisterPage() {
                   className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  You'll use this pin to verify your identity when resetting your password.
+                  You'll use this pin to verify your identity when resetting
+                  your password.
                 </p>
               </div>
 
@@ -200,20 +233,30 @@ export default function RegisterPage() {
                 disabled={loading}
                 className="neu-pill w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold py-3 text-sm transition-all disabled:opacity-60"
               >
-                {loading ? 'Creating account…' : 'Register Free'}
+                {loading ? "Creating account…" : "Register Free"}
               </button>
 
               <p className="text-center text-xs text-muted-foreground">
-                By registering you agree to our{' '}
-                <Link href="/terms" className="text-primary hover:underline">Terms</Link> &{' '}
-                <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+                By registering you agree to our{" "}
+                <Link href="/terms" className="text-primary hover:underline">
+                  Terms
+                </Link>{" "}
+                &{" "}
+                <Link href="/privacy" className="text-primary hover:underline">
+                  Privacy Policy
+                </Link>
               </p>
             </form>
 
             <div className="mt-4 pt-4 border-t border-border text-center">
               <p className="text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <Link href="/login" className="text-primary font-bold hover:underline">Sign In</Link>
+                Already have an account?{" "}
+                <Link
+                  href="/login"
+                  className="text-primary font-bold hover:underline"
+                >
+                  Sign In
+                </Link>
               </p>
             </div>
           </div>
@@ -221,5 +264,5 @@ export default function RegisterPage() {
       </main>
       <Footer />
     </>
-  )
+  );
 }

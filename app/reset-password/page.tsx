@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn, getSession } from "next-auth/react";
+import { signIn, getSession } from "@/lib/auth-client";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -29,7 +29,7 @@ export default function ResetPasswordPage() {
     try {
       await resetUserPasswordAction(toFullNumber(phone), password, pin);
       setMessage("Password reset successfully! You can now log in.");
-      const result = await signIn("user-credentials", { phone, password, redirect: false });
+      const result = await signIn({ phone, password, redirect: false });
       if (!result?.error) {
         const session = await getSession();
         if (session?.user?.role === "admin") {
@@ -140,13 +140,19 @@ export default function ResetPasswordPage() {
             <div className="mt-5 pt-4 border-t border-border text-center space-y-2">
               <p className="text-sm text-muted-foreground">
                 Remembered it?{" "}
-                <Link href="/login" className="text-primary font-bold hover:underline">
+                <Link
+                  href="/login"
+                  className="text-primary font-bold hover:underline"
+                >
                   Sign In
                 </Link>
               </p>
               <p className="text-sm text-muted-foreground">
                 New to Cre8Market?{" "}
-                <Link href="/register" className="text-primary font-bold hover:underline">
+                <Link
+                  href="/register"
+                  className="text-primary font-bold hover:underline"
+                >
                   Register Free
                 </Link>
               </p>

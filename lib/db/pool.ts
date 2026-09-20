@@ -1,3 +1,4 @@
+import "server-only";
 import { Pool, type QueryResult, type QueryResultRow } from "pg";
 
 const globalForPool = globalThis as unknown as { pool: Pool };
@@ -61,13 +62,15 @@ async function queryWithRetry(
       if (!isRetryable(err) || attempt === retries) break;
       // Exponential back-off: 2s, 4s, 8s, 16s — gives Neon time to wake up.
       const delay = 2000 * Math.pow(2, attempt);
-      console.warn(`DB query failed (attempt ${attempt + 1}), retrying in ${delay}ms:`, (err as Error).message);
+      console.warn(
+        `DB query failed (attempt ${attempt + 1}), retrying in ${delay}ms:`,
+        (err as Error).message,
+      );
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
   throw lastError;
 }
-
 
 export const pool = new Proxy(basePool, {
   get(target, prop, receiver) {

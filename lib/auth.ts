@@ -1,84 +1,198 @@
-import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
+import "server-only";
+import crypto from "node:crypto";
 import bcrypt from "bcrypt";
+import { betterAuth } from "better-auth";
+import { toNextJsHandler } from "better-auth/next-js";
+import { PostgresDialect } from "kysely";
+import { headers } from "next/headers";
+import { pool } from "./db/pool";
 import { getAdminUserByEmail, getUserByPhone } from "./db/queries";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret: process.env.AUTH_SECRET,
-  providers: [
-    Credentials({
-      id: "admin-credentials",
-      name: "Admin",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+async function verifyPasswordHash(
+  hash: string,
+  password: string,
+): Promise<boolean> {
+  if (!hash) return false;
 
-        const admin = await getAdminUserByEmail(credentials.email as string);
-        if (!admin) return null;
+  if (hash.startsWith("$2")) {
+    try {
+      return await bcrypt.compare(password, hash);
+    } catch {
+      return false;
+    }
+  }
 
-        const valid = await bcrypt.compare(credentials.password as string, admin.password_hash);
-        if (!valid) return null;
+  const [salt, key] = hash.split(":");
+  if (!salt || !key) return false;
 
-        return {
-          id: admin.id,
-          email: admin.email,
-          name: admin.name ?? "Admin",
-          phone: admin.phone ?? null,
-          whatsapp: admin.whatsapp ?? null,
-          role: "admin" as const,
-        };
-      },
-    }),
-    Credentials({
-      id: "user-credentials",
-      name: "User",
-      credentials: {
-        phone: { label: "Phone", type: "text" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.phone || !credentials?.password) return null;
+  try {
+    const cryptoKey = crypto.scryptSync(password.normalize("NFKC"), salt, 64, {
+      N: 16384,
+      r: 16,
+      p: 1,
+      maxmem: 128 * 16384 * 16 * 2,
+    });
+    return cryptoKey.toString("hex") === key;
+  } catch {
+    return false;
+  }
+}
 
-        const user = await getUserByPhone(credentials.phone as string);
-        if (!user) return null;
-        if (!user.is_active) return null;
+const appBaseUrl =
+  process.env.NEXT_PUBLIC_APP_URL ??
+  process.env.APP_URL ??
+  process.env.AUTH_URL ??
+  "http://localhost:3005";
 
-        const valid = await bcrypt.compare(credentials.password as string, user.password_hash);
-        if (!valid) return null;
+const trustedOrigins = Array.from(
+  new Set(
+    [
+      appBaseUrl,
+      "http://localhost:3000",
+      "http://localhost:3005",
+      "http://127.0.0.1:3000",
+      "http://127.0.0.1:3005",
+      process.env.NEXT_PUBLIC_APP_URL,
+      process.env.APP_URL,
+      process.env.AUTH_URL,
+    ].filter(Boolean) as string[],
+  ),
+);
 
-        return {
-          id: user.id,
-          name: user.name,
-          phone: user.phone,
-          whatsapp: user.whatsapp ?? user.phone,
-          role: user.is_admin ? ("admin" as const) : ("user" as const),
-        };
-      },
-    }),
-  ],
-  session: { strategy: "jwt" },
-  pages: { signIn: "/admin/login" },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.phone = user.phone ?? null;
-        token.whatsapp = user.whatsapp ?? null;
-      }
-      return token;
+const appAuth = betterAuth({
+  appName: "Cre8Market",
+  secret:
+    process.env.AUTH_SECRET ??
+    process.env.BETTER_AUTH_SECRET ??
+    "dev-secret-key",
+  baseURL: appBaseUrl,
+  trustedOrigins,
+  database: new PostgresDialect({ pool }),
+  emailAndPassword: {
+    enabled: true,
+    autoSignIn: true,
+    requireEmailVerification: false,
+    password: {
+      hash: async (password: string) => bcrypt.hash(password, 10),
+      verify: async ({ hash, password }: { hash: string; password: string }) =>
+        verifyPasswordHash(hash, password),
     },
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as "admin" | "user";
-        session.user.phone = token.phone as string | null | undefined;
-        session.user.whatsapp = token.whatsapp as string | null | undefined;
-      }
-      return session;
+  },
+  user: {
+    additionalFields: {
+      phone: { type: "string", required: false, input: false },
+      whatsapp: { type: "string", required: false, input: false },
+      role: { type: "string", required: false, input: false },
     },
   },
 });
+
+export const authHandler = toNextJsHandler(appAuth);
+
+export async function syncLegacyUserToBetterAuth(phone: string) {
+  const user = await getUserByPhone(phone);
+  if (!user) return null;
+
+  const email = `${user.phone.replace(/\D/g, "")}@cre8market.local`;
+  await pool.query(
+    `INSERT INTO "user" (id, name, email, "emailVerified", image, "createdAt", "updatedAt", phone, whatsapp, role)
+     VALUES ($1, $2, $3, true, NULL, NOW(), NOW(), $4, $5, $6)
+     ON CONFLICT (id) DO UPDATE SET
+       name = EXCLUDED.name,
+       email = EXCLUDED.email,
+       "emailVerified" = EXCLUDED."emailVerified",
+       phone = EXCLUDED.phone,
+       whatsapp = EXCLUDED.whatsapp,
+       role = EXCLUDED.role,
+       "updatedAt" = NOW()`,
+    [
+      user.id,
+      user.name,
+      email,
+      user.phone,
+      user.whatsapp ?? user.phone,
+      user.is_admin ? "admin" : "user",
+    ],
+  );
+
+  const accountId = user.id;
+  await pool.query(
+    `DELETE FROM "account"
+     WHERE "providerId" = 'credential'
+       AND "userId" = $1
+       AND "accountId" = $2`,
+    [user.id, accountId],
+  );
+
+  await pool.query(
+    `INSERT INTO "account" (id, "accountId", "providerId", "userId", password, "createdAt", "updatedAt")
+     VALUES ($1, $2, 'credential', $3, $4, NOW(), NOW())
+     ON CONFLICT (id) DO UPDATE SET password = EXCLUDED.password, "updatedAt" = NOW()`,
+    [accountId, accountId, user.id, user.password_hash],
+  );
+
+  return user;
+}
+
+export async function syncLegacyAdminToBetterAuth(email: string) {
+  const admin = await getAdminUserByEmail(email);
+  if (!admin) return null;
+
+  await pool.query(
+    `INSERT INTO "user" (id, name, email, "emailVerified", image, "createdAt", "updatedAt", role)
+     VALUES ($1, $2, $3, true, $4, NOW(), NOW(), 'admin')
+     ON CONFLICT (id) DO UPDATE SET
+       name = EXCLUDED.name,
+       email = EXCLUDED.email,
+       "emailVerified" = EXCLUDED."emailVerified",
+       image = EXCLUDED.image,
+       role = EXCLUDED.role,
+       "updatedAt" = NOW()`,
+    [admin.id, admin.name ?? "Admin", admin.email, admin.avatar ?? null],
+  );
+
+  const accountId = admin.id;
+  await pool.query(
+    `DELETE FROM "account"
+     WHERE "providerId" = 'credential'
+       AND "userId" = $1
+       AND "accountId" = $2`,
+    [admin.id, accountId],
+  );
+
+  await pool.query(
+    `INSERT INTO "account" (id, "accountId", "providerId", "userId", password, "createdAt", "updatedAt")
+     VALUES ($1, $2, 'credential', $3, $4, NOW(), NOW())
+     ON CONFLICT (id) DO UPDATE SET password = EXCLUDED.password, "updatedAt" = NOW()`,
+    [accountId, accountId, admin.id, admin.password_hash],
+  );
+
+  return admin;
+}
+
+export async function authSessionFromHeaders() {
+  const session = await appAuth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) return null;
+
+  const user = session.user as Record<string, unknown>;
+  const email = typeof user.email === "string" ? user.email : null;
+  const adminLookup = email ? await getAdminUserByEmail(email) : null;
+
+  return {
+    user: {
+      id: String(user.id ?? ""),
+      name: String(user.name ?? ""),
+      email,
+      phone: typeof user.phone === "string" ? user.phone : null,
+      whatsapp: typeof user.whatsapp === "string" ? user.whatsapp : null,
+      role: (user.role as "admin" | "user") ?? (adminLookup ? "admin" : "user"),
+    },
+  };
+}
+
+export async function auth() {
+  return authSessionFromHeaders();
+}

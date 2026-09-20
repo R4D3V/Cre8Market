@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@/lib/auth-client";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -87,7 +87,9 @@ export default function Navbar() {
                 <span className="hidden sm:inline">Dashboard</span>
               </Link>
               <button
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={() =>
+                  signOut().then(() => (window.location.href = "/"))
+                }
                 className="text-sm font-semibold text-muted-foreground transition hover:text-foreground"
               >
                 Sign Out

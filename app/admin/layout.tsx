@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@/lib/auth-client";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, LogOut } from "lucide-react";
@@ -35,7 +35,8 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (pathname === "/admin/login" || pathname === "/admin/reset-password") return;
+    if (pathname === "/admin/login" || pathname === "/admin/reset-password")
+      return;
     if (status === "unauthenticated") {
       router.replace("/admin/login");
     } else if (status === "authenticated" && session?.user?.role !== "admin") {
@@ -61,9 +62,13 @@ export default function AdminLayout({
     setSidebarOpen(false);
   }, [pathname]);
 
-  if (pathname === "/admin/login" || pathname === "/admin/reset-password") return <>{children}</>;
+  if (pathname === "/admin/login" || pathname === "/admin/reset-password")
+    return <>{children}</>;
 
-  if (status === "loading" || (status === "authenticated" && session?.user?.role !== "admin")) {
+  if (
+    status === "loading" ||
+    (status === "authenticated" && session?.user?.role !== "admin")
+  ) {
     return null;
   }
 
@@ -71,7 +76,7 @@ export default function AdminLayout({
   const email = session?.user?.email ?? "";
   const initial = (name || email || "A")[0]?.toUpperCase() ?? "A";
   const pageTitle = getPageTitle(pathname);
-  const handleSignOut = () => signOut({ callbackUrl: "/admin/login" });
+  const handleSignOut = () => signOut().then(() => router.push("/admin/login"));
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -120,7 +125,11 @@ export default function AdminLayout({
             <div className="flex items-center gap-2">
               <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs font-bold text-muted-foreground">
                 {adminAvatar ? (
-                  <img src={adminAvatar} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={adminAvatar}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   initial
                 )}

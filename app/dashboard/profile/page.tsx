@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import {
   fetchMyProfileAction,
   updateMyProfileAction,
@@ -53,7 +53,11 @@ export default function ProfilePage() {
     setInfoMsg("");
     setInfoError("");
     try {
-      const updated = await updateMyProfileAction({ name, whatsapp, avatar: avatar || null });
+      const updated = await updateMyProfileAction({
+        name,
+        whatsapp,
+        avatar: avatar || null,
+      });
       setProfile(updated);
       setInfoMsg("Profile updated successfully!");
     } catch (err: unknown) {
@@ -76,7 +80,11 @@ export default function ProfilePage() {
   }
 
   if (loading) {
-    return <div className="text-center py-12 text-muted-foreground text-sm">Loading…</div>;
+    return (
+      <div className="text-center py-12 text-muted-foreground text-sm">
+        Loading…
+      </div>
+    );
   }
 
   return (
@@ -103,7 +111,11 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-2xl shrink-0 overflow-hidden">
               {avatar ? (
-                <img src={avatar} alt="Profile avatar" className="w-full h-full object-cover" />
+                <img
+                  src={avatar}
+                  alt="Profile avatar"
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 (name || profile?.name || "U")[0].toUpperCase()
               )}
@@ -115,7 +127,9 @@ export default function ProfilePage() {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => handleAvatarUpload(e.target.files?.[0] ?? null)}
+                  onChange={(e) =>
+                    handleAvatarUpload(e.target.files?.[0] ?? null)
+                  }
                 />
               </label>
               {avatar && (
@@ -167,7 +181,8 @@ export default function ProfilePage() {
               className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Buyers will contact you on this number. Leave blank to use your phone number.
+              Buyers will contact you on this number. Leave blank to use your
+              phone number.
             </p>
           </div>
 

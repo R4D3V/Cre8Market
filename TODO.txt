@@ -1,7 +1,1 @@
-1. Fix the social titles for each page, like make them dynamic for product and put something professional(SEO wise) for the parent pages.
-
-2. The application is slow on localhost, something is not right, you might need to reinstall/rebuild the node modules or the packages in the project.
-
-3. Switch from using next-auth to using better-auth. "https://indie-starter.dev/blog/next-auth-js-vs-better-auth"
-
-4. Use an ORM(Object Relations Mapper). "https://medium.com/@mdburkee/what-is-the-purpose-of-an-orm-and-what-are-its-advantages-ae3882e9e91e"
+ Use an ORM(Object Relations Mapper). "https://medium.com/@mdburkee/what-is-the-purpose-of-an-orm-and-what-are-its-advantages-ae3882e9e91e"
