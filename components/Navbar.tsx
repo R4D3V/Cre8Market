@@ -194,9 +194,9 @@ export default function Navbar() {
             <Link className="hover:underline" href="/products?sort=latest">
               New Arrivals
             </Link> */}
-            <Link className="hover:underline" href="/selltous">
+            {/* <Link className="hover:underline" href="/selltous">
               Sell to Us
-            </Link>
+            </Link> */}
           </div>
         </div>
       </nav>
@@ -245,12 +245,12 @@ export default function Navbar() {
               >
                 All Categories
               </Link>
-              <Link
+              {/* <Link
                 href="/products"
                 className="py-2.5 text-sm font-semibold text-foreground"
               >
                 Products
-              </Link>
+              </Link> */}
               <Link
                 href="/deals"
                 className="py-2.5 text-sm font-semibold text-foreground"

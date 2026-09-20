@@ -11,6 +11,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 import { latestProducts } from "@/lib/data";
 import { getProducts, getCategories } from "@/lib/db/queries";
 import type { Product, CategoryDB } from "@/lib/types";
+import Laptops from "@/components/Laptops";
 
 export const metadata: Metadata = {
   title: "CRE8MARKET Entebbe | Trusted Marketplace for Local Deals",
@@ -73,6 +74,9 @@ export default async function HomePage() {
         <ScrollReveal delay={100}>
           <TopSellingTabs groups={topGroups} />
         </ScrollReveal>
+        <ScrollReveal delay={150}>
+          <Laptops />
+        </ScrollReveal>
         {/* <ScrollReveal>
           <HeroCarousel />
         </ScrollReveal> */}
@@ -81,7 +85,7 @@ export default async function HomePage() {
           <Recommendations />
         </ScrollReveal>
       </main>
-      <NewsletterSignup />
+      {/* <NewsletterSignup /> */}
       <Footer />
     </div>
   );
