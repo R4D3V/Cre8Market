@@ -42,7 +42,7 @@ export default function Laptops() {
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveIndex((current) => (current + 1) % slides.length);
-    }, 6000);
+    }, 5000);
 
     return () => clearInterval(timer);
   }, []);
