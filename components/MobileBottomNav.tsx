@@ -19,10 +19,11 @@ export default function MobileBottomNav() {
   const navItems = [
     { href: "/", label: "Home", icon: "🏠" },
     { href: "/products", label: "Shop", icon: "🛒" },
+    { href: "/deals", label: "Deals", icon: "🏷️" },
     { href: "/sellers", label: "Sellers", icon: "👥" },
     {
       href: addProductHref,
-      label: "Add Product",
+      label: "Add",
       icon: "➕",
     },
     {

@@ -15,6 +15,7 @@ import type { Product } from "@/lib/types";
 export default function MyProductsPage() {
   const { data: session } = useSession();
   const [products, setProducts] = useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
@@ -42,12 +43,24 @@ export default function MyProductsPage() {
     });
   }
 
+  const filteredProducts = products.filter((product) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+
+    return (
+      product.title.toLowerCase().includes(query) ||
+      product.category.toLowerCase().includes(query) ||
+      product.id.toLowerCase().includes(query)
+    );
+  });
+
   function toggleAll() {
     setSelected((prev) => {
-      if (prev.size === products.length && products.length > 0) {
+      const visibleIds = filteredProducts.map((p) => p.id);
+      if (prev.size === visibleIds.length && visibleIds.length > 0) {
         return new Set();
       }
-      return new Set(products.map((p) => p.id));
+      return new Set(visibleIds);
     });
   }
 
@@ -170,6 +183,24 @@ export default function MyProductsPage() {
         </div>
       )}
 
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-sm">
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search your products..."
+            className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-primary"
+          />
+        </div>
+        {products.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {filteredProducts.length} of {products.length} product
+            {products.length !== 1 ? "s" : ""}
+          </p>
+        )}
+      </div>
+
       {loading ? (
         <div className="text-center py-12 text-muted-foreground text-sm">
           Loading…
@@ -190,6 +221,22 @@ export default function MyProductsPage() {
             + Add Product
           </Link>
         </div>
+      ) : filteredProducts.length === 0 ? (
+        <div className="bg-card border border-border rounded-xl text-center py-12">
+          <p className="text-4xl mb-3">🔎</p>
+          <h3 className="font-bold text-foreground mb-1">
+            No matching products
+          </h3>
+          <p className="text-muted-foreground text-sm mb-4">
+            Try another keyword or clear the search.
+          </p>
+          <button
+            onClick={() => setSearchQuery("")}
+            className="neu-pill bg-background text-primary font-bold px-5 py-2.5 text-sm"
+          >
+            Clear Search
+          </button>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -199,8 +246,10 @@ export default function MyProductsPage() {
                   <input
                     type="checkbox"
                     checked={
-                      selectedIds.length === products.length &&
-                      products.length > 0
+                      filteredProducts.length > 0 &&
+                      filteredProducts.every((product) =>
+                        selected.has(product.id),
+                      )
                     }
                     onChange={toggleAll}
                     className="w-4 h-4 rounded border-border bg-card text-primary cursor-pointer"
@@ -214,7 +263,7 @@ export default function MyProductsPage() {
               </tr>
             </thead>
             <tbody>
-              {products.map((p) => (
+              {filteredProducts.map((p) => (
                 <tr
                   key={p.id}
                   className={`border-t border-border ${selected.has(p.id) ? "bg-primary/5" : ""}`}

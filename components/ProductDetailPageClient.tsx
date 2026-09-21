@@ -12,9 +12,13 @@ import type { Product } from "@/lib/types";
 export default function ProductDetailPageClient({
   initialProduct,
   initialRelated,
+  backHref = "/products",
+  backLabel = "Back to Listings",
 }: {
   initialProduct: Product;
   initialRelated: Product[];
+  backHref?: string;
+  backLabel?: string;
 }) {
   const [product, setProduct] = useState<Product>(initialProduct);
   const [related, setRelated] = useState<Product[]>(initialRelated);
@@ -66,10 +70,10 @@ export default function ProductDetailPageClient({
       <main className="container py-6 pb-28 sm:pb-8">
         <ScrollReveal>
           <Link
-            href="/products"
+            href={backHref}
             className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold mb-5 hover:underline"
           >
-            ← Back to Listings
+            ← {backLabel}
           </Link>
         </ScrollReveal>
 

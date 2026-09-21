@@ -59,10 +59,13 @@ export async function generateMetadata({
 
 export default async function ProductDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ from?: string }>;
 }) {
   const { slug } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const product = await fetchProductBySlugAction(slug);
 
   if (!product) {
@@ -70,11 +73,14 @@ export default async function ProductDetailPage({
   }
 
   const related = await fetchRelatedProductsAction(product);
+  const isFromDeals = resolvedSearchParams.from === "deals";
 
   return (
     <ProductDetailPageClient
       initialProduct={product}
       initialRelated={related}
+      backHref={isFromDeals ? "/deals" : "/products"}
+      backLabel={isFromDeals ? "Back to Deals" : "Back to Listings"}
     />
   );
 }

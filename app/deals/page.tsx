@@ -66,7 +66,11 @@ export default async function DealsPage() {
         <ScrollReveal delay={100}>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
             {deals.map((p) => (
-              <ProductCard key={`${p.id}-${p.slug}`} product={p} />
+              <ProductCard
+                key={`${p.id}-${p.slug}`}
+                product={p}
+                source="deals"
+              />
             ))}
           </div>
         </ScrollReveal>

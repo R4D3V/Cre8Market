@@ -6,20 +6,26 @@ interface Props {
   product: Product;
   size?: "default" | "small";
   variant?: "light" | "dark";
+  source?: "default" | "deals";
 }
 
 export default function ProductCard({
   product,
   variant = "light",
+  source = "default",
 }: Props) {
   const icon = product.categoryIcon ?? "📦";
   const color = product.categoryColor ?? "#64748b";
   const bg = product.categoryBg ?? "#f8fafc";
   const dark = variant === "dark";
+  const productHref =
+    source === "deals"
+      ? `/products/${product.slug}?from=deals`
+      : `/products/${product.slug}`;
 
   return (
     <Link
-      href={`/products/${product.slug}`}
+      href={productHref}
       className={
         dark
           ? "group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition hover:border-primary"
