@@ -21,11 +21,15 @@ export default function MobileBottomNav() {
     { href: "/products", label: "Shop", icon: "🛒" },
     { href: "/deals", label: "Deals", icon: "🏷️" },
     { href: "/sellers", label: "Sellers", icon: "👥" },
-    {
-      href: addProductHref,
-      label: "Add",
-      icon: "➕",
-    },
+    ...(isLoggedIn
+      ? [
+          {
+            href: addProductHref,
+            label: "Add",
+            icon: "➕",
+          },
+        ]
+      : []),
     {
       href: isLoggedIn ? "/dashboard" : "/login",
       label: isLoggedIn ? "Dashboard" : "Login",
