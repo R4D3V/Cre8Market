@@ -1,4 +1,5 @@
 import { pool } from "./pool";
+import { db } from "./db";
 import type { Product, CategoryDB, ProductWithOwner, AppUser } from "../types";
 
 export interface PushSubscriptionRow {
@@ -28,16 +29,69 @@ const PRODUCT_SELECT = `
 `;
 
 export async function getProducts(): Promise<Product[]> {
-  const { rows } = await pool.query(
-    `${PRODUCT_SELECT} ORDER BY p.created_at DESC`,
-  );
+  const rows = await db
+    .selectFrom("products as p")
+    .leftJoin("categories as c", "c.slug", "p.category_slug")
+    .select([
+      "p.id",
+      "p.slug",
+      "p.title",
+      "p.price",
+      "p.category",
+      "p.category_slug",
+      "p.featured",
+      "p.is_deal",
+      "p.description",
+      "p.specs",
+      "p.condition",
+      "p.location",
+      "p.seller",
+      "p.user_id",
+      "p.images",
+      "p.daysAgo",
+      "p.timeAgo",
+      "p.created_at",
+      "c.icon as category_icon",
+      "c.color as category_color",
+      "c.bg_color as category_bg",
+    ])
+    .orderBy("p.created_at", "desc")
+    .execute();
+
   return rows.map(mapProduct);
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
-  const { rows } = await pool.query(
-    `${PRODUCT_SELECT} WHERE p.featured = true ORDER BY p.created_at DESC`,
-  );
+  const rows = await db
+    .selectFrom("products as p")
+    .leftJoin("categories as c", "c.slug", "p.category_slug")
+    .select([
+      "p.id",
+      "p.slug",
+      "p.title",
+      "p.price",
+      "p.category",
+      "p.category_slug",
+      "p.featured",
+      "p.is_deal",
+      "p.description",
+      "p.specs",
+      "p.condition",
+      "p.location",
+      "p.seller",
+      "p.user_id",
+      "p.images",
+      "p.daysAgo",
+      "p.timeAgo",
+      "p.created_at",
+      "c.icon as category_icon",
+      "c.color as category_color",
+      "c.bg_color as category_bg",
+    ])
+    .where("p.featured", "=", true)
+    .orderBy("p.created_at", "desc")
+    .execute();
+
   return rows.map(mapProduct);
 }
 
@@ -68,14 +122,14 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  const { rows } = await pool.query(
-    `${PRODUCT_SELECT} WHERE p.id = $1`,
-    [id],
-  );
+  const { rows } = await pool.query(`${PRODUCT_SELECT} WHERE p.id = $1`, [id]);
   return rows[0] ? mapProduct(rows[0]) : null;
 }
 
-export async function getRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
+export async function getRelatedProducts(
+  product: Product,
+  limit = 4,
+): Promise<Product[]> {
   const { rows } = await pool.query(
     `${PRODUCT_SELECT} WHERE p.category_slug = $1 AND p.id != $2 ORDER BY p.created_at DESC LIMIT $3`,
     [product.categorySlug, product.id, limit],
@@ -83,33 +137,61 @@ export async function getRelatedProducts(product: Product, limit = 4): Promise<P
   return rows.map(mapProduct);
 }
 
-export async function createProduct(data: Record<string, unknown>): Promise<Product> {
+export async function createProduct(
+  data: Record<string, unknown>,
+): Promise<Product> {
   const { rows } = await pool.query(
     `INSERT INTO products (slug, title, price, category, category_slug, featured, is_deal, description, specs, condition, location, seller, images, "daysAgo", "timeAgo", user_id)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
     [
-      data.slug, data.title, data.price, data.category, data.categorySlug,
-      data.featured ?? false, data.is_deal ?? false, data.description ?? null,
-      JSON.stringify(data.specs ?? []), data.condition ?? null, data.location ?? "Entebbe",
-      JSON.stringify(data.seller ?? {}), JSON.stringify(data.images ?? []),
-      data.daysAgo ?? 0, data.timeAgo ?? "Just now", data.user_id ?? null,
+      data.slug,
+      data.title,
+      data.price,
+      data.category,
+      data.categorySlug,
+      data.featured ?? false,
+      data.is_deal ?? false,
+      data.description ?? null,
+      JSON.stringify(data.specs ?? []),
+      data.condition ?? null,
+      data.location ?? "Entebbe",
+      JSON.stringify(data.seller ?? {}),
+      JSON.stringify(data.images ?? []),
+      data.daysAgo ?? 0,
+      data.timeAgo ?? "Just now",
+      data.user_id ?? null,
     ],
   );
   return mapProduct(rows[0]);
 }
 
-export async function updateProduct(id: string, data: Record<string, unknown>): Promise<Product> {
+export async function updateProduct(
+  id: string,
+  data: Record<string, unknown>,
+): Promise<Product> {
   const { rows } = await pool.query(
     `UPDATE products SET slug=$1, title=$2, price=$3, category=$4, category_slug=$5, featured=$6,
      is_deal=$7, description=$8, specs=$9, condition=$10, location=$11, seller=$12, images=$13,
      "daysAgo"=$14, "timeAgo"=$15, user_id=$16, updated_at=now()
      WHERE id=$17 RETURNING *`,
     [
-      data.slug, data.title, data.price, data.category, data.categorySlug,
-      data.featured ?? false, data.is_deal ?? false, data.description ?? null,
-      JSON.stringify(data.specs ?? []), data.condition ?? null, data.location ?? "Entebbe",
-      JSON.stringify(data.seller ?? {}), JSON.stringify(data.images ?? []),
-      data.daysAgo ?? 0, data.timeAgo ?? "Just now", data.user_id ?? null, id,
+      data.slug,
+      data.title,
+      data.price,
+      data.category,
+      data.categorySlug,
+      data.featured ?? false,
+      data.is_deal ?? false,
+      data.description ?? null,
+      JSON.stringify(data.specs ?? []),
+      data.condition ?? null,
+      data.location ?? "Entebbe",
+      JSON.stringify(data.seller ?? {}),
+      JSON.stringify(data.images ?? []),
+      data.daysAgo ?? 0,
+      data.timeAgo ?? "Just now",
+      data.user_id ?? null,
+      id,
     ],
   );
   return mapProduct(rows[0]);
@@ -124,9 +206,15 @@ export async function deleteProductsByIds(ids: string[]): Promise<void> {
   await pool.query("DELETE FROM products WHERE id = ANY($1)", [ids]);
 }
 
-export async function setProductsFeatured(ids: string[], featured: boolean): Promise<void> {
+export async function setProductsFeatured(
+  ids: string[],
+  featured: boolean,
+): Promise<void> {
   if (ids.length === 0) return;
-  await pool.query("UPDATE products SET featured = $2 WHERE id = ANY($1)", [ids, featured]);
+  await pool.query("UPDATE products SET featured = $2 WHERE id = ANY($1)", [
+    ids,
+    featured,
+  ]);
 }
 
 export async function getProductsByUserId(userId: string): Promise<Product[]> {
@@ -137,20 +225,32 @@ export async function getProductsByUserId(userId: string): Promise<Product[]> {
   return rows.map(mapProduct);
 }
 
-export async function getProductOwnerIds(ids: string[]): Promise<Record<string, string | null>> {
+export async function getProductOwnerIds(
+  ids: string[],
+): Promise<Record<string, string | null>> {
   if (ids.length === 0) return {};
-  const { rows } = await pool.query("SELECT id, user_id FROM products WHERE id = ANY($1)", [ids]);
-  return Object.fromEntries(rows.map((r) => [r.id as string, (r.user_id as string) ?? null]));
+  const { rows } = await pool.query(
+    "SELECT id, user_id FROM products WHERE id = ANY($1)",
+    [ids],
+  );
+  return Object.fromEntries(
+    rows.map((r) => [r.id as string, (r.user_id as string) ?? null]),
+  );
 }
 
 export async function getProductOwnerId(id: string): Promise<string | null> {
-  const { rows } = await pool.query("SELECT user_id FROM products WHERE id = $1", [id]);
+  const { rows } = await pool.query(
+    "SELECT user_id FROM products WHERE id = $1",
+    [id],
+  );
   return rows[0]?.user_id ?? null;
 }
 
 // Public: all listings added by a specific registered user, joined with their
 // profile so the buyer-facing UI can show the avatar / verified badge.
-export async function getUserProductsWithOwner(userId: string): Promise<Product[]> {
+export async function getUserProductsWithOwner(
+  userId: string,
+): Promise<Product[]> {
   const { rows } = await pool.query(
     `SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
             u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified
@@ -186,14 +286,20 @@ export async function getProductsWithOwners(): Promise<ProductWithOwner[]> {
   }));
 }
 
-export async function checkSlugExists(slug: string, excludeId?: string): Promise<boolean> {
+export async function checkSlugExists(
+  slug: string,
+  excludeId?: string,
+): Promise<boolean> {
   if (excludeId) {
     const { rows } = await pool.query(
-      `SELECT 1 FROM products WHERE slug = $1 AND id != $2`, [slug, excludeId],
+      `SELECT 1 FROM products WHERE slug = $1 AND id != $2`,
+      [slug, excludeId],
     );
     return rows.length > 0;
   }
-  const { rows } = await pool.query(`SELECT 1 FROM products WHERE slug = $1`, [slug]);
+  const { rows } = await pool.query(`SELECT 1 FROM products WHERE slug = $1`, [
+    slug,
+  ]);
   return rows.length > 0;
 }
 
@@ -204,15 +310,36 @@ export async function getCategories(): Promise<CategoryDB[]> {
   return rows;
 }
 
-export async function createCategory(data: { name: string; slug: string; icon?: string; color?: string; bg_color?: string }): Promise<CategoryDB> {
+export async function createCategory(data: {
+  name: string;
+  slug: string;
+  icon?: string;
+  color?: string;
+  bg_color?: string;
+}): Promise<CategoryDB> {
   const { rows } = await pool.query(
     `INSERT INTO categories (name, slug, icon, color, bg_color) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-    [data.name, data.slug, data.icon ?? "📦", data.color ?? "#64748b", data.bg_color ?? "#f8fafc"],
+    [
+      data.name,
+      data.slug,
+      data.icon ?? "📦",
+      data.color ?? "#64748b",
+      data.bg_color ?? "#f8fafc",
+    ],
   );
   return rows[0];
 }
 
-export async function updateCategory(id: string, data: { name: string; slug: string; icon: string; color: string; bg_color: string }): Promise<CategoryDB> {
+export async function updateCategory(
+  id: string,
+  data: {
+    name: string;
+    slug: string;
+    icon: string;
+    color: string;
+    bg_color: string;
+  },
+): Promise<CategoryDB> {
   const { rows } = await pool.query(
     `UPDATE categories SET name=$1, slug=$2, icon=$3, color=$4, bg_color=$5 WHERE id=$6 RETURNING *`,
     [data.name, data.slug, data.icon, data.color, data.bg_color, id],
@@ -231,7 +358,10 @@ export async function getPushSubscriptions(): Promise<PushSubscriptionRow[]> {
   return rows;
 }
 
-export async function upsertPushSubscription(endpoint: string, keys: { p256dh: string; auth: string }): Promise<void> {
+export async function upsertPushSubscription(
+  endpoint: string,
+  keys: { p256dh: string; auth: string },
+): Promise<void> {
   await pool.query(
     `INSERT INTO push_subscriptions (endpoint, keys) VALUES ($1, $2)
      ON CONFLICT (endpoint) DO UPDATE SET keys = $2`,
@@ -240,24 +370,40 @@ export async function upsertPushSubscription(endpoint: string, keys: { p256dh: s
 }
 
 export async function deletePushSubscription(endpoint: string): Promise<void> {
-  await pool.query("DELETE FROM push_subscriptions WHERE endpoint = $1", [endpoint]);
+  await pool.query("DELETE FROM push_subscriptions WHERE endpoint = $1", [
+    endpoint,
+  ]);
 }
 
 // ── Admin Users ──
 
-export async function getAdminUserByEmail(email: string): Promise<AdminUserRow | null> {
-  const { rows } = await pool.query("SELECT * FROM admin_users WHERE email = $1", [email]);
+export async function getAdminUserByEmail(
+  email: string,
+): Promise<AdminUserRow | null> {
+  const { rows } = await pool.query(
+    "SELECT * FROM admin_users WHERE email = $1",
+    [email],
+  );
   return rows[0] ?? null;
 }
 
-export async function getAdminUserById(id: string): Promise<AdminUserRow | null> {
-  const { rows } = await pool.query("SELECT * FROM admin_users WHERE id = $1", [id]);
+export async function getAdminUserById(
+  id: string,
+): Promise<AdminUserRow | null> {
+  const { rows } = await pool.query("SELECT * FROM admin_users WHERE id = $1", [
+    id,
+  ]);
   return rows[0] ?? null;
 }
 
 export async function updateAdminProfile(
   id: string,
-  data: { name?: string; phone?: string; whatsapp?: string; avatar?: string | null },
+  data: {
+    name?: string;
+    phone?: string;
+    whatsapp?: string;
+    avatar?: string | null;
+  },
 ): Promise<AdminUserRow | null> {
   const { rows } = await pool.query(
     `UPDATE admin_users SET
@@ -266,18 +412,35 @@ export async function updateAdminProfile(
        whatsapp = COALESCE($3, whatsapp),
        avatar = $4
      WHERE id = $5 RETURNING *`,
-    [data.name ?? null, data.phone ?? null, data.whatsapp ?? null, data.avatar ?? null, id],
+    [
+      data.name ?? null,
+      data.phone ?? null,
+      data.whatsapp ?? null,
+      data.avatar ?? null,
+      id,
+    ],
   );
   return rows[0] ?? null;
 }
 
-export async function getAdminUserPasswordHash(id: string): Promise<string | null> {
-  const { rows } = await pool.query("SELECT password_hash FROM admin_users WHERE id = $1", [id]);
+export async function getAdminUserPasswordHash(
+  id: string,
+): Promise<string | null> {
+  const { rows } = await pool.query(
+    "SELECT password_hash FROM admin_users WHERE id = $1",
+    [id],
+  );
   return (rows[0]?.password_hash as string) ?? null;
 }
 
-export async function updateAdminUserPassword(id: string, passwordHash: string): Promise<void> {
-  await pool.query("UPDATE admin_users SET password_hash = $1 WHERE id = $2", [passwordHash, id]);
+export async function updateAdminUserPassword(
+  id: string,
+  passwordHash: string,
+): Promise<void> {
+  await pool.query("UPDATE admin_users SET password_hash = $1 WHERE id = $2", [
+    passwordHash,
+    id,
+  ]);
 }
 
 export async function getAdminUsers(): Promise<AdminUserRow[]> {
@@ -358,7 +521,9 @@ export async function getPublicUsers(): Promise<AppUser[]> {
 
 // Public: sellers for the /products filter — registered users with listings,
 // plus the store (admin-added products, which have no user_id).
-export async function getSellers(): Promise<{ id: string; name: string; productCount: number }[]> {
+export async function getSellers(): Promise<
+  { id: string; name: string; productCount: number }[]
+> {
   const { rows } = await pool.query(`
     SELECT u.id, u.name, COUNT(p.id)::int AS product_count
     FROM users u
@@ -377,7 +542,11 @@ export async function getSellers(): Promise<{ id: string; name: string; productC
   );
   const storeProducts = Number(storeCount.rows[0]?.count ?? 0);
   if (storeProducts > 0) {
-    sellers.push({ id: "store", name: "CRE8MARKET Store", productCount: storeProducts });
+    sellers.push({
+      id: "store",
+      name: "CRE8MARKET Store",
+      productCount: storeProducts,
+    });
   }
 
   return sellers;
@@ -392,17 +561,27 @@ export async function getUserById(id: string): Promise<AppUser | null> {
 }
 
 export async function getUserByPhone(phone: string): Promise<UserRow | null> {
-  const { rows } = await pool.query("SELECT * FROM users WHERE phone = $1", [phone]);
+  const { rows } = await pool.query("SELECT * FROM users WHERE phone = $1", [
+    phone,
+  ]);
   return rows[0] ?? null;
 }
 
 export async function checkPhoneExists(phone: string): Promise<boolean> {
-  const { rows } = await pool.query("SELECT 1 FROM users WHERE phone = $1", [phone]);
+  const { rows } = await pool.query("SELECT 1 FROM users WHERE phone = $1", [
+    phone,
+  ]);
   return rows.length > 0;
 }
 
-export async function checkPhoneExistsExcluding(phone: string, excludeId: string): Promise<boolean> {
-  const { rows } = await pool.query("SELECT 1 FROM users WHERE phone = $1 AND id != $2", [phone, excludeId]);
+export async function checkPhoneExistsExcluding(
+  phone: string,
+  excludeId: string,
+): Promise<boolean> {
+  const { rows } = await pool.query(
+    "SELECT 1 FROM users WHERE phone = $1 AND id != $2",
+    [phone, excludeId],
+  );
   return rows.length > 0;
 }
 
@@ -417,12 +596,22 @@ export async function createUser(data: {
   const { rows } = await pool.query(
     `INSERT INTO users (name, phone, whatsapp, password_hash, pin_hash, is_active)
      VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
-    [data.name, data.phone, data.whatsapp ?? null, data.password_hash, data.pin_hash ?? null, data.is_active ?? true],
+    [
+      data.name,
+      data.phone,
+      data.whatsapp ?? null,
+      data.password_hash,
+      data.pin_hash ?? null,
+      data.is_active ?? true,
+    ],
   );
   return mapUser(rows[0]);
 }
 
-export async function updateUserStatus(id: string, is_active: boolean): Promise<AppUser> {
+export async function updateUserStatus(
+  id: string,
+  is_active: boolean,
+): Promise<AppUser> {
   const { rows } = await pool.query(
     `UPDATE users SET is_active = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
     [is_active, id],
@@ -443,7 +632,12 @@ export async function updateUserProfile(
 
 export async function updateUserContact(
   id: string,
-  data: { name: string; phone: string; whatsapp?: string; avatar?: string | null },
+  data: {
+    name: string;
+    phone: string;
+    whatsapp?: string;
+    avatar?: string | null;
+  },
 ): Promise<AppUser> {
   const { rows } = await pool.query(
     `UPDATE users SET name = $1, phone = $2, whatsapp = $3, avatar = $4 WHERE id = $5 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
@@ -452,7 +646,10 @@ export async function updateUserContact(
   return mapUser(rows[0]);
 }
 
-export async function updateUserAdminStatus(id: string, is_admin: boolean): Promise<AppUser> {
+export async function updateUserAdminStatus(
+  id: string,
+  is_admin: boolean,
+): Promise<AppUser> {
   const { rows } = await pool.query(
     `UPDATE users SET is_admin = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
     [is_admin, id],
@@ -460,7 +657,10 @@ export async function updateUserAdminStatus(id: string, is_admin: boolean): Prom
   return mapUser(rows[0]);
 }
 
-export async function updateUserVerifiedStatus(id: string, is_verified: boolean): Promise<AppUser> {
+export async function updateUserVerifiedStatus(
+  id: string,
+  is_verified: boolean,
+): Promise<AppUser> {
   const { rows } = await pool.query(
     `UPDATE users SET is_verified = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
     [is_verified, id],
@@ -469,12 +669,21 @@ export async function updateUserVerifiedStatus(id: string, is_verified: boolean)
 }
 
 export async function getUserPasswordHash(id: string): Promise<string | null> {
-  const { rows } = await pool.query("SELECT password_hash FROM users WHERE id = $1", [id]);
+  const { rows } = await pool.query(
+    "SELECT password_hash FROM users WHERE id = $1",
+    [id],
+  );
   return (rows[0]?.password_hash as string) ?? null;
 }
 
-export async function updateUserPassword(id: string, passwordHash: string): Promise<void> {
-  await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [passwordHash, id]);
+export async function updateUserPassword(
+  id: string,
+  passwordHash: string,
+): Promise<void> {
+  await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [
+    passwordHash,
+    id,
+  ]);
 }
 
 export async function deleteUser(id: string): Promise<void> {
@@ -493,7 +702,8 @@ function mapUser(row: Record<string, unknown>): AppUser {
     isAdmin: (row.is_admin as boolean) ?? false,
     isVerified: (row.is_verified as boolean) ?? false,
     createdAt: row.created_at as string,
-    productCount: row.product_count !== undefined ? Number(row.product_count) : undefined,
+    productCount:
+      row.product_count !== undefined ? Number(row.product_count) : undefined,
   };
 }
 
@@ -513,7 +723,10 @@ function mapProduct(row: Record<string, unknown>): Product {
     specs: Array.isArray(row.specs) ? row.specs : [],
     condition: (row.condition as Product["condition"]) ?? undefined,
     location: (row.location as string) ?? "Entebbe",
-    seller: typeof row.seller === "object" ? (row.seller as Product["seller"]) : undefined,
+    seller:
+      typeof row.seller === "object"
+        ? (row.seller as Product["seller"])
+        : undefined,
     user_id: (row.user_id as string) ?? null,
     images: Array.isArray(row.images) ? row.images : [],
     daysAgo: (row.daysAgo as number) ?? 0,
@@ -530,7 +743,8 @@ function mapProductWithOwner(row: Record<string, unknown>): Product {
     ownerName: (row.owner_name as string) ?? null,
     ownerPhone: (row.owner_phone as string) ?? null,
     ownerWhatsapp: (row.owner_whatsapp as string) ?? null,
-    ownerAvatar: (row.owner_avatar as string) ?? (row.admin_avatar as string) ?? null,
+    ownerAvatar:
+      (row.owner_avatar as string) ?? (row.admin_avatar as string) ?? null,
     ownerVerified: (row.owner_verified as boolean) ?? null,
   };
 }
