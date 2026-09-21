@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HeroCarousel from "@/components/HeroCarousel";
@@ -9,8 +10,8 @@ import Recommendations from "@/components/Recommendations";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import ScrollReveal from "@/components/ScrollReveal";
 import { latestProducts } from "@/lib/data";
-import { getProducts, getCategories } from "@/lib/db/queries";
-import type { Product, CategoryDB } from "@/lib/types";
+import { getProducts } from "@/lib/db/queries";
+import type { Product } from "@/lib/types";
 import Laptops from "@/components/Laptops";
 import Gaming from "@/components/Gaming";
 
@@ -42,16 +43,11 @@ function groupByCategory(products: Product[], limit = 4): ProductGroup[] {
     }));
 }
 
-export default async function HomePage() {
+async function HomeSections() {
   let products: Product[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let categories: CategoryDB[] = [];
 
   try {
-    [products, categories] = await Promise.all([
-      getProducts(),
-      getCategories(),
-    ]);
+    products = await getProducts();
   } catch (err) {
     // Neon free-tier cold-start timeout — fall back to static data so the page
     // still renders instead of showing a 500 error.
@@ -66,15 +62,40 @@ export default async function HomePage() {
   );
 
   return (
+    <ScrollReveal delay={100}>
+      <TopSellingTabs groups={topGroups} />
+    </ScrollReveal>
+  );
+}
+
+function HomeSectionsSkeleton() {
+  return (
+    <div className="container py-10" aria-busy="true">
+      <div className="h-8 w-56 animate-pulse rounded-md bg-muted" />
+      <div className="mt-6 grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div
+            key={i}
+            className="aspect-[3/4] animate-pulse rounded-xl bg-muted/60"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function HomePage() {
+
+  return (
     <div className="bg-background text-foreground">
       <Navbar />
       <main className="flex-1">
         <ScrollReveal delay={150}>
           <AppleCta />
         </ScrollReveal>
-        <ScrollReveal delay={100}>
-          <TopSellingTabs groups={topGroups} />
-        </ScrollReveal>
+        <Suspense fallback={<HomeSectionsSkeleton />}>
+          <HomeSections />
+        </Suspense>
         <ScrollReveal delay={150}>
           <Laptops />
         </ScrollReveal>
