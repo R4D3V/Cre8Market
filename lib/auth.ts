@@ -5,6 +5,7 @@ import { betterAuth } from "better-auth";
 import { toNextJsHandler } from "better-auth/next-js";
 import { PostgresDialect } from "kysely";
 import { headers } from "next/headers";
+import { APP_URL } from "./env";
 import { pool } from "./db/pool";
 import { getAdminUserByEmail, getUserByPhone } from "./db/queries";
 
@@ -38,16 +39,12 @@ async function verifyPasswordHash(
   }
 }
 
-const appBaseUrl =
-  process.env.NEXT_PUBLIC_APP_URL ??
-  process.env.APP_URL ??
-  process.env.AUTH_URL ??
-  "http://localhost:3005";
-
 const trustedOrigins = Array.from(
   new Set(
     [
-      appBaseUrl,
+      APP_URL,
+      // Local dev aliases so sessions work on either Next.js default port or
+      // the legacy 3005 port used by earlier scripts.
       "http://localhost:3000",
       "http://localhost:3005",
       "http://127.0.0.1:3000",
@@ -65,7 +62,7 @@ const appAuth = betterAuth({
     process.env.AUTH_SECRET ??
     process.env.BETTER_AUTH_SECRET ??
     "dev-secret-key",
-  baseURL: appBaseUrl,
+  baseURL: APP_URL,
   trustedOrigins,
   database: new PostgresDialect({ pool }),
   emailAndPassword: {

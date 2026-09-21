@@ -1,5 +1,4 @@
 import { pool } from "./pool";
-import { db } from "./db";
 import type { Product, CategoryDB, ProductWithOwner, AppUser } from "../types";
 
 export interface PushSubscriptionRow {
@@ -29,69 +28,16 @@ const PRODUCT_SELECT = `
 `;
 
 export async function getProducts(): Promise<Product[]> {
-  const rows = await db
-    .selectFrom("products as p")
-    .leftJoin("categories as c", "c.slug", "p.category_slug")
-    .select([
-      "p.id",
-      "p.slug",
-      "p.title",
-      "p.price",
-      "p.category",
-      "p.category_slug",
-      "p.featured",
-      "p.is_deal",
-      "p.description",
-      "p.specs",
-      "p.condition",
-      "p.location",
-      "p.seller",
-      "p.user_id",
-      "p.images",
-      "p.daysAgo",
-      "p.timeAgo",
-      "p.created_at",
-      "c.icon as category_icon",
-      "c.color as category_color",
-      "c.bg_color as category_bg",
-    ])
-    .orderBy("p.created_at", "desc")
-    .execute();
-
+  const { rows } = await pool.query(
+    `${PRODUCT_SELECT} ORDER BY p.created_at DESC`,
+  );
   return rows.map(mapProduct);
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
-  const rows = await db
-    .selectFrom("products as p")
-    .leftJoin("categories as c", "c.slug", "p.category_slug")
-    .select([
-      "p.id",
-      "p.slug",
-      "p.title",
-      "p.price",
-      "p.category",
-      "p.category_slug",
-      "p.featured",
-      "p.is_deal",
-      "p.description",
-      "p.specs",
-      "p.condition",
-      "p.location",
-      "p.seller",
-      "p.user_id",
-      "p.images",
-      "p.daysAgo",
-      "p.timeAgo",
-      "p.created_at",
-      "c.icon as category_icon",
-      "c.color as category_color",
-      "c.bg_color as category_bg",
-    ])
-    .where("p.featured", "=", true)
-    .orderBy("p.created_at", "desc")
-    .execute();
-
+  const { rows } = await pool.query(
+    `${PRODUCT_SELECT} WHERE p.featured = true ORDER BY p.created_at DESC`,
+  );
   return rows.map(mapProduct);
 }
 

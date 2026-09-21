@@ -5,8 +5,8 @@ import bcrypt from "bcrypt";
 import { checkPhoneExists, createUser, getUserByPhone } from "@/lib/db/queries";
 
 // Public self-registration for regular marketplace users (buyers/sellers).
-// Does not sign the user in — the client calls next-auth's signIn("user-credentials", ...)
-// right after this succeeds, same pattern as the admin login page.
+// Does not sign the user in — the client calls better-auth's signIn.email(...) right
+// after this succeeds, same pattern as the admin login page.
 export async function registerUserAction(data: {
   name: string;
   phone: string;
