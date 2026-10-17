@@ -34,6 +34,111 @@ export async function getProducts(): Promise<Product[]> {
   return rows.map(mapProduct);
 }
 
+export interface ProductsPageParams {
+  search?: string;
+  categorySlug?: string;
+  sellerId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  featured?: boolean;
+  sort?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface ProductsPageResult {
+  products: Product[];
+  total: number;
+}
+
+// Paginated listing query that does the filtering, sorting and counting in
+// Postgres so the client only ever receives one page of rows.
+export async function getProductsPage(
+  params: ProductsPageParams = {},
+): Promise<ProductsPageResult> {
+  const {
+    search,
+    categorySlug,
+    sellerId,
+    minPrice,
+    maxPrice,
+    featured,
+    sort,
+    limit = 16,
+    offset = 0,
+  } = params;
+
+  const conditions: string[] = [];
+  const values: unknown[] = [];
+
+  if (featured) {
+    conditions.push("p.featured = true");
+  }
+
+  if (categorySlug) {
+    values.push(categorySlug);
+    conditions.push(`p.category_slug = $${values.length}`);
+  }
+
+  if (sellerId === "store") {
+    conditions.push("p.user_id IS NULL");
+  } else if (sellerId) {
+    values.push(sellerId);
+    conditions.push(`p.user_id = $${values.length}`);
+  }
+
+  if (search && search.trim()) {
+    values.push(`%${search.trim()}%`);
+    const idx = values.length;
+    conditions.push(
+      `(p.title ILIKE $${idx} OR p.category ILIKE $${idx} OR p.description ILIKE $${idx})`,
+    );
+  }
+
+  if (typeof minPrice === "number" && !Number.isNaN(minPrice)) {
+    values.push(minPrice);
+    conditions.push(`p.price >= $${values.length}`);
+  }
+
+  if (typeof maxPrice === "number" && !Number.isNaN(maxPrice)) {
+    values.push(maxPrice);
+    conditions.push(`p.price <= $${values.length}`);
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+
+  const orderBy =
+    sort === "latest"
+      ? `p."daysAgo" ASC`
+      : sort === "price-asc"
+        ? "p.price ASC"
+        : sort === "price-desc"
+          ? "p.price DESC"
+          : sort === "featured"
+            ? "p.featured DESC, p.created_at DESC"
+            : "p.created_at DESC";
+
+  const limitIdx = values.length + 1;
+  const offsetIdx = values.length + 2;
+
+  const { rows } = await pool.query(
+    `SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
+            COUNT(*) OVER() AS total_count
+     FROM products p
+     LEFT JOIN categories c ON c.slug = p.category_slug
+     ${where}
+     ORDER BY ${orderBy}
+     LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+    [...values, limit, offset],
+  );
+
+  // COUNT(*) OVER() is attached to every returned row; when the page is empty
+  // there are no rows, which correctly means zero matches.
+  const total = rows.length ? Number(rows[0].total_count) : 0;
+
+  return { products: rows.map(mapProduct), total };
+}
+
 export async function getFeaturedProducts(): Promise<Product[]> {
   const { rows } = await pool.query(
     `${PRODUCT_SELECT} WHERE p.featured = true ORDER BY p.created_at DESC`,

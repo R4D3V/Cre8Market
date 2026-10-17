@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,7 +8,7 @@ import ProductCard from "@/components/ProductCard";
 import ScrollReveal from "@/components/ScrollReveal";
 import { ChevronUp } from "lucide-react";
 import {
-  fetchProductsAction,
+  fetchProductsPageAction,
   fetchSellersAction,
 } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
@@ -53,7 +53,8 @@ function ProductsPageContent() {
   const featuredParam = searchParams.get("featured") ?? "";
   const sortParam = searchParams.get("sort") ?? "";
 
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [total, setTotal] = useState(0);
   const [categories, setCategories] = useState<CategoryDB[]>([]);
   const [sellers, setSellers] = useState<
     { id: string; name: string; productCount: number }[]
@@ -61,6 +62,7 @@ function ProductsPageContent() {
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState(qParam);
+  const [debouncedSearch, setDebouncedSearch] = useState(qParam);
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
   const [selectedSeller, setSelectedSeller] = useState("");
   const [minPrice, setMinPrice] = useState("");
@@ -79,10 +81,6 @@ function ProductsPageContent() {
   }, [qParam]);
 
   useEffect(() => {
-    fetchProductsAction().then((data) => {
-      setAllProducts(data);
-      setLoading(false);
-    });
     fetchCategoriesAction().then((data) => {
       setCategories(data ?? []);
     });
@@ -91,59 +89,47 @@ function ProductsPageContent() {
     });
   }, []);
 
-  const filtered = useMemo(() => {
-    let list = [...allProducts];
+  // Debounce the search box so we don't hit the DB on every keystroke.
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-    if (featuredParam === "1") list = list.filter((p) => p.featured);
-    if (sortParam === "latest")
-      list = [...list].sort((a, b) => a.daysAgo - b.daysAgo);
-    else if (sortParam === "price-asc")
-      list = [...list].sort((a, b) => a.price - b.price);
-    else if (sortParam === "price-desc")
-      list = [...list].sort((a, b) => b.price - a.price);
-    else if (sortParam === "featured")
-      list = [...list].sort((a, b) => Number(b.featured) - Number(a.featured));
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter(
-        (p) =>
-          p.title.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q),
-      );
-    }
-
-    if (selectedCategory) {
-      list = list.filter((p) => p.categorySlug === selectedCategory);
-    }
-
-    if (selectedSeller === "store") {
-      list = list.filter((p) => !p.user_id);
-    } else if (selectedSeller) {
-      list = list.filter((p) => p.user_id === selectedSeller);
-    }
-
-    if (minPrice) list = list.filter((p) => p.price >= Number(minPrice));
-    if (maxPrice) list = list.filter((p) => p.price <= Number(maxPrice));
-
-    return list;
+  // Fetch one page of products, letting Postgres handle filtering and sorting.
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetchProductsPageAction({
+      search: debouncedSearch,
+      categorySlug: selectedCategory,
+      sellerId: selectedSeller,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      featured: featuredParam === "1",
+      sort: sortParam,
+      limit: ITEMS_PER_PAGE,
+      offset: (page - 1) * ITEMS_PER_PAGE,
+    }).then(({ products: pageProducts, total: pageTotal }) => {
+      if (!active) return;
+      setProducts(pageProducts);
+      setTotal(pageTotal);
+      setLoading(false);
+    });
+    return () => {
+      active = false;
+    };
   }, [
-    search,
+    debouncedSearch,
     selectedCategory,
     selectedSeller,
     minPrice,
     maxPrice,
     featuredParam,
     sortParam,
-    allProducts,
+    page,
   ]);
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE,
-  );
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
   function resetFilters() {
     setSearch("");
@@ -289,8 +275,7 @@ function ProductsPageContent() {
                       : "All Listings"}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  {filtered.length}{" "}
-                  {filtered.length === 1 ? "result" : "results"}
+                  {total} {total === 1 ? "result" : "results"}
                   {selectedCategory &&
                     ` in ${categories.find((c) => c.slug === selectedCategory)?.name}`}
                 </p>
@@ -300,6 +285,7 @@ function ProductsPageContent() {
                 onChange={(e) => {
                   const params = new URLSearchParams(searchParams.toString());
                   params.set("sort", e.target.value);
+                  setPage(1);
                   router.replace(`/products?${params.toString()}`);
                 }}
                 className="neu-inset px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
@@ -311,15 +297,15 @@ function ProductsPageContent() {
               </select>
             </div>
 
-            {loading ? (
+            {loading && products.length === 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <ProductCardSkeleton key={i} />
                 ))}
               </div>
-            ) : paginated.length > 0 ? (
+            ) : products.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
-                {paginated.map((p) => (
+                {products.map((p) => (
                   <ProductCard key={`${p.id}-${p.slug}`} product={p} />
                 ))}
               </div>

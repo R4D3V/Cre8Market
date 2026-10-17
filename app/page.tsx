@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import HeroCarousel from "@/components/HeroCarousel";
+// import HeroCarousel from "@/components/HeroCarousel";
 // import CategoryTiles from "@/components/CategoryTiles";
 import AppleCta from "@/components/AppleCta";
 import TopSellingTabs, { type ProductGroup } from "@/components/TopSellingTabs";
@@ -14,6 +14,7 @@ import { getProducts } from "@/lib/db/queries";
 import type { Product } from "@/lib/types";
 import Laptops from "@/components/Laptops";
 import Gaming from "@/components/Gaming";
+import Hero2 from "@/components/Hero2";
 
 export const metadata: Metadata = {
   title: "CRE8MARKET Entebbe | Trusted Marketplace for Local Deals",
@@ -85,7 +86,6 @@ function HomeSectionsSkeleton() {
 }
 
 export default function HomePage() {
-
   return (
     <div className="bg-background text-foreground">
       <Navbar />
@@ -99,6 +99,9 @@ export default function HomePage() {
         <ScrollReveal delay={150}>
           <Laptops />
         </ScrollReveal>
+        {/* <ScrollReveal>
+          <Hero2 />
+        </ScrollReveal> */}
         <ScrollReveal delay={150}>
           <Gaming />
         </ScrollReveal>

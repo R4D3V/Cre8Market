@@ -2,6 +2,7 @@
 
 import {
   getProducts,
+  getProductsPage,
   getFeaturedProducts,
   getDeals,
   getProductBySlug,
@@ -25,6 +26,7 @@ import { auth } from "@/lib/auth";
 import { sendPushNotification } from "@/lib/push";
 import { revalidatePath } from "next/cache";
 import type { Product } from "@/lib/types";
+import type { ProductsPageParams } from "@/lib/db/queries";
 
 async function requireAdmin() {
   const session = await auth();
@@ -92,6 +94,10 @@ export async function fetchMyListingLimitAction() {
 
 export async function fetchProductsAction() {
   return getProducts();
+}
+
+export async function fetchProductsPageAction(params: ProductsPageParams = {}) {
+  return getProductsPage(params);
 }
 
 export async function fetchSellersAction() {
