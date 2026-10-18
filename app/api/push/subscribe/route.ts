@@ -28,7 +28,8 @@ export async function POST(req: Request) {
     await upsertPushSubscription(endpoint, keys);
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    console.error("push/subscribe POST failed:", err);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 }
@@ -43,7 +44,8 @@ export async function DELETE(req: Request) {
     await deletePushSubscription(endpoint);
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    console.error("push/subscribe DELETE failed:", err);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 }

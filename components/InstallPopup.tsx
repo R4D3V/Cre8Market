@@ -39,7 +39,12 @@ export default function InstallPopup() {
   }, []);
 
   async function subscribeToPush() {
-    if (!("Notification" in window) || !("PushManager" in window)) return;
+    if (!("Notification" in window) || !("PushManager" in window)) {
+      console.warn(
+        "Push not supported in this browser/context. Notifications require HTTPS and a supported browser.",
+      );
+      return;
+    }
 
     const permission = await Notification.requestPermission();
     if (permission !== "granted") {
@@ -51,8 +56,22 @@ export default function InstallPopup() {
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+
+      // Fetch the VAPID public key at runtime so a missing build-time
+      // NEXT_PUBLIC_VAPID_PUBLIC_KEY doesn't silently break subscriptions on
+      // hosted builds (the server always has the authoritative key).
+      let vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!vapidKey) {
+        try {
+          const res = await fetch("/api/push/notify", { cache: "no-store" });
+          const data = await res.json();
+          vapidKey = data?.vapidPublicKey ?? undefined;
+        } catch (err) {
+          console.error("Failed to fetch VAPID public key:", err);
+        }
+      }
+      if (!vapidKey) {
+        console.error("Push subscription skipped: no VAPID public key available.");
         setNotifStatus("denied");
         return;
       }
@@ -62,15 +81,22 @@ export default function InstallPopup() {
         applicationServerKey: urlBase64ToUint8Array(vapidKey),
       });
 
-      await fetch("/api/push/subscribe", {
+      const saveRes = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(subscription.toJSON()),
       });
+      if (!saveRes.ok) {
+        const errText = await saveRes.text().catch(() => "");
+        console.error("Failed to save push subscription:", saveRes.status, errText);
+        setNotifStatus("denied");
+        return;
+      }
 
       localStorage.setItem(NOTIF_KEY, "1");
       setNotifStatus("granted");
-    } catch {
+    } catch (err) {
+      console.error("Push subscription failed:", err);
       setNotifStatus("denied");
     }
   }

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { sendPushNotification } from "@/lib/push";
+import { sendPushNotification, getVapidPublicKey } from "@/lib/push";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function POST(req: Request) {
   // Only admins may broadcast push notifications.
@@ -23,7 +26,9 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json({
-    vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? null,
+  const res = NextResponse.json({
+    vapidPublicKey: getVapidPublicKey(),
   });
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  return res;
 }

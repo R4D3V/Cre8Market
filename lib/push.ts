@@ -5,14 +5,20 @@ const webpush = require("web-push");
 // VAPID keys must come from the environment. Auto-generating them at runtime is
 // dangerous in serverless deployments (each instance would get a different pair,
 // breaking the keys subscribers were registered with), so we never do that here.
-const configured =
-  !!process.env.VAPID_PUBLIC_KEY && !!process.env.VAPID_PRIVATE_KEY;
+// Allow the public key to come from either the server-only or the inlined
+// (NEXT_PUBLIC_*) variable so a hosted build that only exposes one of them
+// still works. The private key is always server-only.
+const vapidPublicKey =
+  process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+
+const configured = !!vapidPublicKey && !!vapidPrivateKey;
 
 if (configured) {
   webpush.setVapidDetails(
     "mailto:raymonjohns@gmail.com",
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY,
+    vapidPublicKey,
+    vapidPrivateKey,
   );
 }
 
@@ -50,6 +56,19 @@ export async function sendPushNotification(opts: {
 
   const sent = results.filter((r) => r.status === "fulfilled").length;
 
+  // Log rejected sends so production failures are diagnosable instead of silent.
+  for (let i = 0; i < results.length; i++) {
+    const r = results[i];
+    if (r.status === "rejected") {
+      const reason = r.reason as { statusCode?: number; message?: string } | undefined;
+      console.error(
+        `Push send failed for ${subscriptions[i].endpoint}:`,
+        reason?.statusCode ?? "no-status",
+        reason?.message ?? reason,
+      );
+    }
+  }
+
   // Remove subscriptions that are no longer valid (410 Gone / 404 Not Found).
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
@@ -59,5 +78,18 @@ export async function sendPushNotification(opts: {
     }
   }
 
+  if (sent === 0 && subscriptions.length > 0) {
+    console.warn(`Push notification delivered to 0/${subscriptions.length} subscribers.`);
+  }
+
   return { sent, total: subscriptions.length };
+}
+
+
+export function getVapidPublicKey(): string | null {
+  return (
+    process.env.VAPID_PUBLIC_KEY ||
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
+    null
+  );
 }
