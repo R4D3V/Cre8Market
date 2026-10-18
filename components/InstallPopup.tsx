@@ -38,6 +38,16 @@ export default function InstallPopup() {
     };
   }, []);
 
+  // Ensure we're subscribed whenever permission is already granted, even if the
+  // user never interacts with the install prompt (common on mobile).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      subscribeToPush();
+    }
+  }, []);
+
   async function subscribeToPush() {
     if (!("Notification" in window) || !("PushManager" in window)) {
       console.warn(

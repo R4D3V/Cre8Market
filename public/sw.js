@@ -6,7 +6,7 @@ self.addEventListener("activate", (e) => e.waitUntil(clients.claim()));
 
 self.addEventListener("fetch", (e) => {
   e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request)),
+    fetch(e.request).catch(() => caches.match(e.request) || new Response("", { status: 503, statusText: "Service Unavailable" })),
   );
 });
 
@@ -26,7 +26,11 @@ self.addEventListener("push", (e) => {
     data: { url: data.url || "/" },
   };
 
-  e.waitUntil(self.registration.showNotification(title, options));
+  e.waitUntil(
+    self.registration.showNotification(title, options).catch((err) => {
+      console.error("showNotification failed:", err);
+    }),
+  );
 });
 
 self.addEventListener("notificationclick", (e) => {
