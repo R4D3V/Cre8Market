@@ -8,18 +8,36 @@ const webpush = require("web-push");
 // Allow the public key to come from either the server-only or the inlined
 // (NEXT_PUBLIC_*) variable so a hosted build that only exposes one of them
 // still works. The private key is always server-only.
+function isValidVapidPublicKey(key: string | undefined): key is string {
+  if (!key) return false;
+  try {
+    const b64 = key.replace(/-/g, "+").replace(/_/g, "/");
+    const pad = "=".repeat((4 - (b64.length % 4)) % 4);
+    const raw = Buffer.from(b64 + pad, "base64");
+    return raw.length === 65;
+  } catch {
+    return false;
+  }
+}
+
 const vapidPublicKey =
   process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
 
-const configured = !!vapidPublicKey && !!vapidPrivateKey;
-
+// Guard against malformed keys so a bad value in the hosting env doesn't crash
+// the build/runtime module evaluation.
+let configured = !!vapidPublicKey && !!vapidPrivateKey && isValidVapidPublicKey(vapidPublicKey);
 if (configured) {
-  webpush.setVapidDetails(
-    "mailto:raymonjohns@gmail.com",
-    vapidPublicKey,
-    vapidPrivateKey,
-  );
+  try {
+    webpush.setVapidDetails(
+      "mailto:raymonjohns@gmail.com",
+      vapidPublicKey as string,
+      vapidPrivateKey as string,
+    );
+  } catch (err) {
+    console.error("Invalid VAPID keys; push disabled:", err);
+    configured = false;
+  }
 }
 
 export async function sendPushNotification(opts: {
@@ -87,9 +105,10 @@ export async function sendPushNotification(opts: {
 
 
 export function getVapidPublicKey(): string | null {
-  return (
+  const key =
     process.env.VAPID_PUBLIC_KEY ||
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
-    null
-  );
+    null;
+  if (!key || !isValidVapidPublicKey(key)) return null;
+  return key;
 }
