@@ -5,8 +5,17 @@ import {
   upsertPushSubscription,
   deletePushSubscription,
 } from "@/lib/db/queries";
+import { auth } from "@/lib/auth";
+
+async function requireAdmin() {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "admin") {
+    throw new Error("Not authorized");
+  }
+}
 
 export async function fetchPushSubscriptionsAction() {
+  await requireAdmin();
   return getPushSubscriptions();
 }
 

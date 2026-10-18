@@ -9,6 +9,7 @@ import {
 } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import { ProductImagePicker } from "@/components/ProductImagePicker";
+import { uploadProductImage } from "@/lib/uploadImage";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import type { CategoryDB } from "@/lib/types";
 
@@ -34,16 +35,17 @@ export default function EditProductPage() {
   });
   const [images, setImages] = useState<string[]>(["", "", "", ""]);
 
-  function handleImageUpload(index: number, file: File) {
-    const reader = new FileReader();
-    reader.onload = () => {
+  async function handleImageUpload(index: number, file: File) {
+    try {
+      const url = await uploadProductImage(file);
       setImages((prev) => {
         const next = [...prev];
-        next[index] = reader.result as string;
+        next[index] = url;
         return next;
       });
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      // Keep the slot unchanged on failure.
+    }
   }
 
   function removeImage(index: number) {

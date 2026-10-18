@@ -41,13 +41,21 @@ export async function registerUserAction(data: {
 }
 
 // Backup pin required before an admin password can be reset.
-const ADMIN_RESET_PIN = process.env.ADMIN_RESET_PIN || "1285";
+// SECURITY: there is intentionally NO default. If ADMIN_RESET_PIN is not
+// configured, the reset flow is disabled rather than falling back to a
+// well-known value that anyone could use to take over an admin account.
+const ADMIN_RESET_PIN = process.env.ADMIN_RESET_PIN;
 
 export async function resetAdminPasswordAction(
   email: string,
   newPassword: string,
   pin: string,
 ) {
+  if (!ADMIN_RESET_PIN) {
+    throw new Error(
+      "Admin password reset is disabled: ADMIN_RESET_PIN is not configured on the server.",
+    );
+  }
   if (!email || !newPassword) throw new Error("Email and password are required");
   if (newPassword.length < 6) throw new Error("Password must be at least 6 characters");
   if (pin !== ADMIN_RESET_PIN) {
@@ -71,13 +79,19 @@ export async function resetUserPasswordAction(phone: string, newPassword: string
   const user = await getUserByPhone(phone);
   if (!user) throw new Error("No account found with that phone number");
 
-  // Legacy accounts created before the reset pin existed have no pin_hash.
-  // They reset as before. Accounts with a pin require it (2-step verification).
-  if (user.pin_hash) {
-    if (!/^\d{4}$/.test(pin)) throw new Error("Enter the 4-digit reset pin you set when registering");
-    const valid = await bcrypt.compare(pin, user.pin_hash);
-    if (!valid) throw new Error("Incorrect reset pin. Please enter the 4-digit pin you set when registering.");
+  // Accounts must have a reset pin to self-serve a password reset. Legacy
+  // accounts created before the pin feature existed have no pin_hash and
+  // cannot reset their own password — an admin must reset it for them via
+  // resetUserPasswordByAdminAction. This prevents anyone who merely knows a
+  // phone number from taking over such an account.
+  if (!user.pin_hash) {
+    throw new Error(
+      "This account has no reset pin configured. Please contact an admin to reset your password.",
+    );
   }
+  if (!/^\d{4}$/.test(pin)) throw new Error("Enter the 4-digit reset pin you set when registering");
+  const valid = await bcrypt.compare(pin, user.pin_hash);
+  if (!valid) throw new Error("Incorrect reset pin. Please enter the 4-digit pin you set when registering.");
 
   const passwordHash = await bcrypt.hash(newPassword, 12);
   const { rowCount } = await pool.query(

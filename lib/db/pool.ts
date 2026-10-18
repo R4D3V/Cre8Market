@@ -8,10 +8,18 @@ const globalForPool = globalThis as unknown as { pool: Pool };
 // explicitly and emits no warning.
 function buildConnectionString(): string {
   const base = process.env.DATABASE_URL ?? "";
-  // Avoid duplicating the param if the env already includes it.
-  if (base.includes("sslmode=")) return base;
-  const separator = base.includes("?") ? "&" : "?";
-  return `${base}${separator}sslmode=verify-full`;
+  // Only force verify-full for Neon (which needs it); local Postgres often
+  // runs without TLS, so don't break those setups.
+  if (!/neon\.tech|neon\.build/i.test(base)) return base;
+  // Normalize any sslmode the env already carries (e.g. 'require') to
+  // 'verify-full'. pg-connection-string treats require/prefer/verify-ca as
+  // aliases for verify-full today but will adopt weaker libpq semantics in
+  // v3, which would trigger the deprecation warning and weaken security.
+  const withoutSslmode = base
+    .replace(/([?&])sslmode=[^&]*/g, "$1")
+    .replace(/[?&]$/, "");
+  const separator = withoutSslmode.includes("?") ? "&" : "?";
+  return `${withoutSslmode}${separator}sslmode=verify-full`;
 }
 
 const basePool =

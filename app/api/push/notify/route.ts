@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { sendPushNotification } from "@/lib/push";
 
 export async function POST(req: Request) {
+  // Only admins may broadcast push notifications.
+  const session = await auth();
+  if (!session?.user || session.user.role !== "admin") {
+    return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+  }
   try {
     const { title, body, url } = await req.json();
 

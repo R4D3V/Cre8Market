@@ -147,7 +147,7 @@ export async function createProductAction(data: Record<string, unknown>) {
     title: "New Product Added!",
     body: `${product.title} — UGX ${Number(product.price).toLocaleString()}`,
     url: `/products/${product.slug}`,
-  }).catch(() => {});
+  }).catch((err) => console.error("Push notification failed:", err));
   revalidatePath("/admin");
   revalidatePath("/products");
   revalidatePath("/deals");
@@ -197,7 +197,12 @@ export async function duplicateProductsAction(ids: string[]) {
     if (!source) continue;
     const data = buildDuplicateData(source, source.user_id ?? null);
     data.slug = await uniqueSlug(source.slug);
-    await createProduct(data);
+    const product = await createProduct(data);
+    await sendPushNotification({
+      title: "New Product Added!",
+      body: `${product.title} — UGX ${Number(product.price).toLocaleString()}`,
+      url: `/products/${product.slug}`,
+    }).catch((err) => console.error("Push notification failed:", err));
   }
   revalidatePath("/admin");
   revalidatePath("/products");
@@ -235,7 +240,7 @@ export async function createMyProductAction(data: Record<string, unknown>) {
     title: "New Product Added!",
     body: `${product.title} — UGX ${Number(product.price).toLocaleString()}`,
     url: `/products/${product.slug}`,
-  }).catch(() => {});
+  }).catch((err) => console.error("Push notification failed:", err));
   revalidatePath("/dashboard");
   revalidatePath("/admin");
   revalidatePath("/products");
@@ -313,7 +318,12 @@ export async function duplicateMyProductsAction(ids: string[]) {
     if (!source) continue;
     const data = buildDuplicateData(source, userId);
     data.slug = await uniqueSlug(source.slug);
-    await createProduct(data);
+    const product = await createProduct(data);
+    await sendPushNotification({
+      title: "New Product Added!",
+      body: `${product.title} — UGX ${Number(product.price).toLocaleString()}`,
+      url: `/products/${product.slug}`,
+    }).catch((err) => console.error("Push notification failed:", err));
   }
   revalidatePath("/dashboard");
   revalidatePath("/admin");

@@ -10,7 +10,7 @@ import {
   deleteMyProductAction,
 } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
-import { compressImage } from "@/lib/imageCompress";
+import { uploadProductImage } from "@/lib/uploadImage";
 import { ProductImagePicker } from "@/components/ProductImagePicker";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { CategoryDB } from "@/lib/types";
@@ -38,10 +38,10 @@ export default function EditMyProductPage() {
 
   async function handleImageUpload(index: number, file: File) {
     try {
-      const dataUrl = await compressImage(file);
+      const url = await uploadProductImage(file);
       setImages((prev) => {
         const next = [...prev];
-        next[index] = dataUrl;
+        next[index] = url;
         return next;
       });
     } catch {

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createProductAction, checkSlugAction } from "@/lib/actions/products";
 import { fetchMyAdminProfileAction } from "@/lib/actions/admin";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
+import { uploadProductImage } from "@/lib/uploadImage";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import type { CategoryDB } from "@/lib/types";
 
@@ -47,17 +48,18 @@ export default function NewProductPage() {
       .catch(() => {});
   }, []);
 
-  function handleImageUpload(index: number, file: File | null) {
+  async function handleImageUpload(index: number, file: File | null) {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
+    try {
+      const url = await uploadProductImage(file);
       setImages((prev) => {
         const next = [...prev];
-        next[index] = reader.result as string;
+        next[index] = url;
         return next;
       });
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      // Ignore; the slot stays empty on failure.
+    }
   }
 
   function slugify(text: string) {

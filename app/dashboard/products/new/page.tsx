@@ -10,7 +10,7 @@ import {
   fetchMyListingLimitAction,
 } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
-import { compressImage } from "@/lib/imageCompress";
+import { uploadProductImage } from "@/lib/uploadImage";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { CategoryDB } from "@/lib/types";
 
@@ -49,10 +49,10 @@ export default function NewMyProductPage() {
   async function handleImageUpload(index: number, file: File | null) {
     if (!file) return;
     try {
-      const dataUrl = await compressImage(file);
+      const url = await uploadProductImage(file);
       setImages((prev) => {
         const next = [...prev];
-        next[index] = dataUrl;
+        next[index] = url;
         return next;
       });
     } catch {

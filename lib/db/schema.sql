@@ -89,3 +89,54 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS pin_hash TEXT;
 
 -- Migration: seller verification — admins mark a user verified so a badge shows on their listings.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false;
+
+-- ── better-auth tables (required for login / sessions) ──
+-- These mirror the accounts in `users` / `admin_users`. Safe to re-run.
+CREATE TABLE IF NOT EXISTS "user" (
+  id TEXT PRIMARY KEY,
+  name TEXT,
+  email TEXT UNIQUE NOT NULL,
+  "emailVerified" BOOLEAN DEFAULT false,
+  image TEXT,
+  "createdAt" TIMESTAMPTZ DEFAULT now(),
+  "updatedAt" TIMESTAMPTZ DEFAULT now(),
+  phone TEXT,
+  whatsapp TEXT,
+  role TEXT
+);
+
+CREATE TABLE IF NOT EXISTS "account" (
+  id TEXT PRIMARY KEY,
+  "accountId" TEXT NOT NULL,
+  "providerId" TEXT NOT NULL,
+  "userId" TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  "accessToken" TEXT,
+  "refreshToken" TEXT,
+  "idToken" TEXT,
+  "accessTokenExpiresAt" TIMESTAMPTZ,
+  "refreshTokenExpiresAt" TIMESTAMPTZ,
+  scope TEXT,
+  password TEXT,
+  "createdAt" TIMESTAMPTZ DEFAULT now(),
+  "updatedAt" TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "session" (
+  id TEXT PRIMARY KEY,
+  "expiresAt" TIMESTAMPTZ NOT NULL,
+  token TEXT UNIQUE NOT NULL,
+  "createdAt" TIMESTAMPTZ DEFAULT now(),
+  "updatedAt" TIMESTAMPTZ DEFAULT now(),
+  "ipAddress" TEXT,
+  "userAgent" TEXT,
+  "userId" TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS "verification" (
+  id TEXT PRIMARY KEY,
+  identifier TEXT NOT NULL,
+  value TEXT NOT NULL,
+  "expiresAt" TIMESTAMPTZ NOT NULL,
+  "createdAt" TIMESTAMPTZ DEFAULT now(),
+  "updatedAt" TIMESTAMPTZ DEFAULT now()
+);

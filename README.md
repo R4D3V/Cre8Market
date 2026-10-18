@@ -65,7 +65,8 @@ See `.env.example` for the full annotated list. The essentials:
 | `/products/[slug]` | Product detail — contact seller, make offer, related items |
 | `/deals` | Hot deals page |
 | `/sellers` | Public seller directory with per-seller listings |
-| `/sell` | Post a listing with AI auto-fill |
+| `/dashboard/products/new` | Post a listing (regular users) with AI auto-fill |
+| `/admin/products/new` | Post a listing (admins) with AI auto-fill |
 | `/selltous` | Sell your item to CRE8MARKET ENTEBBE for cash |
 | `/login`, `/register`, `/reset-password` | Account management |
 | `/dashboard` | Logged-in users — profile, listings |

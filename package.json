@@ -13,6 +13,7 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "better-auth": "^1.7.5",
+    "cloudinary": "^2.11.0",
     "kysely": "^0.29.6",
     "lucide-react": "^1.46.0",
     "next": "^16.2.9",

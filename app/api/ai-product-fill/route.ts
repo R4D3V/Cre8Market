@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { auth } from "@/lib/auth";
 import { getCategories } from "@/lib/db/queries";
 import {
   normalizeCategorySlug,
@@ -8,7 +9,43 @@ import {
   normalizePrice,
 } from "@/lib/ai/normalize";
 
+// Simple in-memory per-IP rate limiter for the AI endpoint (best-effort; resets
+// on cold start). Limits abuse of the OpenAI-backed endpoint.
+const rateBuckets = new Map<string, { count: number; reset: number }>();
+const RATE_LIMIT = 20;
+const RATE_WINDOW_MS = 60_000;
+
+function checkRateLimit(key: string): boolean {
+  const now = Date.now();
+  const bucket = rateBuckets.get(key);
+  if (!bucket || bucket.reset < now) {
+    rateBuckets.set(key, { count: 1, reset: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (bucket.count >= RATE_LIMIT) return false;
+  bucket.count += 1;
+  return true;
+}
+
 export async function POST(request: Request) {
+  // Require an authenticated session (admin or regular user) to prevent
+  // anonymous abuse of the OpenAI-backed endpoint.
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Not authorized" }, { status: 401 });
+  }
+
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 },
+    );
+  }
+
   try {
     const body = await request.json();
     const title = typeof body?.title === "string" ? body.title.trim() : "";
