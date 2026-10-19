@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -37,38 +37,64 @@ function ProductCardSkeleton() {
   );
 }
 
-export default function ProductsPageClient() {
+export default function ProductsPageClient(props: {
+  initialProducts?: Product[];
+  initialTotal?: number;
+  initialCategories?: CategoryDB[];
+  initialSellers?: { id: string; name: string; productCount: number }[];
+} = {}) {
   return (
     <Suspense fallback={null}>
-      <ProductsPageContent />
+      <ProductsPageContent {...props} />
     </Suspense>
   );
 }
 
-function ProductsPageContent() {
+function ProductsPageContent({
+  initialProducts,
+  initialTotal,
+  initialCategories,
+  initialSellers,
+}: {
+  initialProducts?: Product[];
+  initialTotal?: number;
+  initialCategories?: CategoryDB[];
+  initialSellers?: { id: string; name: string; productCount: number }[];
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const qParam = searchParams.get("q") ?? "";
   const categoryParam = searchParams.get("category") ?? "";
   const featuredParam = searchParams.get("featured") ?? "";
   const sortParam = searchParams.get("sort") ?? "";
+  const sellerParam = searchParams.get("seller") ?? "";
+  const minPriceParam = searchParams.get("minPrice") ?? "";
+  const maxPriceParam = searchParams.get("maxPrice") ?? "";
+  const pageParam = searchParams.get("page") ?? "";
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [total, setTotal] = useState(0);
-  const [categories, setCategories] = useState<CategoryDB[]>([]);
+  const [products, setProducts] = useState<Product[]>(initialProducts ?? []);
+  const [total, setTotal] = useState(initialTotal ?? 0);
+  const [categories, setCategories] = useState<CategoryDB[]>(
+    initialCategories ?? [],
+  );
   const [sellers, setSellers] = useState<
     { id: string; name: string; productCount: number }[]
-  >([]);
-  const [loading, setLoading] = useState(true);
+  >(initialSellers ?? []);
+  const [loading, setLoading] = useState(initialProducts ? false : true);
 
   const [search, setSearch] = useState(qParam);
   const [debouncedSearch, setDebouncedSearch] = useState(qParam);
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
-  const [selectedSeller, setSelectedSeller] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [page, setPage] = useState(1);
+  const [selectedSeller, setSelectedSeller] = useState(sellerParam);
+  const [minPrice, setMinPrice] = useState(minPriceParam);
+  const [maxPrice, setMaxPrice] = useState(maxPriceParam);
+  const [page, setPage] = useState(pageParam ? Number(pageParam) : 1);
   const [filtersOpen, setFiltersOpen] = useState(true);
+
+  const skipInitialProductsRef = useRef(!!initialProducts);
+  const skipInitialMetaRef = useRef(
+    !!(initialCategories || initialSellers),
+  );
 
   useEffect(() => {
     setSelectedCategory(categoryParam);
@@ -81,6 +107,7 @@ function ProductsPageContent() {
   }, [qParam]);
 
   useEffect(() => {
+    if (skipInitialMetaRef.current) return;
     fetchCategoriesAction().then((data) => {
       setCategories(data ?? []);
     });
@@ -97,6 +124,10 @@ function ProductsPageContent() {
 
   // Fetch one page of products, letting Postgres handle filtering and sorting.
   useEffect(() => {
+    if (skipInitialProductsRef.current) {
+      skipInitialProductsRef.current = false;
+      return;
+    }
     let active = true;
     setLoading(true);
     fetchProductsPageAction({
