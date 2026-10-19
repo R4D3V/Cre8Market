@@ -98,13 +98,12 @@ export default function AdminLayout({
               className="hidden items-center gap-2 font-heading text-sm font-extrabold tracking-wide sm:flex"
             >
               <Image
-                src="/brand/logo.webp"
+                src="/brand/cre8-market-logo-transparent.svg"
                 alt="Cre8 Market"
-                width={1080}
-                height={1080}
-                className="size-7 shrink-0 rounded-lg object-contain"
+                width={954}
+                height={257}
+                className="h-7 w-auto shrink-0 object-contain"
               />
-              CRE8<span className="text-primary">MARKET</span>
             </Link>
 
             <span className="hidden h-5 w-px bg-border sm:block" />
