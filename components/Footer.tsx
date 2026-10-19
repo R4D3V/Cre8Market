@@ -12,13 +12,12 @@ export default function Footer() {
             className="inline-flex items-center gap-x-2 text-h5 font-black font-heading"
           >
             <Image
-              src="/brand/logo.webp"
+              src="/brand/cre8-market-logo-transparent.svg"
               alt="Cre8 Market"
-              width={1080}
-              height={1080}
-              className="size-10 shrink-0 object-contain"
+              width={954}
+              height={257}
+              className="h-10 w-auto shrink-0 object-contain"
             />
-            Cre8<span className="text-primary">Market</span>
           </Link>
           <p className="mt-3 text-sm text-muted-foreground">
             Entebbe&apos;s #1 marketplace for New and secondhand electronics,

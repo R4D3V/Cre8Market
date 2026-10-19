@@ -18,13 +18,12 @@ export default function Navbar() {
           className="flex items-center gap-x-2 text-h5 font-black font-heading"
         >
           <Image
-            src="/brand/logo.webp"
+            src="/brand/cre8-market-logo-transparent.svg"
             alt="Cre8 Market"
-            width={1080}
-            height={1080}
-            className="size-8 shrink-0 rounded-lg object-contain"
+            width={954}
+            height={257}
+            className="h-8 w-auto shrink-0 object-contain"
           />
-          Cre8<span className="text-primary">Market</span>
         </Link>
 
         <form
