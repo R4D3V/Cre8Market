@@ -1,28 +1,61 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
-import { fetchPublicUsersAction } from "@/lib/actions/users";
-import type { AppUser } from "@/lib/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
+import { getPublicUsers } from "@/lib/db/queries";
+import type { AppUser } from "@/lib/types";
 
-export default function SellersPage() {
-  const [users, setUsers] = useState<AppUser[]>([]);
-  const [loading, setLoading] = useState(true);
+export const metadata: Metadata = {
+  title: "Our Sellers | CRE8MARKET",
+  description:
+    "Browse registered sellers on Cre8 Market in Entebbe and view everything they have listed.",
+  alternates: {
+    canonical: "/sellers",
+  },
+};
 
-  useEffect(() => {
-    fetchPublicUsersAction().then((data) => {
-      setUsers(data);
-      setLoading(false);
-    });
-  }, []);
+export const revalidate = 60;
+
+function SellerCardSkeleton() {
+  return (
+    <div className="neu-card rounded-2xl p-5 text-center animate-pulse">
+      <div className="mx-auto mb-3 flex flex-col items-center">
+        <div className="w-16 h-16 rounded-full bg-muted" />
+      </div>
+      <div className="h-4 w-24 mx-auto rounded-full bg-muted mb-2" />
+      <div className="h-3 w-16 mx-auto rounded-full bg-muted mb-1" />
+      <div className="h-3 w-20 mx-auto rounded-full bg-muted" />
+    </div>
+  );
+}
+
+function SellersSkeleton() {
+  return (
+    <div className="container py-10" aria-busy="true">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <SellerCardSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+async function SellersContent() {
+  let users: AppUser[] = [];
+  try {
+    users = await getPublicUsers();
+  } catch (err) {
+    console.error(
+      "DB unavailable on sellers page load:",
+      (err as Error).message,
+    );
+  }
 
   return (
-    <>
-      <Navbar />
-      <main className="container py-10 space-y-10">
+    <main className="container py-10 space-y-10">
       <ScrollReveal>
         <div className="text-center space-y-2">
           <h1 className="font-heading text-3xl md:text-4xl font-extrabold text-foreground">
@@ -35,17 +68,11 @@ export default function SellersPage() {
         </div>
       </ScrollReveal>
 
-      {loading ? (
-        <div className="text-center py-12 text-muted-foreground text-sm">
-          Loading…
-        </div>
-      ) : users.length === 0 ? (
+      {users.length === 0 ? (
         <ScrollReveal>
           <div className="neu-card text-center py-12">
             <p className="text-4xl mb-3">🛍️</p>
-            <h3 className="font-bold text-foreground mb-1">
-              No sellers yet
-            </h3>
+            <h3 className="font-bold text-foreground mb-1">No sellers yet</h3>
             <p className="text-muted-foreground text-sm">
               Check back soon — sellers are registering every day.
             </p>
@@ -108,7 +135,17 @@ export default function SellersPage() {
           ))}
         </div>
       )}
-      </main>
+    </main>
+  );
+}
+
+export default function SellersPage() {
+  return (
+    <>
+      <Navbar />
+      <Suspense fallback={<SellersSkeleton />}>
+        <SellersContent />
+      </Suspense>
       <Footer />
     </>
   );

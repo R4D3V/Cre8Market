@@ -14,7 +14,7 @@ export default function TermsPage() {
         </ScrollReveal>
         <ScrollReveal delay={100}>
           <div className="neu-card p-6 sm:p-8 prose prose-sm text-muted-foreground space-y-4">
-          <p>Last updated: January 2025</p>
+          <p>Last updated: October 22, 2026</p>
           <p>By using CRE8MARKET ENTEBBE, you agree to these terms. Please read them carefully.</p>
           <h2 className="text-base font-bold text-foreground mt-6">Marketplace Rules</h2>
           <p>CRE8MARKET ENTEBBE is a peer-to-peer marketplace. We connect buyers and sellers but are not a party to transactions. All sales are between individual users.</p>

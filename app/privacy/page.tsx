@@ -14,7 +14,7 @@ export default function PrivacyPage() {
         </ScrollReveal>
         <ScrollReveal delay={100}>
           <div className="neu-card p-6 sm:p-8 prose prose-sm text-muted-foreground space-y-4">
-          <p>Last updated: January 2025</p>
+          <p>Last updated: October 22, 2026</p>
           <p>CRE8MARKET ENTEBBE ("we", "us", or "our") operates the cre8market.com website. This page informs you of our policies regarding the collection, use, and disclosure of personal information we receive from users of the Site.</p>
           <h2 className="text-base font-bold text-foreground mt-6">Information We Collect</h2>
           <p>We collect information you provide directly to us, such as your name, phone number, and the content of listings you post. We also collect usage data through cookies and similar technologies.</p>
