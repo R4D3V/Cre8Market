@@ -17,6 +17,7 @@ export interface Product {
   isDeal?: boolean;
   daysAgo: number;
   timeAgo: string;
+  createdAt?: string;
   description?: string;
   specs?: { label: string; value: string }[];
   condition?:

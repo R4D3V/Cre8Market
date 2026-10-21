@@ -109,7 +109,7 @@ export async function getProductsPage(
 
   const orderBy =
     sort === "latest"
-      ? `p."daysAgo" ASC`
+      ? `p.created_at DESC`
       : sort === "price-asc"
         ? "p.price ASC"
         : sort === "price-desc"
@@ -760,7 +760,32 @@ function mapUser(row: Record<string, unknown>): AppUser {
 
 // ── Helpers ──
 
+function formatTimeAgo(dateValue: unknown): string {
+  if (!dateValue) return "Just now";
+  const date = new Date(dateValue as string);
+  if (Number.isNaN(date.getTime())) return "Just now";
+  const diffMs = Date.now() - date.getTime();
+  if (diffMs < 0) return "Just now";
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins} minute${mins === 1 ? "" : "s"} ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months === 1 ? "" : "s"} ago`;
+  const years = Math.floor(days / 365);
+  return `${years} year${years === 1 ? "" : "s"} ago`;
+}
+
 function mapProduct(row: Record<string, unknown>): Product {
+  const createdAt = row.created_at;
+  const daysAgo = createdAt
+    ? Math.max(0, Math.floor((Date.now() - new Date(createdAt as string).getTime()) / 86400000))
+    : ((row.daysAgo as number) ?? 0);
   return {
     id: row.id as string,
     slug: row.slug as string,
@@ -780,8 +805,9 @@ function mapProduct(row: Record<string, unknown>): Product {
         : undefined,
     user_id: (row.user_id as string) ?? null,
     images: Array.isArray(row.images) ? row.images : [],
-    daysAgo: (row.daysAgo as number) ?? 0,
-    timeAgo: (row.timeAgo as string) ?? "Just now",
+    daysAgo,
+    timeAgo: formatTimeAgo(createdAt ?? row.timeAgo),
+    createdAt: createdAt ? new Date(createdAt as string).toISOString() : undefined,
     categoryIcon: (row.category_icon as string) ?? "📦",
     categoryColor: (row.category_color as string) ?? "#64748b",
     categoryBg: (row.category_bg as string) ?? "#f8fafc",

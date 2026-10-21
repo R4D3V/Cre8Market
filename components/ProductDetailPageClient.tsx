@@ -174,7 +174,18 @@ export default function ProductDetailPageClient({
             <div className="neu-card p-4">
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: "Listed", value: product.timeAgo },
+                  {
+                    label: "Listed",
+                    value: product.createdAt
+                      ? new Date(product.createdAt).toLocaleString("en", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : product.timeAgo,
+                  },
                   { label: "Category", value: product.category },
                   {
                     label: "Seller",
