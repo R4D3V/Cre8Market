@@ -36,7 +36,8 @@ export default function NewMyProductPage() {
   const [limit, setLimit] = useState<{
     productCount: number;
     isVerified: boolean;
-    limit: number;
+    isVip: boolean;
+    limit: number | null;
   } | null>(null);
 
   useEffect(() => {
@@ -244,18 +245,17 @@ export default function NewMyProductPage() {
         </Link>
       }
     >
-      {limit && !limit.isVerified && limit.productCount >= limit.limit ? (
+      {limit && limit.limit !== null && limit.productCount >= limit.limit ? (
         <div className="bg-card border border-border rounded-xl p-8 text-center">
           <p className="text-5xl mb-4">🔒</p>
           <h2 className="font-heading text-xl font-bold text-foreground mb-2">
             Listing limit reached
           </h2>
           <p className="text-muted-foreground text-sm mb-1">
-            You've reached the limit of {limit.limit} listings as an unverified
-            seller.
+            You've reached the limit of {limit.limit} listings for your account.
           </p>
           <p className="text-muted-foreground text-sm mb-6">
-            Contact the admin to get verified so you can post more items.
+            Contact the admin to upgrade your account so you can post more items.
           </p>
           <a
             href="https://wa.me/256767155113?text=Hi+I+would+like+to+get+verified+so+I+can+post+more+listings"
@@ -268,11 +268,19 @@ export default function NewMyProductPage() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
-          {limit && !limit.isVerified && (
+          {limit && limit.limit !== null && (
             <div className="bg-primary/10 border border-primary/40 text-primary text-xs font-semibold rounded-xl px-4 py-3">
-              Unverified sellers can post up to {limit.limit} listings. You've
-              used {limit.productCount} of {limit.limit}. Get verified to post
-              more.
+              You can post up to {limit.limit} listings. You've used{" "}
+              {limit.productCount} of {limit.limit}.{" "}
+              {limit.isVerified
+                ? "Become a VIP to post unlimited listings."
+                : "Get verified to post more."}
+            </div>
+          )}
+          {limit && limit.isVip && (
+            <div className="bg-primary/10 border border-primary/40 text-primary text-xs font-semibold rounded-xl px-4 py-3">
+              VIP sellers have unlimited listings. You've posted{" "}
+              {limit.productCount} so far.
             </div>
           )}
           <div>
@@ -389,10 +397,8 @@ export default function NewMyProductPage() {
                 <option value="">Select…</option>
                 {[
                   "New",
-                  "Like New",
-                  "Used - Good",
-                  "Used - Fair",
-                  "Refurbished",
+                "Used",
+                "Refurbished",
                 ].map((c) => (
                   <option key={c} value={c}>
                     {c}

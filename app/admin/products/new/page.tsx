@@ -363,9 +363,7 @@ export default function NewProductPage() {
               <option value="">Select…</option>
               {[
                 "New",
-                "Like New",
-                "Used - Good",
-                "Used - Fair",
+                "Used",
                 "Refurbished",
               ].map((c) => (
                 <option key={c} value={c}>

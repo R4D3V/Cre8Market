@@ -57,17 +57,17 @@ describe("normalizeCategorySlug", () => {
 });
 
 describe("normalizeCondition", () => {
-  it.each(["New", "Like New", "Used - Good", "Used - Fair", "Refurbished"])(
+  it.each(["New", "Used", "Refurbished"])(
     "accepts the valid condition %s",
     (condition) => {
       expect(normalizeCondition(condition)).toBe(condition);
     },
   );
 
-  it("defaults invalid and empty conditions to Used - Good", () => {
-    expect(normalizeCondition("Brand New")).toBe("Used - Good");
-    expect(normalizeCondition(undefined)).toBe("Used - Good");
-    expect(normalizeCondition("  ")).toBe("Used - Good");
+  it("defaults invalid and empty conditions to Used", () => {
+    expect(normalizeCondition("Brand New")).toBe("Used");
+    expect(normalizeCondition(undefined)).toBe("Used");
+    expect(normalizeCondition("  ")).toBe("Used");
   });
 });
 

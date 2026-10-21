@@ -161,10 +161,8 @@ export default function SellToUsPage() {
                         <option value="">Select…</option>
                         {[
                           "New",
-                          "Like New",
-                          "Used - Good",
-                          "Used - Fair",
-                          "For Parts",
+                          "Used",
+                          "Refurbished",
                         ].map((c) => (
                           <option key={c} value={c}>
                             {c}

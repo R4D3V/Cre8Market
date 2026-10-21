@@ -70,6 +70,15 @@ export default function SellerPage() {
     <>
       <Navbar />
       <main className="container py-10 space-y-10">
+      {user.banner && (
+        <div className="overflow-hidden rounded-2xl border border-border">
+          <img
+            src={user.banner}
+            alt={`${user.name} banner`}
+            className="w-full h-48 md:h-64 object-cover"
+          />
+        </div>
+      )}
       {/* Seller header */}
       <ScrollReveal>
         <div className="neu-card rounded-2xl p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">

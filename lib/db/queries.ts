@@ -157,6 +157,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   const { rows } = await pool.query(
     `SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
             u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified,
+            u.is_vip AS owner_vip,
             a.avatar AS admin_avatar
      FROM products p
      LEFT JOIN categories c ON c.slug = p.category_slug
@@ -201,7 +202,7 @@ export async function createProduct(
       data.category,
       data.categorySlug,
       data.featured ?? false,
-      data.is_deal ?? false,
+      (data.is_deal ?? data.isDeal ?? false),
       data.description ?? null,
       JSON.stringify(data.specs ?? []),
       data.condition ?? null,
@@ -232,7 +233,7 @@ export async function updateProduct(
       data.category,
       data.categorySlug,
       data.featured ?? false,
-      data.is_deal ?? false,
+      (data.is_deal ?? data.isDeal ?? false),
       data.description ?? null,
       JSON.stringify(data.specs ?? []),
       data.condition ?? null,
@@ -304,7 +305,8 @@ export async function getUserProductsWithOwner(
 ): Promise<Product[]> {
   const { rows } = await pool.query(
     `SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
-            u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified
+            u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified,
+            u.is_vip AS owner_vip
      FROM products p
      LEFT JOIN categories c ON c.slug = p.category_slug
      INNER JOIN users u ON u.id = p.user_id
@@ -320,7 +322,8 @@ export async function getUserProductsWithOwner(
 export async function getProductsWithOwners(): Promise<ProductWithOwner[]> {
   const { rows } = await pool.query(`
     SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
-           u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified
+           u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified,
+            u.is_vip AS owner_vip
     FROM products p
     LEFT JOIN categories c ON c.slug = p.category_slug
     LEFT JOIN users u ON u.id = p.user_id
@@ -546,7 +549,7 @@ export interface UserRow {
 
 export async function getUsers(): Promise<AppUser[]> {
   const { rows } = await pool.query(`
-    SELECT u.id, u.name, u.phone, u.whatsapp, u.avatar, u.is_active, u.is_admin, u.is_verified, u.created_at,
+    SELECT u.id, u.name, u.phone, u.whatsapp, u.avatar, u.banner, u.is_active, u.is_admin, u.is_verified, u.is_vip, u.created_at,
            COUNT(p.id)::int AS product_count
     FROM users u
     LEFT JOIN products p ON p.user_id = u.id
@@ -559,7 +562,7 @@ export async function getUsers(): Promise<AppUser[]> {
 // Public sellers directory: active registered users who currently have listings.
 export async function getPublicUsers(): Promise<AppUser[]> {
   const { rows } = await pool.query(`
-    SELECT u.id, u.name, u.phone, u.whatsapp, u.avatar, u.is_active, u.is_admin, u.is_verified, u.created_at,
+    SELECT u.id, u.name, u.phone, u.whatsapp, u.avatar, u.banner, u.is_active, u.is_admin, u.is_verified, u.is_vip, u.created_at,
            COUNT(p.id)::int AS product_count
     FROM users u
     LEFT JOIN products p ON p.user_id = u.id
@@ -605,7 +608,7 @@ export async function getSellers(): Promise<
 
 export async function getUserById(id: string): Promise<AppUser | null> {
   const { rows } = await pool.query(
-    "SELECT id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at FROM users WHERE id = $1",
+    "SELECT id, name, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, is_vip, created_at FROM users WHERE id = $1",
     [id],
   );
   return rows[0] ? mapUser(rows[0]) : null;
@@ -672,11 +675,11 @@ export async function updateUserStatus(
 
 export async function updateUserProfile(
   id: string,
-  data: { name: string; whatsapp?: string; avatar?: string | null },
+  data: { name: string; whatsapp?: string; avatar?: string | null; banner?: string | null },
 ): Promise<AppUser> {
   const { rows } = await pool.query(
-    `UPDATE users SET name = $1, whatsapp = $2, avatar = $3 WHERE id = $4 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
-    [data.name, data.whatsapp ?? null, data.avatar ?? null, id],
+    `UPDATE users SET name = $1, whatsapp = $2, avatar = $3, banner = $4 WHERE id = $5 RETURNING id, name, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, is_vip, created_at`,
+    [data.name, data.whatsapp ?? null, data.avatar ?? null, data.banner ?? null, id],
   );
   return mapUser(rows[0]);
 }
@@ -713,8 +716,19 @@ export async function updateUserVerifiedStatus(
   is_verified: boolean,
 ): Promise<AppUser> {
   const { rows } = await pool.query(
-    `UPDATE users SET is_verified = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
+    `UPDATE users SET is_verified = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, is_vip, created_at`,
     [is_verified, id],
+  );
+  return mapUser(rows[0]);
+}
+
+export async function updateUserVipStatus(
+  id: string,
+  is_vip: boolean,
+): Promise<AppUser> {
+  const { rows } = await pool.query(
+    `UPDATE users SET is_vip = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, is_vip, created_at`,
+    [is_vip, id],
   );
   return mapUser(rows[0]);
 }
@@ -749,9 +763,11 @@ function mapUser(row: Record<string, unknown>): AppUser {
     phone: row.phone as string,
     whatsapp: (row.whatsapp as string) ?? null,
     avatar: (row.avatar as string) ?? null,
+    banner: (row.banner as string) ?? null,
     isActive: row.is_active as boolean,
     isAdmin: (row.is_admin as boolean) ?? false,
     isVerified: (row.is_verified as boolean) ?? false,
+    isVip: (row.is_vip as boolean) ?? false,
     createdAt: row.created_at as string,
     productCount:
       row.product_count !== undefined ? Number(row.product_count) : undefined,
@@ -823,5 +839,6 @@ function mapProductWithOwner(row: Record<string, unknown>): Product {
     ownerAvatar:
       (row.owner_avatar as string) ?? (row.admin_avatar as string) ?? null,
     ownerVerified: (row.owner_verified as boolean) ?? null,
+    ownerVip: (row.owner_vip as boolean) ?? null,
   };
 }

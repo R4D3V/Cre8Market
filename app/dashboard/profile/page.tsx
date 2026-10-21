@@ -20,6 +20,7 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [avatar, setAvatar] = useState("");
+  const [banner, setBanner] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
@@ -34,6 +35,7 @@ export default function ProfilePage() {
       setName(data.name);
       setWhatsapp(data.whatsapp ?? "");
       setAvatar(data.avatar ?? "");
+      setBanner(data.banner ?? "");
       setLoading(false);
     });
   }, []);
@@ -48,6 +50,16 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleBannerUpload(file: File | null) {
+    if (!file) return;
+    try {
+      const dataUrl = await compressImage(file, 1200, 0.75);
+      setBanner(dataUrl);
+    } catch {
+      setInfoError("Could not read that image. Please try a different file.");
+    }
+  }
+
   async function handleInfoSubmit(e: React.FormEvent) {
     e.preventDefault();
     setInfoMsg("");
@@ -57,6 +69,7 @@ export default function ProfilePage() {
         name,
         whatsapp,
         avatar: avatar || null,
+        banner: banner || null,
       });
       setProfile(updated);
       setInfoMsg("Profile updated successfully!");
@@ -139,6 +152,42 @@ export default function ProfilePage() {
                   className="text-xs text-destructive font-semibold"
                 >
                   Remove Photo
+                </button>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+              Banner Image (shown on your seller page)
+            </label>
+            {banner && (
+              <div className="mb-2 overflow-hidden rounded-xl border border-border">
+                <img
+                  src={banner}
+                  alt="Profile banner"
+                  className="w-full h-32 object-cover"
+                />
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <label className="neu-pill bg-background text-primary text-xs font-semibold px-3 py-1.5 cursor-pointer text-center">
+                📷 Upload Banner
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) =>
+                    handleBannerUpload(e.target.files?.[0] ?? null)
+                  }
+                />
+              </label>
+              {banner && (
+                <button
+                  type="button"
+                  onClick={() => setBanner("")}
+                  className="text-xs text-destructive font-semibold"
+                >
+                  Remove Banner
                 </button>
               )}
             </div>

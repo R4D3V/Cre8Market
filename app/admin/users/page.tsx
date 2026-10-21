@@ -1,23 +1,20 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   fetchUsersAction,
-  createUserByAdminAction,
   setUserActiveAction,
   setUserVerifiedAction,
+  setUserVipAction,
   deleteUserAction,
 } from "@/lib/actions/users";
 import type { AppUser } from "@/lib/types";
-import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AppUser[]>([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: "", phone: "", whatsapp: "", password: "", pin: "" });
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
 
   const load = useCallback(async () => {
     const data = await fetchUsersAction();
@@ -29,27 +26,6 @@ export default function AdminUsersPage() {
     load();
   }, [load]);
 
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    setError("");
-    try {
-      await createUserByAdminAction({
-        name: form.name,
-        phone: toFullNumber(form.phone),
-        whatsapp: form.whatsapp ? toFullNumber(form.whatsapp) : undefined,
-        password: form.password,
-        pin: form.pin || undefined,
-      });
-      setForm({ name: "", phone: "", whatsapp: "", password: "", pin: "" });
-      await load();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to add user");
-    } finally {
-      setSaving(false);
-    }
-  }
-
   async function handleToggleActive(u: AppUser) {
     await setUserActiveAction(u.id, !u.isActive);
     load();
@@ -57,6 +33,11 @@ export default function AdminUsersPage() {
 
   async function handleToggleVerified(u: AppUser) {
     await setUserVerifiedAction(u.id, !u.isVerified);
+    load();
+  }
+
+  async function handleToggleVip(u: AppUser) {
+    await setUserVipAction(u.id, !u.isVip);
     load();
   }
 
@@ -71,6 +52,17 @@ export default function AdminUsersPage() {
     load();
   }
 
+  const filteredUsers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return users;
+    return users.filter(
+      (u) =>
+        u.name.toLowerCase().includes(q) ||
+        u.phone.toLowerCase().includes(q) ||
+        (u.whatsapp ?? "").toLowerCase().includes(q),
+    );
+  }, [users, search]);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -80,93 +72,32 @@ export default function AdminUsersPage() {
         </Link>
       </div>
 
-      {/* Add user form */}
-      <form onSubmit={handleCreate} className="neu-card p-5 max-w-xl mb-8 space-y-3">
-        <h2 className="font-bold text-foreground font-heading">Add User</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">Full Name *</label>
-            <input
-              required
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-              placeholder="Jane Doe"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">Phone *</label>
-            <PhoneInput
-              required
-              value={form.phone}
-              onChange={(v) => setForm((f) => ({ ...f, phone: v }))}
-              placeholder="700000000"
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">
-              WhatsApp (optional — defaults to phone)
-            </label>
-            <PhoneInput
-              value={form.whatsapp}
-              onChange={(v) => setForm((f) => ({ ...f, whatsapp: v }))}
-              placeholder="700000000"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">
-              Temporary Password *
-            </label>
-            <input
-              required
-              type="text"
-              value={form.password}
-              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-              placeholder="At least 6 characters"
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">
-              4-Digit Reset Pin (optional)
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="\d{4}"
-              maxLength={4}
-              value={form.pin}
-              onChange={(e) => setForm((f) => ({ ...f, pin: e.target.value.replace(/\D/g, "") }))}
-              className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-              placeholder="e.g. 1234"
-            />
-          </div>
-        </div>
-
-        {error && (
-          <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
-            {error}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2 text-sm disabled:opacity-60"
+      {/* Add user button */}
+      <div className="mb-6">
+        <Link
+          href="/admin/users/new"
+          className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2 text-sm inline-block"
         >
-          {saving ? "Adding…" : "+ Add User"}
-        </button>
-      </form>
+          + Add User
+        </Link>
+      </div>
+
+      {/* Search */}
+      <div className="mb-4">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, phone or WhatsApp…"
+          className="neu-inset w-full sm:w-80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+        />
+      </div>
 
       {/* List */}
       {loading ? (
         <p className="text-center text-muted-foreground text-sm py-8">Loading…</p>
-      ) : users.length === 0 ? (
-        <p className="text-center text-muted-foreground text-sm py-8">No users yet.</p>
+      ) : filteredUsers.length === 0 ? (
+        <p className="text-center text-muted-foreground text-sm py-8">No users found.</p>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
@@ -178,12 +109,13 @@ export default function AdminUsersPage() {
                 <th className="pb-3 pr-4 font-semibold">Products</th>
                 <th className="pb-3 pr-4 font-semibold">Status</th>
                 <th className="pb-3 pr-4 font-semibold">Verified</th>
+                <th className="pb-3 pr-4 font-semibold">VIP</th>
                 <th className="pb-3 pr-4 font-semibold">Joined</th>
                 <th className="pb-3 pr-4 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
+              {filteredUsers.map((u) => (
                 <tr key={u.id} className="border-t border-border align-middle">
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-2">
@@ -237,13 +169,35 @@ export default function AdminUsersPage() {
                   <td className="py-3 pr-4">
                     <button
                       onClick={() => handleToggleVerified(u)}
-                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition-all ${
-                        u.isVerified
-                          ? "bg-secondary/10 text-secondary hover:bg-secondary/20"
-                          : "bg-muted text-muted-foreground hover:bg-muted/70"
+                      role="switch"
+                      aria-checked={u.isVerified}
+                      title={u.isVerified ? "Verified" : "Not verified"}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        u.isVerified ? "bg-secondary" : "bg-muted"
                       }`}
                     >
-                      {u.isVerified ? "✓ Verified" : "○ Not Verified"}
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                          u.isVerified ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </td>
+                  <td className="py-3 pr-4">
+                    <button
+                      onClick={() => handleToggleVip(u)}
+                      role="switch"
+                      aria-checked={u.isVip ?? false}
+                      title={u.isVip ? "VIP" : "Not VIP"}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        u.isVip ? "bg-amber-500" : "bg-muted"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                          u.isVip ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
                     </button>
                   </td>
                   <td className="py-3 pr-4 text-muted-foreground">

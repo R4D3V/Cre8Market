@@ -48,9 +48,7 @@ export function normalizeCategorySlug(
 
 const ALLOWED_CONDITIONS = [
   "New",
-  "Like New",
-  "Used - Good",
-  "Used - Fair",
+  "Used",
   "Refurbished",
 ] as const;
 
@@ -60,7 +58,7 @@ export function normalizeCondition(value: string | undefined) {
     cleaned as (typeof ALLOWED_CONDITIONS)[number],
   )
     ? cleaned
-    : "Used - Good";
+    : "Used";
 }
 
 export function normalizeSpecs(value: unknown) {

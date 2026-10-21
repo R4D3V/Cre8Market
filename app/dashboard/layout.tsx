@@ -92,6 +92,7 @@ export default function DashboardLayout({
                 alt="Cre8 Market"
                 width={954}
                 height={257}
+                loading="eager"
                 className="h-7 w-auto shrink-0 object-contain"
               />
             </Link>

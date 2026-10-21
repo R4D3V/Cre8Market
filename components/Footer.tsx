@@ -16,6 +16,7 @@ export default function Footer() {
               alt="Cre8 Market"
               width={954}
               height={257}
+              loading="eager"
               className="h-10 w-auto shrink-0 object-contain"
             />
           </Link>

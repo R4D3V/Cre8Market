@@ -16,6 +16,7 @@ function getPageTitle(pathname: string) {
   if (/^\/admin\/products\/[^/]+\/edit$/.test(pathname)) return "Edit Product";
   if (pathname === "/admin/categories") return "Categories";
   if (pathname === "/admin/users") return "Users";
+  if (pathname === "/admin/users/new") return "Add User";
   if (/^\/admin\/users\/[^/]+\/edit$/.test(pathname)) return "Edit User";
   if (pathname === "/admin/admins") return "Admins";
   if (pathname === "/admin/profile") return "My Profile";
@@ -102,6 +103,7 @@ export default function AdminLayout({
                 alt="Cre8 Market"
                 width={954}
                 height={257}
+                loading="eager"
                 className="h-7 w-auto shrink-0 object-contain"
               />
             </Link>

@@ -12,6 +12,7 @@ import {
   updateUserContact,
   updateUserAdminStatus,
   updateUserVerifiedStatus,
+  updateUserVipStatus,
   getUserPasswordHash,
   updateUserPassword,
   deleteUser,
@@ -136,6 +137,16 @@ export async function setUserVerifiedAction(id: string, isVerified: boolean) {
   return user;
 }
 
+// Admin promotes/demotes a user to/from VIP (VIP sellers have unlimited listings).
+export async function setUserVipAction(id: string, isVip: boolean) {
+  await requireAdmin();
+  const user = await updateUserVipStatus(id, isVip);
+  revalidatePath("/admin/users");
+  revalidatePath("/admin");
+  revalidatePath("/products");
+  return user;
+}
+
 // Admin promotes/demotes a user to/from admin role (phone login grants admin access).
 export async function setUserAdminAction(id: string, isAdmin: boolean) {
   await requireAdmin();
@@ -182,6 +193,7 @@ export async function updateMyProfileAction(data: {
   name: string;
   whatsapp?: string;
   avatar?: string | null;
+  banner?: string | null;
 }) {
   const userId = await requireUser();
   if (!data.name || !data.name.trim()) throw new Error("Name is required");
@@ -189,6 +201,7 @@ export async function updateMyProfileAction(data: {
     name: data.name.trim(),
     whatsapp: data.whatsapp,
     avatar: data.avatar,
+    banner: data.banner,
   });
   revalidatePath("/dashboard/profile");
   revalidatePath("/dashboard");

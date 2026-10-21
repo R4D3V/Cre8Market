@@ -22,10 +22,11 @@ export interface Product {
   specs?: { label: string; value: string }[];
   condition?:
     | "New"
+    | "Used"
+    | "Refurbished"
     | "Like New"
     | "Used - Good"
-    | "Used - Fair"
-    | "Refurbished";
+    | "Used - Fair";
   location?: string;
   seller?: Seller;
   user_id?: string | null;
@@ -35,6 +36,7 @@ export interface Product {
   ownerWhatsapp?: string | null;
   ownerAvatar?: string | null;
   ownerVerified?: boolean | null;
+  ownerVip?: boolean | null;
   categoryIcon?: string;
   categoryColor?: string;
   categoryBg?: string;
@@ -56,9 +58,11 @@ export interface AppUser {
   phone: string;
   whatsapp: string | null;
   avatar?: string | null;
+  banner?: string | null;
   isActive: boolean;
   isAdmin: boolean;
   isVerified: boolean;
+  isVip?: boolean;
   createdAt: string;
   productCount?: number;
 }

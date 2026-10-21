@@ -45,7 +45,8 @@ async function requireUser() {
 
 // Unverified sellers can only post a limited number of listings. Once they're
 // verified by an admin, the limit is lifted.
-const MAX_UNVERIFIED_PRODUCTS = 5;
+const MAX_FREE_PRODUCTS = 3;
+const MAX_VERIFIED_PRODUCTS = 20;
 
 // Generate a slug that doesn't collide with an existing one (e.g. `x-copy-2`).
 async function uniqueSlug(base: string): Promise<string> {
@@ -85,10 +86,18 @@ export async function fetchMyListingLimitAction() {
   const userId = await requireUser();
   const user = await getUserById(userId);
   const products = await getProductsByUserId(userId);
+  const isVip = user?.isVip ?? false;
+  const isVerified = user?.isVerified ?? false;
+  const limit = isVip
+    ? null
+    : isVerified
+      ? MAX_VERIFIED_PRODUCTS
+      : MAX_FREE_PRODUCTS;
   return {
     productCount: products.length,
-    isVerified: user?.isVerified ?? false,
-    limit: MAX_UNVERIFIED_PRODUCTS,
+    isVerified,
+    isVip,
+    limit,
   };
 }
 
@@ -224,11 +233,16 @@ export async function createMyProductAction(data: Record<string, unknown>) {
   const userId = await requireUser();
 
   const user = await getUserById(userId);
-  if (user && !user.isVerified) {
+  const isVip = user?.isVip ?? false;
+  const isVerified = user?.isVerified ?? false;
+  if (!isVip) {
+    const max = isVerified ? MAX_VERIFIED_PRODUCTS : MAX_FREE_PRODUCTS;
     const existing = await getProductsByUserId(userId);
-    if (existing.length >= MAX_UNVERIFIED_PRODUCTS) {
+    if (existing.length >= max) {
       throw new Error(
-        `You've reached the limit of ${MAX_UNVERIFIED_PRODUCTS} listings as an unverified seller. Contact the admin to get verified so you can post more.`,
+        isVerified
+          ? `You've reached the limit of ${MAX_VERIFIED_PRODUCTS} listings as a verified seller. Contact the admin to become a VIP for unlimited listings.`
+          : `You've reached the limit of ${MAX_FREE_PRODUCTS} listings as a free seller. Contact the admin to get verified so you can post more.`,
       );
     }
   }
@@ -304,11 +318,14 @@ export async function duplicateMyProductsAction(ids: string[]) {
   }
 
   const user = await getUserById(userId);
-  if (user && !user.isVerified) {
+  const isVip = user?.isVip ?? false;
+  const isVerified = user?.isVerified ?? false;
+  if (!isVip) {
+    const max = isVerified ? MAX_VERIFIED_PRODUCTS : MAX_FREE_PRODUCTS;
     const existing = await getProductsByUserId(userId);
-    if (existing.length + ids.length > MAX_UNVERIFIED_PRODUCTS) {
+    if (existing.length + ids.length > max) {
       throw new Error(
-        `Duplicating ${ids.length} product${ids.length !== 1 ? "s" : ""} would put you past the ${MAX_UNVERIFIED_PRODUCTS} listing limit as an unverified seller. Contact the admin to get verified so you can post more.`,
+        `Duplicating ${ids.length} product${ids.length !== 1 ? "s" : ""} would put you past the ${max} listing limit. Contact the admin to upgrade your account.`,
       );
     }
   }

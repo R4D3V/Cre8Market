@@ -90,6 +90,12 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS pin_hash TEXT;
 -- Migration: seller verification — admins mark a user verified so a badge shows on their listings.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false;
 
+-- Migration: profile banner image shown on the seller's storefront page.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS banner TEXT;
+
+-- Migration: VIP sellers can post unlimited listings.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_vip BOOLEAN DEFAULT false;
+
 -- ── better-auth tables (required for login / sessions) ──
 -- These mirror the accounts in `users` / `admin_users`. Safe to re-run.
 CREATE TABLE IF NOT EXISTS "user" (

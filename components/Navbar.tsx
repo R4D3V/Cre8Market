@@ -22,6 +22,7 @@ export default function Navbar() {
             alt="Cre8 Market"
             width={954}
             height={257}
+            loading="eager"
             className="h-8 w-auto shrink-0 object-contain"
           />
         </Link>

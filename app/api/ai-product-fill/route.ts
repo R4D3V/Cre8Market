@@ -90,7 +90,7 @@ export async function POST(request: Request) {
           Rules:
           - categorySlug must be one of these exact values: ${categoryList}
           - Use the closest relevant category if the title is a little different.
-          - condition must be one of: New, Like New, Used - Good, Used - Fair, Refurbished.
+          - condition must be one of: New, Used, Refurbished.
           - description should sound like a clean marketplace listing.
           - specs should be plain text with one item per line using "Label: Value".
           - price must be a string of digits only in UGX, realistic for Uganda.

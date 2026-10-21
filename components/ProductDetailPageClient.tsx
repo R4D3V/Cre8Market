@@ -43,6 +43,8 @@ export default function ProductDetailPageClient({
   const color = product.categoryColor ?? "#64748b";
   const bg = product.categoryBg ?? "#f8fafc";
   const sellerName = product.ownerName ?? product.seller?.name;
+  const sellerHref = product.user_id ? `/sellers/${product.user_id}` : null;
+  const SellerWrapper = (sellerHref ? Link : "div") as React.ElementType;
   const isVerified = product.user_id ? !!product.ownerVerified : true;
   const sellerWhatsapp =
     product.ownerWhatsapp ?? product.seller?.whatsapp ?? "256751621506";
@@ -201,7 +203,13 @@ export default function ProductDetailPageClient({
                       {m.label}
                     </p>
                     <p className="text-sm font-semibold text-foreground mt-0.5">
-                      {m.value}
+                      {m.label === "Seller" && sellerHref ? (
+                        <Link href={sellerHref} className="text-primary hover:underline">
+                          {m.value}
+                        </Link>
+                      ) : (
+                        m.value
+                      )}
                     </p>
                   </div>
                 ))}
@@ -304,7 +312,10 @@ export default function ProductDetailPageClient({
               )}
             </div>
 
-            <div className="neu-card p-5">
+            <SellerWrapper
+              href={sellerHref ?? undefined}
+              className="neu-card p-5 block group hover:opacity-90 transition-opacity cursor-pointer"
+            >
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">
                 About the Seller
               </p>
@@ -338,6 +349,11 @@ export default function ProductDetailPageClient({
                       </svg>
                     )}
                   </p>
+                  {product.ownerVip && (
+                    <span className="inline-block bg-amber-500/10 text-amber-600 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 mr-1">
+                      ★ VIP Seller
+                    </span>
+                  )}
                   {isVerified && (
                     <span className="inline-block bg-secondary/10 text-secondary text-[10px] font-bold px-2 py-0.5 rounded-full mt-1">
                       ✓ Verified Seller
@@ -350,7 +366,7 @@ export default function ProductDetailPageClient({
                   )}
                 </div>
               </div>
-            </div>
+            </SellerWrapper>
 
             <div className="bg-secondary/10 border border-secondary/40 rounded-2xl p-4">
               <p className="text-xs font-bold text-secondary uppercase tracking-wide mb-2">

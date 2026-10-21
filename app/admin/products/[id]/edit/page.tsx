@@ -222,7 +222,7 @@ export default function EditProductPage() {
               className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             >
               <option value="">Select…</option>
-              {["New", "Like New", "Used - Good", "Used - Fair", "Refurbished"].map(
+              {["New", "Used", "Refurbished"].map(
                 (c) => (
                   <option key={c} value={c}>
                     {c}
