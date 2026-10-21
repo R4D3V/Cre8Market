@@ -328,7 +328,7 @@ function ProductsPageContent({
               </select>
             </div>
 
-            {loading && products.length === 0 ? (
+            {loading ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <ProductCardSkeleton key={i} />
