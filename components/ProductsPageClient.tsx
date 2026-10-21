@@ -89,7 +89,7 @@ function ProductsPageContent({
   const [minPrice, setMinPrice] = useState(minPriceParam);
   const [maxPrice, setMaxPrice] = useState(maxPriceParam);
   const [page, setPage] = useState(pageParam ? Number(pageParam) : 1);
-  const [filtersOpen, setFiltersOpen] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const skipInitialProductsRef = useRef(!!initialProducts);
   const skipInitialMetaRef = useRef(
