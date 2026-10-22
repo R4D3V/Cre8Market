@@ -27,9 +27,18 @@ self.addEventListener("push", (e) => {
   };
 
   e.waitUntil(
-    self.registration.showNotification(title, options).catch((err) => {
-      console.error("showNotification failed:", err);
-    }),
+    (async () => {
+      try {
+        await self.registration.showNotification(title, options);
+      } catch (err) {
+        console.error("showNotification failed:", err);
+      }
+      // Notify any open website tabs so they can show an in-app toast.
+      const allClients = await clients.matchAll({ type: "window", includeUncontrolled: true });
+      for (const client of allClients) {
+        client.postMessage({ type: "push", title, body: data.body || "", url: data.url || "/" });
+      }
+    })(),
   );
 });
 

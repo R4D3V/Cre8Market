@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import FloatingIcons from './FloatingIcons'
 import InstallPopup from './InstallPopup'
 import MobileBottomNav from './MobileBottomNav'
+import InAppNotificationToast from './InAppNotificationToast'
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -24,6 +25,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     <>
       <FloatingIcons />
       <InstallPopup />
+      <InAppNotificationToast />
       <div className="relative z-10">
         {children}
       </div>
