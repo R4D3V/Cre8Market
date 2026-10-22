@@ -314,6 +314,7 @@ export default function ProductDetailPageClient({
 
             <SellerWrapper
               href={sellerHref ?? undefined}
+              data-testid="seller-link"
               className="neu-card p-5 block group hover:opacity-90 transition-opacity cursor-pointer"
             >
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">

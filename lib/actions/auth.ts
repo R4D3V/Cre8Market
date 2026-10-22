@@ -2,7 +2,13 @@
 
 import { pool } from "@/lib/db/pool";
 import bcrypt from "bcrypt";
-import { checkPhoneExists, createUser, getUserByPhone } from "@/lib/db/queries";
+import {
+  checkPhoneExists,
+  createUser,
+  getUserByPhone,
+  getAdminUserByEmail,
+  logAudit,
+} from "@/lib/db/queries";
 
 // Public self-registration for regular marketplace users (buyers/sellers).
 // Does not sign the user in — the client calls better-auth's signIn.email(...) right
@@ -37,6 +43,15 @@ export async function registerUserAction(data: {
     pin_hash,
   });
 
+  await logAudit({
+    actorId: user.id,
+    actorRole: "user",
+    action: "user.register",
+    targetType: "user",
+    targetId: user.id,
+    metadata: { name: data.name, phone: data.phone },
+  });
+
   return user;
 }
 
@@ -63,12 +78,21 @@ export async function resetAdminPasswordAction(
   }
 
   const passwordHash = await bcrypt.hash(newPassword, 12);
+  const admin = await getAdminUserByEmail(email);
   const { rowCount } = await pool.query(
     "UPDATE admin_users SET password_hash = $1 WHERE email = $2",
     [passwordHash, email],
   );
 
   if (rowCount === 0) throw new Error("No admin user found with that email");
+  await logAudit({
+    actorId: null,
+    actorRole: "admin",
+    action: "admin.password_reset_self",
+    targetType: "admin",
+    targetId: admin?.id ?? email,
+    metadata: { email },
+  });
   return { success: true };
 }
 
@@ -100,5 +124,13 @@ export async function resetUserPasswordAction(phone: string, newPassword: string
   );
 
   if (rowCount === 0) throw new Error("No account found with that phone number");
+  await logAudit({
+    actorId: user.id,
+    actorRole: "user",
+    action: "user.password_reset_self",
+    targetType: "user",
+    targetId: user.id,
+    metadata: { phone },
+  });
   return { success: true };
 }

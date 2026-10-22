@@ -1,6 +1,6 @@
 import { getPushSubscriptions, deletePushSubscription } from "@/lib/db/queries";
 
-const webpush = require("web-push");
+import * as webpush from "web-push";
 
 // VAPID keys must come from the environment. Auto-generating them at runtime is
 // dangerous in serverless deployments (each instance would get a different pair,

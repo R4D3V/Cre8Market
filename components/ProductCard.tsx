@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/data";
 
@@ -26,6 +27,7 @@ export default function ProductCard({
   return (
     <Link
       href={productHref}
+      data-testid="product-card"
       className={
         dark
           ? "group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition hover:border-primary"
@@ -40,10 +42,12 @@ export default function ProductCard({
         style={{ backgroundColor: bg }}
       >
         {product.images?.[0] ? (
-          <img
+          <Image
             src={product.images[0]}
             alt={product.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            fill
+            sizes="(max-width: 640px) 50vw, 25vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <span className="text-5xl opacity-60 group-hover:scale-110 transition-transform duration-300">

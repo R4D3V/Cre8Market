@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
-import Link from "next/link";
-import Image from "next/image";
 import { Menu, X, LogOut } from "lucide-react";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { fetchMyProfileAction } from "@/lib/actions/users";
+import Navbar from "@/components/Navbar";
 
 function getPageTitle(pathname: string) {
   if (pathname === "/dashboard") return "My Products";
@@ -70,9 +69,12 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Top navbar */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
-        <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-6">
+      {/* Project navbar */}
+      <Navbar />
+
+      {/* Dashboard sub-bar */}
+      <header className="sticky top-[3.5rem] z-30 border-b border-border bg-background/80 backdrop-blur">
+        <div className="flex h-12 items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
@@ -82,53 +84,15 @@ export default function DashboardLayout({
             >
               <Menu className="size-5" />
             </button>
-
-            <Link
-              href="/dashboard"
-              className="hidden items-center gap-2 font-heading text-sm font-extrabold tracking-wide sm:flex"
-            >
-              <Image
-                src="/brand/cre8-market-logo-transparent.svg"
-                alt="Cre8 Market"
-                width={954}
-                height={257}
-                loading="eager"
-                className="h-7 w-auto shrink-0 object-contain"
-              />
-            </Link>
-
-            <span className="hidden h-5 w-px bg-border sm:block" />
-
             <h1 className="truncate font-heading text-sm font-extrabold sm:text-base">
               {pageTitle}
             </h1>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/"
-              className="hidden text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:inline"
-            >
-              View site →
-            </Link>
-
-            <div className="flex items-center gap-2">
-              <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs font-bold text-muted-foreground">
-                {userAvatar ? (
-                  <img
-                    src={userAvatar}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  initial
-                )}
-              </span>
-              <span className="hidden max-w-[140px] truncate text-xs text-muted-foreground sm:inline">
-                {name}
-              </span>
-            </div>
-
+            <span className="hidden max-w-[140px] truncate text-xs text-muted-foreground sm:inline">
+              {name}
+            </span>
             <button
               type="button"
               onClick={handleSignOut}

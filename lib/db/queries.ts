@@ -401,8 +401,12 @@ export async function updateCategory(
   return rows[0];
 }
 
-export async function deleteCategory(id: string): Promise<void> {
-  await pool.query("DELETE FROM categories WHERE id = $1", [id]);
+export async function deleteCategory(id: string): Promise<CategoryDB | null> {
+  const { rows } = await pool.query(
+    "DELETE FROM categories WHERE id = $1 RETURNING *",
+    [id],
+  );
+  return rows[0] ?? null;
 }
 
 // ── Push Subscriptions ──
@@ -841,4 +845,233 @@ function mapProductWithOwner(row: Record<string, unknown>): Product {
     ownerVerified: (row.owner_verified as boolean) ?? null,
     ownerVip: (row.owner_vip as boolean) ?? null,
   };
+}
+
+// ── Audit log ────────────────────────────────────────────────────────────────
+
+export interface AuditLogFilters {
+  limit?: number;
+  offset?: number;
+  action?: string;
+  actorRole?: string;
+  actorId?: string;
+  targetType?: string;
+  targetId?: string;
+  search?: string;
+  from?: string;
+  to?: string;
+}
+
+export interface AuditEntry {
+  id: string;
+  actor_id: string | null;
+  actor_role: string | null;
+  actor_name: string | null;
+  action: string;
+  target_type: string | null;
+  target_id: string | null;
+  metadata: Record<string, unknown>;
+  ip: string | null;
+  user_agent: string | null;
+  created_at: string;
+}
+
+export interface AuditFacets {
+  actions: string[];
+  actor_roles: string[];
+  target_types: string[];
+}
+
+// Resolve the caller's IP and user agent inside a request. Falls back to
+// nulls when called outside a request context (scripts, tests, workers).
+async function getRequestMeta(): Promise<{
+  ip: string | null;
+  userAgent: string | null;
+}> {
+  try {
+    const { headers } = await import("next/headers");
+    const h = await headers();
+    const forwarded = h.get("x-forwarded-for");
+    return {
+      ip:
+        forwarded?.split(",")[0]?.trim() ||
+        h.get("x-real-ip") ||
+        h.get("cf-connecting-ip") ||
+        null,
+      userAgent: h.get("user-agent") || null,
+    };
+  } catch {
+    return { ip: null, userAgent: null };
+  }
+}
+
+export async function logAudit(entry: {
+  actorId?: string | null;
+  actorRole?: string | null;
+  action: string;
+  targetType?: string | null;
+  targetId?: string | null;
+  metadata?: Record<string, unknown>;
+  ip?: string | null;
+  userAgent?: string | null;
+}): Promise<void> {
+  const requestMeta =
+    entry.ip === undefined && entry.userAgent === undefined
+      ? await getRequestMeta()
+      : { ip: entry.ip ?? null, userAgent: entry.userAgent ?? null };
+
+  const values = [
+    entry.actorId ?? null,
+    entry.actorRole ?? null,
+    entry.action,
+    entry.targetType ?? null,
+    entry.targetId ?? null,
+    JSON.stringify(entry.metadata ?? {}),
+    requestMeta.ip,
+    requestMeta.userAgent,
+  ];
+
+  try {
+    await pool.query(
+      `INSERT INTO audit_log
+         (actor_id, actor_role, action, target_type, target_id, metadata, ip, user_agent)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      values,
+    );
+  } catch (err) {
+    // Fall back to the legacy column set so audit logging keeps working on
+    // databases that have not yet run migration 0002.
+    try {
+      await pool.query(
+        `INSERT INTO audit_log (actor_id, actor_role, action, target_type, target_id, metadata)
+         VALUES ($1,$2,$3,$4,$5,$6)`,
+        values.slice(0, 6),
+      );
+    } catch (fallbackErr) {
+      console.error("audit log failed:", fallbackErr ?? err);
+    }
+  }
+}
+
+function buildAuditWhere(filters: AuditLogFilters): {
+  where: string;
+  values: unknown[];
+} {
+  const clauses: string[] = [];
+  const values: unknown[] = [];
+
+  const add = (column: string, value: unknown) => {
+    values.push(value);
+    clauses.push(`a.${column} = $${values.length}`);
+  };
+
+  if (filters.action) add("action", filters.action);
+  if (filters.actorRole) add("actor_role", filters.actorRole);
+  if (filters.actorId) add("actor_id", filters.actorId);
+  if (filters.targetType) add("target_type", filters.targetType);
+  if (filters.targetId) add("target_id", filters.targetId);
+
+  if (filters.from) {
+    values.push(filters.from);
+    clauses.push(`a.created_at >= $${values.length}`);
+  }
+  if (filters.to) {
+    values.push(filters.to);
+    clauses.push(`a.created_at <= $${values.length}`);
+  }
+
+  if (filters.search) {
+    values.push(`%${filters.search}%`);
+    const p = `$${values.length}`;
+    clauses.push(
+      `(a.action ILIKE ${p} OR a.actor_id ILIKE ${p} OR a.target_id ILIKE ${p} OR a.metadata::text ILIKE ${p})`,
+    );
+  }
+
+  return {
+    where: clauses.length ? `WHERE ${clauses.join(" AND ")}` : "",
+    values,
+  };
+}
+
+export async function getAuditLog(
+  filters: number | AuditLogFilters = 100,
+): Promise<AuditEntry[]> {
+  const f: AuditLogFilters =
+    typeof filters === "number" ? { limit: filters } : filters;
+  const limit = Math.min(Math.max(f.limit ?? 100, 1), 500);
+  const offset = Math.max(f.offset ?? 0, 0);
+  const { where, values } = buildAuditWhere(f);
+
+  const { rows } = await pool.query(
+    `SELECT a.*,
+       COALESCE(
+         (SELECT u.name FROM users u WHERE u.id::text = a.actor_id),
+         (SELECT au.name FROM admin_users au WHERE au.id::text = a.actor_id)
+       ) AS actor_name
+     FROM audit_log a ${where}
+     ORDER BY a.created_at DESC
+     LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
+    [...values, limit, offset],
+  );
+  return rows as AuditEntry[];
+}
+
+export async function countAuditLog(
+  filters: AuditLogFilters = {},
+): Promise<number> {
+  const { where, values } = buildAuditWhere(filters);
+  const { rows } = await pool.query(
+    `SELECT COUNT(*)::int AS count FROM audit_log a ${where}`,
+    values,
+  );
+  return (rows[0]?.count as number) ?? 0;
+}
+
+export async function getAuditFacets(): Promise<AuditFacets> {
+  const { rows } = await pool.query(`
+    SELECT
+      ARRAY(SELECT DISTINCT action FROM audit_log ORDER BY action) AS actions,
+      ARRAY(
+        SELECT DISTINCT actor_role FROM audit_log
+        WHERE actor_role IS NOT NULL ORDER BY actor_role
+      ) AS actor_roles,
+      ARRAY(
+        SELECT DISTINCT target_type FROM audit_log
+        WHERE target_type IS NOT NULL ORDER BY target_type
+      ) AS target_types
+  `);
+  return (
+    (rows[0] as AuditFacets | undefined) ?? {
+      actions: [],
+      actor_roles: [],
+      target_types: [],
+    }
+  );
+}
+
+// ── Feature flags ────────────────────────────────────────────────────────────
+export async function isFeatureEnabled(key: string): Promise<boolean> {
+  // Env override takes precedence: FEATURE_<KEY>=true/false
+  const envKey = `FEATURE_${key.toUpperCase().replace(/-/g, "_")}`;
+  const envVal = process.env[envKey];
+  if (envVal === "true") return true;
+  if (envVal === "false") return false;
+  try {
+    const { rows } = await pool.query(
+      `SELECT enabled FROM feature_flags WHERE key = $1`,
+      [key],
+    );
+    return rows[0]?.enabled === true;
+  } catch {
+    return false;
+  }
+}
+
+export async function setFeatureFlag(key: string, enabled: boolean): Promise<void> {
+  await pool.query(
+    `INSERT INTO feature_flags (key, enabled, updated_at) VALUES ($1,$2,now())
+     ON CONFLICT (key) DO UPDATE SET enabled = $2, updated_at = now()`,
+    [key, enabled],
+  );
 }

@@ -5,6 +5,7 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  logAudit,
 } from "@/lib/db/queries";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -14,6 +15,7 @@ async function requireAdmin() {
   if (!session?.user || session.user.role !== "admin") {
     throw new Error("Not authorized");
   }
+  return session.user.id;
 }
 
 export async function fetchCategoriesAction() {
@@ -21,8 +23,16 @@ export async function fetchCategoriesAction() {
 }
 
 export async function createCategoryAction(data: { name: string; slug: string; icon?: string; color?: string; bg_color?: string }) {
-  await requireAdmin();
+  const actorId = await requireAdmin();
   const category = await createCategory(data);
+  await logAudit({
+    actorId,
+    actorRole: "admin",
+    action: "category.create",
+    targetType: "category",
+    targetId: category.id,
+    metadata: { name: category.name, slug: category.slug },
+  });
   revalidatePath("/");
   revalidatePath("/products");
   revalidatePath("/selltous");
@@ -31,8 +41,16 @@ export async function createCategoryAction(data: { name: string; slug: string; i
 }
 
 export async function updateCategoryAction(id: string, data: { name: string; slug: string; icon: string; color: string; bg_color: string }) {
-  await requireAdmin();
+  const actorId = await requireAdmin();
   const category = await updateCategory(id, data);
+  await logAudit({
+    actorId,
+    actorRole: "admin",
+    action: "category.update",
+    targetType: "category",
+    targetId: id,
+    metadata: { name: category.name, slug: category.slug },
+  });
   revalidatePath("/");
   revalidatePath("/products");
   revalidatePath("/selltous");
@@ -41,8 +59,16 @@ export async function updateCategoryAction(id: string, data: { name: string; slu
 }
 
 export async function deleteCategoryAction(id: string) {
-  await requireAdmin();
-  await deleteCategory(id);
+  const actorId = await requireAdmin();
+  const category = await deleteCategory(id);
+  await logAudit({
+    actorId,
+    actorRole: "admin",
+    action: "category.delete",
+    targetType: "category",
+    targetId: id,
+    metadata: { name: category?.name, slug: category?.slug },
+  });
   revalidatePath("/");
   revalidatePath("/products");
   revalidatePath("/selltous");

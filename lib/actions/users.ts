@@ -18,6 +18,7 @@ import {
   deleteUser,
   checkPhoneExists,
   checkPhoneExistsExcluding,
+  logAudit,
 } from "@/lib/db/queries";
 import { revalidatePath } from "next/cache";
 
@@ -88,13 +89,32 @@ export async function createUserByAdminAction(data: {
     pin_hash,
   });
 
+  const session = await auth();
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: session?.user?.role ?? "admin",
+    action: "user.create",
+    targetType: "user",
+    targetId: user.id,
+    metadata: { name: data.name, phone: data.phone },
+  });
+
   revalidatePath("/admin/users");
   return user;
 }
 
 export async function setUserActiveAction(id: string, isActive: boolean) {
   await requireAdmin();
+  const session = await auth();
   const user = await updateUserStatus(id, isActive);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: isActive ? "user.activate" : "user.deactivate",
+    targetType: "user",
+    targetId: id,
+    metadata: { isActive },
+  });
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${id}/edit`);
   return user;
@@ -121,6 +141,15 @@ export async function updateUserByAdminAction(
     whatsapp: data.whatsapp?.trim() || phone,
     avatar: data.avatar,
   });
+  const session = await auth();
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: "user.update",
+    targetType: "user",
+    targetId: id,
+    metadata: { name: data.name.trim(), phone },
+  });
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${id}/edit`);
   revalidatePath("/admin");
@@ -130,7 +159,16 @@ export async function updateUserByAdminAction(
 // Admin verifies/unverifies a seller (verified sellers show a badge on their listings).
 export async function setUserVerifiedAction(id: string, isVerified: boolean) {
   await requireAdmin();
+  const session = await auth();
   const user = await updateUserVerifiedStatus(id, isVerified);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: isVerified ? "user.verify" : "user.unverify",
+    targetType: "user",
+    targetId: id,
+    metadata: { isVerified },
+  });
   revalidatePath("/admin/users");
   revalidatePath("/admin");
   revalidatePath("/products");
@@ -140,7 +178,16 @@ export async function setUserVerifiedAction(id: string, isVerified: boolean) {
 // Admin promotes/demotes a user to/from VIP (VIP sellers have unlimited listings).
 export async function setUserVipAction(id: string, isVip: boolean) {
   await requireAdmin();
+  const session = await auth();
   const user = await updateUserVipStatus(id, isVip);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: isVip ? "user.promote_vip" : "user.demote_vip",
+    targetType: "user",
+    targetId: id,
+    metadata: { isVip },
+  });
   revalidatePath("/admin/users");
   revalidatePath("/admin");
   revalidatePath("/products");
@@ -150,7 +197,16 @@ export async function setUserVipAction(id: string, isVip: boolean) {
 // Admin promotes/demotes a user to/from admin role (phone login grants admin access).
 export async function setUserAdminAction(id: string, isAdmin: boolean) {
   await requireAdmin();
+  const session = await auth();
   const user = await updateUserAdminStatus(id, isAdmin);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: isAdmin ? "user.promote_admin" : "user.demote_admin",
+    targetType: "user",
+    targetId: id,
+    metadata: { isAdmin },
+  });
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${id}/edit`);
   revalidatePath("/admin");
@@ -160,11 +216,19 @@ export async function setUserAdminAction(id: string, isAdmin: boolean) {
 // Backup plan: an admin sets a new password for a user (e.g. if they forgot their reset pin).
 export async function resetUserPasswordByAdminAction(id: string, newPassword: string) {
   await requireAdmin();
+  const session = await auth();
   if (!newPassword || newPassword.length < 6) {
     throw new Error("New password must be at least 6 characters");
   }
   const passwordHash = await bcrypt.hash(newPassword, 12);
   await updateUserPassword(id, passwordHash);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: "user.password_reset",
+    targetType: "user",
+    targetId: id,
+  });
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${id}/edit`);
   return { success: true };
@@ -174,7 +238,17 @@ export async function resetUserPasswordByAdminAction(id: string, newPassword: st
 // unassigned (their "Added by" reverts to the admin/store).
 export async function deleteUserAction(id: string) {
   await requireAdmin();
+  const session = await auth();
+  const target = await getUserById(id).catch(() => null);
   await deleteUser(id);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: "user.delete",
+    targetType: "user",
+    targetId: id,
+    metadata: { name: target?.name, phone: target?.phone },
+  });
   revalidatePath("/admin/users");
   revalidatePath("/admin");
   revalidatePath("/products");
@@ -203,6 +277,14 @@ export async function updateMyProfileAction(data: {
     avatar: data.avatar,
     banner: data.banner,
   });
+  await logAudit({
+    actorId: userId,
+    actorRole: "user",
+    action: "profile.update",
+    targetType: "user",
+    targetId: userId,
+    metadata: { name: data.name.trim() },
+  });
   revalidatePath("/dashboard/profile");
   revalidatePath("/dashboard");
   return user;
@@ -220,5 +302,12 @@ export async function changeMyPasswordAction(currentPassword: string, newPasswor
 
   const passwordHash = await bcrypt.hash(newPassword, 12);
   await updateUserPassword(userId, passwordHash);
+  await logAudit({
+    actorId: userId,
+    actorRole: "user",
+    action: "password.change",
+    targetType: "user",
+    targetId: userId,
+  });
   return { success: true };
 }

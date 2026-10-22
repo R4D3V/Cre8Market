@@ -21,12 +21,18 @@ import {
   getProductOwnerIds,
   getSellers,
   getUserById,
+  logAudit,
+  getAuditLog,
+  countAuditLog,
+  getAuditFacets,
 } from "@/lib/db/queries";
 import { auth } from "@/lib/auth";
 import { sendPushNotification } from "@/lib/push";
 import { revalidatePath } from "next/cache";
 import type { Product } from "@/lib/types";
 import type { ProductsPageParams } from "@/lib/db/queries";
+import type { AuditLogFilters } from "@/lib/db/queries";
+import { productInputSchema } from "@/lib/validation";
 
 async function requireAdmin() {
   const session = await auth();
@@ -145,13 +151,37 @@ export async function fetchProductsWithOwnersAction() {
   return getProductsWithOwners();
 }
 
+export async function fetchAuditLogAction(filters: AuditLogFilters = {}) {
+  await requireAdmin();
+  const [entries, total, facets] = await Promise.all([
+    getAuditLog(filters),
+    countAuditLog(filters),
+    getAuditFacets(),
+  ]);
+  return { entries, total, facets };
+}
+
 // ── Admin-only product management (any product) ──
 
 export async function createProductAction(data: Record<string, unknown>) {
   await requireAdmin();
-  const exists = await checkSlugExists(data.slug as string);
+  const session = await auth();
+  const parsed = productInputSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((i) => i.message).join("; "));
+  }
+  const input = parsed.data;
+  const exists = await checkSlugExists(input.slug);
   if (exists) throw new Error("Slug already exists");
-  const product = await createProduct(data);
+  const product = await createProduct(input as Record<string, unknown>);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: "product.create",
+    targetType: "product",
+    targetId: product.id,
+    metadata: { title: product.title, slug: product.slug },
+  });
   await sendPushNotification({
     title: "New Product Added!",
     body: `${product.title} — UGX ${Number(product.price).toLocaleString()}`,
@@ -165,9 +195,25 @@ export async function createProductAction(data: Record<string, unknown>) {
 
 export async function updateProductAction(id: string, data: Record<string, unknown>) {
   await requireAdmin();
-  const exists = await checkSlugExists(data.slug as string, id);
-  if (exists) throw new Error("Slug already exists");
-  const product = await updateProduct(id, data);
+  const session = await auth();
+  const parsed = productInputSchema.partial().safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((i) => i.message).join("; "));
+  }
+  const input = parsed.data;
+  if (input.slug) {
+    const exists = await checkSlugExists(input.slug, id);
+    if (exists) throw new Error("Slug already exists");
+  }
+  const product = await updateProduct(id, input as Record<string, unknown>);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: "product.update",
+    targetType: "product",
+    targetId: id,
+    metadata: { title: product.title, slug: product.slug },
+  });
   revalidatePath("/admin");
   revalidatePath("/products");
   revalidatePath("/deals");
@@ -177,7 +223,17 @@ export async function updateProductAction(id: string, data: Record<string, unkno
 
 export async function deleteProductAction(id: string) {
   await requireAdmin();
+  const session = await auth();
+  const existing = await getProductById(id).catch(() => null);
   await deleteProduct(id);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: "product.delete",
+    targetType: "product",
+    targetId: id,
+    metadata: { title: existing?.title, slug: existing?.slug },
+  });
   revalidatePath("/admin");
   revalidatePath("/products");
   revalidatePath("/deals");
@@ -185,7 +241,16 @@ export async function deleteProductAction(id: string) {
 
 export async function deleteProductsAction(ids: string[]) {
   await requireAdmin();
+  const session = await auth();
   await deleteProductsByIds(ids);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: "product.bulk_delete",
+    targetType: "product",
+    targetId: null,
+    metadata: { ids, count: ids.length },
+  });
   revalidatePath("/admin");
   revalidatePath("/products");
   revalidatePath("/deals");
@@ -193,21 +258,41 @@ export async function deleteProductsAction(ids: string[]) {
 
 export async function setProductsFeaturedAction(ids: string[], featured: boolean) {
   await requireAdmin();
+  const session = await auth();
   await setProductsFeatured(ids, featured);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: featured ? "product.feature" : "product.unfeature",
+    targetType: "product",
+    targetId: null,
+    metadata: { ids, count: ids.length },
+  });
   revalidatePath("/admin");
   revalidatePath("/products");
 }
 
 export async function duplicateProductsAction(ids: string[]) {
   await requireAdmin();
+  const session = await auth();
   if (ids.length === 0) return;
+  const created: string[] = [];
   for (const id of ids) {
     const source = await getProductById(id);
     if (!source) continue;
     const data = buildDuplicateData(source, source.user_id ?? null);
     data.slug = await uniqueSlug(source.slug);
-    await createProduct(data);
+    const product = await createProduct(data);
+    created.push(product.id);
   }
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: "product.duplicate",
+    targetType: "product",
+    targetId: null,
+    metadata: { sourceIds: ids, createdIds: created, count: created.length },
+  });
   revalidatePath("/admin");
   revalidatePath("/products");
   revalidatePath("/deals");
@@ -242,9 +327,22 @@ export async function createMyProductAction(data: Record<string, unknown>) {
     }
   }
 
-  const exists = await checkSlugExists(data.slug as string);
+  const parsed = productInputSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((i) => i.message).join("; "));
+  }
+  const input = parsed.data;
+  const exists = await checkSlugExists(input.slug);
   if (exists) throw new Error("Slug already exists");
-  const product = await createProduct({ ...data, user_id: userId });
+  const product = await createProduct({ ...input, user_id: userId });
+  await logAudit({
+    actorId: userId,
+    actorRole: "user",
+    action: "product.create",
+    targetType: "product",
+    targetId: product.id,
+    metadata: { title: product.title, slug: product.slug },
+  });
   await sendPushNotification({
     title: "New Product Added!",
     body: `${product.title} — UGX ${Number(product.price).toLocaleString()}`,
@@ -262,9 +360,24 @@ export async function updateMyProductAction(id: string, data: Record<string, unk
   const ownerId = await getProductOwnerId(id);
   if (ownerId !== userId) throw new Error("You can only edit products you added");
 
-  const exists = await checkSlugExists(data.slug as string, id);
-  if (exists) throw new Error("Slug already exists");
-  const product = await updateProduct(id, { ...data, user_id: userId });
+  const parsed = productInputSchema.partial().safeParse(data);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((i) => i.message).join("; "));
+  }
+  const input = parsed.data;
+  if (input.slug) {
+    const exists = await checkSlugExists(input.slug, id);
+    if (exists) throw new Error("Slug already exists");
+  }
+  const product = await updateProduct(id, { ...input, user_id: userId });
+  await logAudit({
+    actorId: userId,
+    actorRole: "user",
+    action: "product.update",
+    targetType: "product",
+    targetId: id,
+    metadata: { title: product.title, slug: product.slug },
+  });
   revalidatePath("/dashboard");
   revalidatePath("/admin");
   revalidatePath("/products");
@@ -278,7 +391,16 @@ export async function deleteMyProductAction(id: string) {
   const ownerId = await getProductOwnerId(id);
   if (ownerId !== userId) throw new Error("You can only delete products you added");
 
+  const existing = await getProductById(id).catch(() => null);
   await deleteProduct(id);
+  await logAudit({
+    actorId: userId,
+    actorRole: "user",
+    action: "product.delete",
+    targetType: "product",
+    targetId: id,
+    metadata: { title: existing?.title, slug: existing?.slug },
+  });
   revalidatePath("/dashboard");
   revalidatePath("/admin");
   revalidatePath("/products");
@@ -295,6 +417,14 @@ export async function deleteMyProductsAction(ids: string[]) {
     }
   }
   await deleteProductsByIds(ids);
+  await logAudit({
+    actorId: userId,
+    actorRole: "user",
+    action: "product.bulk_delete",
+    targetType: "product",
+    targetId: null,
+    metadata: { ids, count: ids.length },
+  });
   revalidatePath("/dashboard");
   revalidatePath("/admin");
   revalidatePath("/products");
@@ -325,13 +455,23 @@ export async function duplicateMyProductsAction(ids: string[]) {
     }
   }
 
+  const created: string[] = [];
   for (const id of ids) {
     const source = await getProductById(id);
     if (!source) continue;
     const data = buildDuplicateData(source, userId);
     data.slug = await uniqueSlug(source.slug);
-    await createProduct(data);
+    const product = await createProduct(data);
+    created.push(product.id);
   }
+  await logAudit({
+    actorId: userId,
+    actorRole: "user",
+    action: "product.duplicate",
+    targetType: "product",
+    targetId: null,
+    metadata: { sourceIds: ids, createdIds: created, count: created.length },
+  });
   revalidatePath("/dashboard");
   revalidatePath("/admin");
   revalidatePath("/products");

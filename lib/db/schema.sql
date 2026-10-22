@@ -43,6 +43,26 @@ CREATE TABLE IF NOT EXISTS categories (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS audit_log (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  actor_id TEXT,
+  actor_role TEXT,
+  action TEXT NOT NULL,
+  target_type TEXT,
+  target_id TEXT,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  ip TEXT,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS feature_flags (
+  key TEXT PRIMARY KEY,
+  enabled BOOLEAN NOT NULL DEFAULT false,
+  description TEXT,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS push_subscriptions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   endpoint TEXT UNIQUE NOT NULL,

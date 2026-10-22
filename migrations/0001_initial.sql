@@ -1,0 +1,168 @@
+-- NeonDB Schema for Cre8Market (no RLS — handled at app level)
+
+-- Registered marketplace users (buyers/sellers who self-register or are added by admin).
+-- Distinct from admin_users (site administrators).
+CREATE TABLE IF NOT EXISTS users (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  phone TEXT UNIQUE NOT NULL,
+  whatsapp TEXT,
+  password_hash TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  is_admin BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  slug TEXT UNIQUE NOT NULL,
+  title TEXT NOT NULL,
+  price NUMERIC NOT NULL,
+  category TEXT NOT NULL,
+  category_slug TEXT NOT NULL,
+  featured BOOLEAN DEFAULT false,
+  description TEXT,
+  specs JSONB DEFAULT '[]'::jsonb,
+  condition TEXT,
+  location TEXT DEFAULT 'Entebbe',
+  seller JSONB DEFAULT '{}'::jsonb,
+  images JSONB DEFAULT '[]'::jsonb,
+  "daysAgo" INTEGER DEFAULT 0,
+  "timeAgo" TEXT DEFAULT 'Just now',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS categories (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  icon TEXT NOT NULL DEFAULT '📦',
+  color TEXT NOT NULL DEFAULT '#64748b',
+  bg_color TEXT NOT NULL DEFAULT '#f8fafc',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS audit_log (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  actor_id TEXT,
+  actor_role TEXT,
+  action TEXT NOT NULL,
+  target_type TEXT,
+  target_id TEXT,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  ip TEXT,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS feature_flags (
+  key TEXT PRIMARY KEY,
+  enabled BOOLEAN NOT NULL DEFAULT false,
+  description TEXT,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  endpoint TEXT UNIQUE NOT NULL,
+  keys JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS admin_users (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Migration: admin profile fields. Safe to re-run.
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS name TEXT;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS whatsapp TEXT;
+
+-- Migration: admin avatar (profile picture shown in the admin dashboard).
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS avatar TEXT;
+
+-- Migration: link products to the registered user who added them.
+-- Safe to re-run — only adds the column/index if missing.
+ALTER TABLE products ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_products_user_id ON products(user_id);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
+
+-- Migration: sellers feature removed — drop the legacy table and its FK column.
+ALTER TABLE products DROP COLUMN IF EXISTS seller_id;
+DROP TABLE IF EXISTS sellers;
+
+-- Migration: promote a regular user to admin (phone login grants admin role).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false;
+
+-- Migration: deal flag for products shown on the /deals page.
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_deal BOOLEAN DEFAULT false;
+
+-- Migration: user avatar (profile picture shown on listings).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT;
+
+-- Migration: 4-digit reset pin (hashed) used as 2-step verification to reset a password.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS pin_hash TEXT;
+
+-- Migration: seller verification — admins mark a user verified so a badge shows on their listings.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false;
+
+-- Migration: profile banner image shown on the seller's storefront page.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS banner TEXT;
+
+-- Migration: VIP sellers can post unlimited listings.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_vip BOOLEAN DEFAULT false;
+
+-- ── better-auth tables (required for login / sessions) ──
+-- These mirror the accounts in `users` / `admin_users`. Safe to re-run.
+CREATE TABLE IF NOT EXISTS "user" (
+  id TEXT PRIMARY KEY,
+  name TEXT,
+  email TEXT UNIQUE NOT NULL,
+  "emailVerified" BOOLEAN DEFAULT false,
+  image TEXT,
+  "createdAt" TIMESTAMPTZ DEFAULT now(),
+  "updatedAt" TIMESTAMPTZ DEFAULT now(),
+  phone TEXT,
+  whatsapp TEXT,
+  role TEXT
+);
+
+CREATE TABLE IF NOT EXISTS "account" (
+  id TEXT PRIMARY KEY,
+  "accountId" TEXT NOT NULL,
+  "providerId" TEXT NOT NULL,
+  "userId" TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  "accessToken" TEXT,
+  "refreshToken" TEXT,
+  "idToken" TEXT,
+  "accessTokenExpiresAt" TIMESTAMPTZ,
+  "refreshTokenExpiresAt" TIMESTAMPTZ,
+  scope TEXT,
+  password TEXT,
+  "createdAt" TIMESTAMPTZ DEFAULT now(),
+  "updatedAt" TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "session" (
+  id TEXT PRIMARY KEY,
+  "expiresAt" TIMESTAMPTZ NOT NULL,
+  token TEXT UNIQUE NOT NULL,
+  "createdAt" TIMESTAMPTZ DEFAULT now(),
+  "updatedAt" TIMESTAMPTZ DEFAULT now(),
+  "ipAddress" TEXT,
+  "userAgent" TEXT,
+  "userId" TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS "verification" (
+  id TEXT PRIMARY KEY,
+  identifier TEXT NOT NULL,
+  value TEXT NOT NULL,
+  "expiresAt" TIMESTAMPTZ NOT NULL,
+  "createdAt" TIMESTAMPTZ DEFAULT now(),
+  "updatedAt" TIMESTAMPTZ DEFAULT now()
+);

@@ -22,13 +22,14 @@ function inferRoleFromEmail(email?: string | null): "admin" | "user" {
   return email.endsWith("@cre8market.local") ? "user" : "admin";
 }
 
-function normalizeSession(session: any): { user: AppSessionUser } | null {
-  if (!session?.user) return null;
+function normalizeSession(session: unknown): { user: AppSessionUser } | null {
+  const s = session as { user?: AppSessionUser & { role?: string; email?: string | null } } | null;
+  if (!s?.user) return null;
 
   return {
     user: {
-      ...session.user,
-      role: session.user.role ?? inferRoleFromEmail(session.user.email ?? null),
+      ...s.user,
+      role: (s.user.role as "admin" | "user" | undefined) ?? inferRoleFromEmail(s.user.email ?? null),
     },
   };
 }
@@ -41,7 +42,13 @@ export function useSession(): {
   error: unknown;
   refetch: () => Promise<void>;
 } {
-  const result = authClient.useSession() as any;
+  const result = authClient.useSession() as {
+    data?: { user?: AppSessionUser } | null;
+    isPending?: boolean;
+    isRefetching?: boolean;
+    error?: unknown;
+    refetch?: () => Promise<void>;
+  };
   const status = result.isPending
     ? "loading"
     : result.data?.user
@@ -51,6 +58,10 @@ export function useSession(): {
   return {
     ...result,
     status,
+    isPending: result.isPending ?? false,
+    isRefetching: result.isRefetching ?? false,
+    error: result.error ?? null,
+    refetch: result.refetch ?? (async () => {}),
     data: normalizeSession(result.data),
   };
 }

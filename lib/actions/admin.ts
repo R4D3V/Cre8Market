@@ -11,6 +11,7 @@ import {
   updateAdminProfile,
   getAdminUserPasswordHash,
   updateAdminUserPassword,
+  logAudit,
 } from "@/lib/db/queries";
 import { revalidatePath } from "next/cache";
 
@@ -35,7 +36,7 @@ export async function createAdminUserAction(data: {
   avatar?: string | null;
   password: string;
 }) {
-  await requireAdmin();
+  const actorId = await requireAdmin();
 
   if (!data.email || !data.email.trim() || !data.password) {
     throw new Error("Email and password are required");
@@ -59,6 +60,15 @@ export async function createAdminUserAction(data: {
     password_hash,
   });
 
+  await logAudit({
+    actorId,
+    actorRole: "admin",
+    action: "admin.create",
+    targetType: "admin",
+    targetId: admin.id,
+    metadata: { email: admin.email, name: admin.name },
+  });
+
   revalidatePath("/admin/admins");
   revalidatePath("/admin");
   return admin;
@@ -69,7 +79,16 @@ export async function deleteAdminUserAction(id: string) {
   if (id === currentAdminId) {
     throw new Error("You cannot delete your own admin account");
   }
+  const target = await getAdminUserById(id).catch(() => null);
   await deleteAdminUser(id);
+  await logAudit({
+    actorId: currentAdminId,
+    actorRole: "admin",
+    action: "admin.delete",
+    targetType: "admin",
+    targetId: id,
+    metadata: { email: target?.email, name: target?.name },
+  });
   revalidatePath("/admin/admins");
   revalidatePath("/admin");
   return { success: true };
@@ -90,6 +109,14 @@ export async function updateMyAdminProfileAction(data: {
 }) {
   const adminId = await requireAdmin();
   const admin = await updateAdminProfile(adminId, data);
+  await logAudit({
+    actorId: adminId,
+    actorRole: "admin",
+    action: "admin.profile_update",
+    targetType: "admin",
+    targetId: adminId,
+    metadata: { name: admin?.name, phone: admin?.phone },
+  });
   revalidatePath("/admin/profile");
   return admin;
 }
@@ -106,5 +133,12 @@ export async function changeMyAdminPasswordAction(currentPassword: string, newPa
 
   const passwordHash = await bcrypt.hash(newPassword, 12);
   await updateAdminUserPassword(adminId, passwordHash);
+  await logAudit({
+    actorId: adminId,
+    actorRole: "admin",
+    action: "admin.password_change",
+    targetType: "admin",
+    targetId: adminId,
+  });
   return { success: true };
 }

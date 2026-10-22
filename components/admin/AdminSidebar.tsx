@@ -11,6 +11,7 @@ import {
   Users,
   ShieldCheck,
   UserCircle,
+  ClipboardList,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
@@ -27,6 +28,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Add Product", href: "/admin/products/new", icon: PlusCircle },
   { label: "Categories", href: "/admin/categories", icon: FolderTree },
   { label: "Users", href: "/admin/users", icon: Users },
+  { label: "Audit Log", href: "/admin/audit", icon: ClipboardList },
   { label: "Admins", href: "/admin/admins", icon: ShieldCheck },
   { label: "My Profile", href: "/admin/profile", icon: UserCircle },
 ];

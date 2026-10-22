@@ -1,30 +1,26 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { upsertPushSubscription, deletePushSubscription } from "@/lib/db/queries";
+import { pushSubscribeSchema } from "@/lib/validation";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   try {
-    const { endpoint, keys } = await req.json();
-
-    if (
-      typeof endpoint !== "string" ||
-      endpoint.trim().length === 0 ||
-      !keys ||
-      typeof keys !== "object"
-    ) {
-      return NextResponse.json({ error: "Invalid subscription" }, { status: 400 });
+    const h = await headers();
+    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const rl = rateLimit(`push:subscribe:${ip}`, { limit: 10, windowMs: 60_000 });
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
-
-    // Normalize keys so a missing/invalid value doesn't break storage.
-    const p256dh =
-      typeof keys.p256dh === "string" ? keys.p256dh : String(keys.p256dh ?? "");
-    const auth = typeof keys.auth === "string" ? keys.auth : String(keys.auth ?? "");
-    if (!p256dh || !auth) {
-      return NextResponse.json({ error: "Invalid subscription" }, { status: 400 });
+    const body = await req.json();
+    const parsed = pushSubscribeSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues.map((i) => i.message).join("; ") },
+        { status: 400 },
+      );
     }
-    // Use the normalized values downstream.
-    keys.p256dh = p256dh;
-    keys.auth = auth;
-
+    const { endpoint, keys } = parsed.data;
     await upsertPushSubscription(endpoint, keys);
 
     return NextResponse.json({ success: true });
