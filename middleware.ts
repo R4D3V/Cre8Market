@@ -1,15 +1,24 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Lightweight guard: better-auth stores the session token in a cookie named
-// `better-auth.session_token`. We only check for its presence here to avoid a
-// flash of protected content and to bounce anonymous visitors; the real
-// authorization still happens in the Server Actions via requireAdmin/requireUser.
-const SESSION_COOKIE = "better-auth.session_token";
+// Better Auth stores the session token in a cookie named
+// `better-auth.session_token`. On HTTPS deployments it prefixes that name with
+// `__Secure-`, and large tokens may be chunked (`.0`, `.1`, …). Checking only
+// the unprefixed name makes the middleware bounce already-authenticated admins
+// back to /admin/login in production.
+function hasSessionCookie(request: NextRequest) {
+  return request.cookies.getAll().some(({ name }) => {
+    const base = name.replace(/^__Secure-/, "");
+    return (
+      base === "better-auth.session_token" ||
+      base.startsWith("better-auth.session_token.")
+    );
+  });
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasSession = request.cookies.has(SESSION_COOKIE);
+  const hasSession = hasSessionCookie(request);
 
   const isAdminArea = pathname.startsWith("/admin");
   const isDashboardArea = pathname.startsWith("/dashboard");

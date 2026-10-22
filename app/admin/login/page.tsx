@@ -24,7 +24,22 @@ export default function AdminLoginPage() {
     });
 
     if (result?.error) {
-      setError("Invalid email or password");
+      console.error("Admin sign-in failed:", result.error);
+      const { message, status } = result.error;
+      if (status === 403 || /origin|forbidden/i.test(message)) {
+        setError(
+          "Sign-in is blocked for this domain. The site's APP_URL does not match this address.",
+        );
+      } else if (
+        status === 500 ||
+        /internal server error|database|connection/i.test(message)
+      ) {
+        setError(
+          "The server could not complete sign-in. Please try again or check the deployment logs.",
+        );
+      } else {
+        setError("Invalid email or password");
+      }
       setLoading(false);
       return;
     }

@@ -439,8 +439,8 @@ export async function getAdminUserByEmail(
   email: string,
 ): Promise<AdminUserRow | null> {
   const { rows } = await pool.query(
-    "SELECT * FROM admin_users WHERE email = $1",
-    [email],
+    "SELECT * FROM admin_users WHERE LOWER(email) = LOWER($1)",
+    [email.trim()],
   );
   return rows[0] ?? null;
 }

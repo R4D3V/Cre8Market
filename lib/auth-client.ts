@@ -76,19 +76,31 @@ function toLegacyEmail(phone?: string) {
   return digits ? `${digits}@cre8market.local` : "";
 }
 
+export type SignInError = {
+  message: string;
+  status?: number;
+  code?: string;
+};
+
+export type SignInResult = {
+  data?: unknown;
+  error?: SignInError;
+};
+
 export async function signIn(input: {
   email?: string;
   phone?: string;
   password: string;
   redirect?: boolean;
-}) {
-  const email = input.email ?? toLegacyEmail(input.phone);
+}): Promise<SignInResult> {
+  const rawEmail = input.email ?? toLegacyEmail(input.phone);
+  const email = rawEmail.trim().toLowerCase();
   if (!email) {
-    return { error: "Missing credentials" };
+    return { error: { message: "Missing credentials" } };
   }
 
   try {
-    await fetch("/api/auth/legacy-sync", {
+    const syncResponse = await fetch("/api/auth/legacy-sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -97,16 +109,47 @@ export async function signIn(input: {
       }),
     });
 
+    if (!syncResponse.ok) {
+      const body = (await syncResponse.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+      return {
+        error: {
+          message:
+            body?.error ?? "Could not prepare your account for sign-in.",
+          status: syncResponse.status,
+        },
+      };
+    }
+
     const result = await authClient.signIn.email({
       email,
       password: input.password,
       rememberMe: true,
     });
-    return result;
+
+    if (result?.error) {
+      const err = result.error as {
+        message?: string;
+        status?: number;
+        code?: string;
+      };
+      return {
+        error: {
+          message: err?.message ?? "Invalid email or password",
+          status: err?.status,
+          code: err?.code,
+        },
+      };
+    }
+
+    return { data: result?.data };
   } catch (error) {
     return {
-      error:
-        error instanceof Error ? error.message : "Invalid email or password",
+      error: {
+        message:
+          error instanceof Error ? error.message : "Invalid email or password",
+      },
     };
   }
 }

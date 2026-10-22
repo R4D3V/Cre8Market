@@ -49,10 +49,21 @@ const trustedOrigins = Array.from(
       "http://localhost:3005",
       "http://127.0.0.1:3000",
       "http://127.0.0.1:3005",
+      // Vercel production and preview hosts (set automatically by Vercel).
+      process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : undefined,
+      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+      process.env.VERCEL_BRANCH_URL
+        ? `https://${process.env.VERCEL_BRANCH_URL}`
+        : undefined,
       process.env.NEXT_PUBLIC_APP_URL,
       process.env.APP_URL,
       process.env.AUTH_URL,
-    ].filter(Boolean) as string[],
+      process.env.BETTER_AUTH_URL,
+    ]
+      .filter(Boolean)
+      .map((origin) => (origin as string).trim().replace(/\/+$/, "")),
   ),
 );
 
@@ -135,6 +146,8 @@ export async function syncLegacyAdminToBetterAuth(email: string) {
   const admin = await getAdminUserByEmail(email);
   if (!admin) return null;
 
+  const normalizedEmail = admin.email.trim().toLowerCase();
+
   await pool.query(
     `INSERT INTO "user" (id, name, email, "emailVerified", image, "createdAt", "updatedAt", role)
      VALUES ($1, $2, $3, true, $4, NOW(), NOW(), 'admin')
@@ -145,7 +158,7 @@ export async function syncLegacyAdminToBetterAuth(email: string) {
        image = EXCLUDED.image,
        role = EXCLUDED.role,
        "updatedAt" = NOW()`,
-    [admin.id, admin.name ?? "Admin", admin.email, admin.avatar ?? null],
+    [admin.id, admin.name ?? "Admin", normalizedEmail, admin.avatar ?? null],
   );
 
   const accountId = admin.id;
