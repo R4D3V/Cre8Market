@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   Tag,
   UserCircle,
+  ClipboardList,
 } from "lucide-react";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import { AdminStatCard } from "@/components/admin/AdminStatCard";
@@ -44,12 +45,6 @@ const QUICK_ACTIONS = [
     icon: Package,
   },
   {
-    label: "Add Product",
-    description: "List a new item for sale",
-    href: "/admin/products/new",
-    icon: PlusCircle,
-  },
-  {
     label: "Categories",
     description: "Manage marketplace categories",
     href: "/admin/categories",
@@ -60,6 +55,12 @@ const QUICK_ACTIONS = [
     description: "Manage registered sellers",
     href: "/admin/users",
     icon: Users,
+  },
+  {
+    label: "Audit Log",
+    description: "Review recent admin and user activity",
+    href: "/admin/audit",
+    icon: ClipboardList,
   },
   {
     label: "Admins",

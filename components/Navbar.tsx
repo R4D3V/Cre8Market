@@ -8,6 +8,7 @@ import { useSession, signOut } from "@/lib/auth-client";
 export default function Navbar() {
   const { data: session } = useSession();
   const isUser = session?.user != null;
+  const isAdmin = session?.user?.role === "admin";
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -66,7 +67,7 @@ export default function Navbar() {
           {isUser ? (
             <>
               <Link
-                href="/dashboard"
+                href={isAdmin ? "/admin" : "/dashboard"}
                 className="hidden items-center gap-x-1.5 text-sm font-semibold text-foreground sm:flex"
               >
                 <svg
@@ -84,7 +85,9 @@ export default function Navbar() {
                   <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
-                <span className="hidden sm:inline">Dashboard</span>
+                <span className="hidden sm:inline">
+                  {isAdmin ? "Admin" : "Dashboard"}
+                </span>
               </Link>
               <button
                 onClick={() =>
@@ -284,11 +287,11 @@ export default function Navbar() {
               </Link>
               {isUser ? (
                 <Link
-                  href="/dashboard"
+                  href={isAdmin ? "/admin" : "/dashboard"}
                   onClick={() => setMobileOpen(false)}
                   className="py-2.5 text-sm font-semibold text-foreground"
                 >
-                  My Dashboard
+                  {isAdmin ? "Admin Panel" : "My Dashboard"}
                 </Link>
               ) : (
                 <Link

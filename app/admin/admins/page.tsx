@@ -109,12 +109,6 @@ export default function AdminUsersPage() {
             Add another person to manage the dashboard
           </p>
         </div>
-        <Link
-          href="/admin"
-          className="neu-pill bg-card text-primary text-sm font-semibold px-4 py-2 transition-all"
-        >
-          ← Back to Dashboard
-        </Link>
       </div>
 
       {/* Add admin */}

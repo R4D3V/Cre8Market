@@ -66,10 +66,9 @@ export default function AdminUsersPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-extrabold text-foreground font-heading">Users</h1>
-        <Link href="/admin" className="text-sm text-primary font-semibold hover:underline">
-          ← Back to Dashboard
-        </Link>
+        <h1 className="text-2xl font-extrabold text-foreground font-heading">
+          Users
+        </h1>
       </div>
 
       {/* Add user button */}
@@ -95,9 +94,13 @@ export default function AdminUsersPage() {
 
       {/* List */}
       {loading ? (
-        <p className="text-center text-muted-foreground text-sm py-8">Loading…</p>
+        <p className="text-center text-muted-foreground text-sm py-8">
+          Loading…
+        </p>
       ) : filteredUsers.length === 0 ? (
-        <p className="text-center text-muted-foreground text-sm py-8">No users found.</p>
+        <p className="text-center text-muted-foreground text-sm py-8">
+          No users found.
+        </p>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
@@ -121,13 +124,19 @@ export default function AdminUsersPage() {
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold overflow-hidden shrink-0">
                         {u.avatar ? (
-                          <img src={u.avatar} alt={u.name} className="w-full h-full object-cover" />
+                          <img
+                            src={u.avatar}
+                            alt={u.name}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           u.name[0].toUpperCase()
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-foreground truncate">{u.name}</p>
+                        <p className="font-semibold text-foreground truncate">
+                          {u.name}
+                        </p>
                         {u.isAdmin && (
                           <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded">
                             Admin
@@ -161,9 +170,13 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="py-3 pr-4">
                     {u.isActive ? (
-                      <span className="text-primary text-xs font-bold">● Active</span>
+                      <span className="text-primary text-xs font-bold">
+                        ● Active
+                      </span>
                     ) : (
-                      <span className="text-muted-foreground text-xs font-bold">● Disabled</span>
+                      <span className="text-muted-foreground text-xs font-bold">
+                        ● Disabled
+                      </span>
                     )}
                   </td>
                   <td className="py-3 pr-4">

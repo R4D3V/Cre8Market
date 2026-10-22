@@ -38,7 +38,13 @@ export default function AdminCategoriesPage() {
   const [cats, setCats] = useState<Cat[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", slug: "", icon: "📦", color: "#64748b", bg_color: "#f8fafc" });
+  const [form, setForm] = useState({
+    name: "",
+    slug: "",
+    icon: "📦",
+    color: "#64748b",
+    bg_color: "#f8fafc",
+  });
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
@@ -47,14 +53,27 @@ export default function AdminCategoriesPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   function slugify(t: string) {
-    return t.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim();
+    return t
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .trim();
   }
 
   function resetForm() {
-    setForm({ name: "", slug: "", icon: "📦", color: "#64748b", bg_color: "#f8fafc" });
+    setForm({
+      name: "",
+      slug: "",
+      icon: "📦",
+      color: "#64748b",
+      bg_color: "#f8fafc",
+    });
     setEditing(null);
   }
 
@@ -79,40 +98,55 @@ export default function AdminCategoriesPage() {
   }
 
   function startEdit(c: Cat) {
-    setForm({ name: c.name, slug: c.slug, icon: c.icon, color: c.color, bg_color: c.bg_color });
+    setForm({
+      name: c.name,
+      slug: c.slug,
+      icon: c.icon,
+      color: c.color,
+      bg_color: c.bg_color,
+    });
     setEditing(c.id);
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-extrabold font-heading text-foreground">Categories</h1>
-        <Link
-          href="/admin"
-          className="text-sm text-primary font-semibold hover:underline"
-        >
-          ← Back to Dashboard
-        </Link>
+        <h1 className="text-2xl font-extrabold font-heading text-foreground">
+          Categories
+        </h1>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSave} className="neu-card p-5 max-w-xl mb-8 space-y-3">
+      <form
+        onSubmit={handleSave}
+        className="neu-card p-5 max-w-xl mb-8 space-y-3"
+      >
         <h2 className="font-bold font-heading text-foreground">
           {editing ? "Edit Category" : "Add Category"}
         </h2>
         <div className="flex gap-3">
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">Name</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">
+              Name
+            </label>
             <input
               required
               value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value, slug: editing ? f.slug : slugify(e.target.value) }))}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  name: e.target.value,
+                  slug: editing ? f.slug : slugify(e.target.value),
+                }))
+              }
               className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="Electronics"
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">Slug</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">
+              Slug
+            </label>
             <input
               required
               value={form.slug}
@@ -124,7 +158,9 @@ export default function AdminCategoriesPage() {
         </div>
         <div className="flex gap-3">
           <div className="w-20">
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">Icon</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">
+              Icon
+            </label>
             <input
               value={form.icon}
               onChange={(e) => setForm((f) => ({ ...f, icon: e.target.value }))}
@@ -133,19 +169,27 @@ export default function AdminCategoriesPage() {
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">Color</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">
+              Color
+            </label>
             <input
               value={form.color}
-              onChange={(e) => setForm((f) => ({ ...f, color: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, color: e.target.value }))
+              }
               className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none font-mono"
               placeholder="#64748b"
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">BG Color</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">
+              BG Color
+            </label>
             <input
               value={form.bg_color}
-              onChange={(e) => setForm((f) => ({ ...f, bg_color: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, bg_color: e.target.value }))
+              }
               className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none font-mono"
               placeholder="#f8fafc"
             />
@@ -157,7 +201,9 @@ export default function AdminCategoriesPage() {
             <button
               key={dc.color}
               type="button"
-              onClick={() => setForm((f) => ({ ...f, color: dc.color, bg_color: dc.bg }))}
+              onClick={() =>
+                setForm((f) => ({ ...f, color: dc.color, bg_color: dc.bg }))
+              }
               className="w-6 h-6 rounded-full border border-border"
               style={{ backgroundColor: dc.color }}
               title={`${dc.color} / ${dc.bg}`}
@@ -173,7 +219,11 @@ export default function AdminCategoriesPage() {
             {saving ? "Saving…" : editing ? "Update" : "Add Category"}
           </button>
           {editing && (
-            <button type="button" onClick={resetForm} className="text-sm text-muted-foreground hover:text-foreground">
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
               Cancel
             </button>
           )}
@@ -182,9 +232,13 @@ export default function AdminCategoriesPage() {
 
       {/* List */}
       {loading ? (
-        <p className="text-center text-muted-foreground text-sm py-8">Loading…</p>
+        <p className="text-center text-muted-foreground text-sm py-8">
+          Loading…
+        </p>
       ) : cats.length === 0 ? (
-        <p className="text-center text-muted-foreground text-sm py-8">No categories yet.</p>
+        <p className="text-center text-muted-foreground text-sm py-8">
+          No categories yet.
+        </p>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-x-auto">
           <table className="w-full text-sm">
@@ -201,12 +255,22 @@ export default function AdminCategoriesPage() {
               {cats.map((c) => (
                 <tr key={c.id} className="border-t border-border">
                   <td className="py-3 pr-4 text-xl">{c.icon}</td>
-                  <td className="py-3 pr-4 font-semibold text-foreground">{c.name}</td>
-                  <td className="py-3 pr-4 text-muted-foreground font-mono text-xs">{c.slug}</td>
+                  <td className="py-3 pr-4 font-semibold text-foreground">
+                    {c.name}
+                  </td>
+                  <td className="py-3 pr-4 text-muted-foreground font-mono text-xs">
+                    {c.slug}
+                  </td>
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full border border-border" style={{ backgroundColor: c.color }} />
-                      <span className="w-5 h-5 rounded-full border border-border" style={{ backgroundColor: c.bg_color }} />
+                      <span
+                        className="w-5 h-5 rounded-full border border-border"
+                        style={{ backgroundColor: c.color }}
+                      />
+                      <span
+                        className="w-5 h-5 rounded-full border border-border"
+                        style={{ backgroundColor: c.bg_color }}
+                      />
                     </div>
                   </td>
                   <td className="py-3 pr-4">
