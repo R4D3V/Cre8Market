@@ -23,8 +23,16 @@ export default function AdminUsersPage() {
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    let active = true;
+    fetchUsersAction().then((data) => {
+      if (!active) return;
+      setUsers(data ?? []);
+      setLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function handleToggleActive(u: AppUser) {
     await setUserActiveAction(u.id, !u.isActive);
@@ -102,8 +110,145 @@ export default function AdminUsersPage() {
           No users found.
         </p>
       ) : (
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <>
+          {/* Mobile cards */}
+          <div className="space-y-3 lg:hidden">
+            {filteredUsers.map((u) => (
+              <div
+                key={u.id}
+                className="rounded-xl border border-border bg-card p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                    {u.avatar ? (
+                      <img
+                        src={u.avatar}
+                        alt={u.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      u.name[0].toUpperCase()
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-foreground">
+                      {u.name}
+                    </p>
+                    {u.isAdmin && (
+                      <span className="mt-1 inline-block rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                        Admin
+                      </span>
+                    )}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {u.phone}
+                    </p>
+                    {u.whatsapp && (
+                      <a
+                        href={`https://wa.me/${u.whatsapp}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-0.5 block truncate text-xs text-primary hover:underline"
+                      >
+                        WhatsApp: {u.whatsapp}
+                      </a>
+                    )}
+                  </div>
+                  <span
+                    className={`shrink-0 text-xs font-bold ${
+                      u.isActive ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    ● {u.isActive ? "Active" : "Disabled"}
+                  </span>
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <p className="text-muted-foreground">Products</p>
+                    <Link
+                      href={`/admin?user=${u.id}`}
+                      className="font-semibold text-primary hover:underline"
+                    >
+                      {u.productCount ?? 0}
+                    </Link>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Joined</p>
+                    <p className="text-foreground">
+                      {new Date(u.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-4 border-t border-border pt-3">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                    Verified
+                    <button
+                      type="button"
+                      onClick={() => handleToggleVerified(u)}
+                      role="switch"
+                      aria-checked={u.isVerified}
+                      title={u.isVerified ? "Verified" : "Not verified"}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        u.isVerified ? "bg-secondary" : "bg-muted"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                          u.isVerified ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                    VIP
+                    <button
+                      type="button"
+                      onClick={() => handleToggleVip(u)}
+                      role="switch"
+                      aria-checked={u.isVip ?? false}
+                      title={u.isVip ? "VIP" : "Not VIP"}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        u.isVip ? "bg-amber-500" : "bg-muted"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                          u.isVip ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link
+                    href={`/admin/users/${u.id}/edit`}
+                    className="neu-pill bg-card px-3 py-1.5 text-xs font-semibold text-primary"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleActive(u)}
+                    className="neu-pill bg-card px-3 py-1.5 text-xs font-semibold text-primary"
+                  >
+                    {u.isActive ? "Disable" : "Enable"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(u.id)}
+                    className="neu-pill bg-card px-3 py-1.5 text-xs font-semibold text-destructive"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto rounded-xl border border-border bg-card lg:block">
+            <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-muted-foreground text-xs uppercase tracking-wide">
                 <th className="pb-3 pr-4 font-semibold">Name</th>
@@ -241,8 +386,9 @@ export default function AdminUsersPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

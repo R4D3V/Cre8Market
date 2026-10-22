@@ -209,7 +209,7 @@ export default function MyProductsPage() {
         <div className="bg-card border border-border rounded-xl text-center py-12">
           <p className="text-4xl mb-3">📦</p>
           <h3 className="font-bold text-foreground mb-1">
-            You haven't added any products yet
+            You haven&apos;t added any products yet
           </h3>
           <p className="text-muted-foreground text-sm mb-4">
             List your first item to start selling.
@@ -238,8 +238,88 @@ export default function MyProductsPage() {
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <>
+          <div className="mb-3 flex items-center gap-2 text-xs font-semibold text-muted-foreground lg:hidden">
+            <input
+              type="checkbox"
+              checked={
+                filteredProducts.length > 0 &&
+                filteredProducts.every((product) => selected.has(product.id))
+              }
+              onChange={toggleAll}
+              className="h-4 w-4 cursor-pointer rounded border-border bg-card text-primary"
+            />
+            Select all
+          </div>
+
+          {/* Mobile cards */}
+          <div className="space-y-3 lg:hidden">
+            {filteredProducts.map((p) => (
+              <div
+                key={p.id}
+                className={`rounded-xl border border-border bg-background/40 p-4 ${
+                  selected.has(p.id) ? "border-primary/40 bg-primary/5" : ""
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(p.id)}
+                    onChange={() => toggleSelected(p.id)}
+                    aria-label={`Select ${p.title}`}
+                    className="mt-1 h-4 w-4 cursor-pointer rounded border-border bg-card text-primary"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <Link
+                        href={`/products/${p.slug}`}
+                        target="_blank"
+                        className="font-semibold text-foreground hover:text-primary hover:underline"
+                      >
+                        {p.title}
+                      </Link>
+                      <span className="shrink-0 text-sm font-bold text-primary">
+                        {formatPrice(p.price)}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {p.category}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Listed {p.timeAgo}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
+                  <Link
+                    href={`/dashboard/products/${p.id}/edit`}
+                    className="neu-pill bg-background px-3 py-1.5 text-xs font-semibold text-primary transition-all"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleDuplicate(p.id)}
+                    disabled={busy}
+                    className="neu-pill bg-background px-3 py-1.5 text-xs font-semibold text-primary transition-all disabled:opacity-60"
+                  >
+                    Duplicate
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(p.id)}
+                    className="neu-pill bg-background px-3 py-1.5 text-xs font-semibold text-destructive transition-all"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto lg:block">
+            <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-muted-foreground text-xs uppercase tracking-wide">
                 <th className="pb-3 pr-4 font-semibold">
@@ -321,7 +401,8 @@ export default function MyProductsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
     </DashboardPanel>
   );

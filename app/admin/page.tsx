@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   Package,
-  PlusCircle,
   FolderTree,
   Users,
   ShieldCheck,
@@ -86,15 +85,6 @@ export default async function AdminDashboardPage() {
     <AdminPanel
       title="Admin Dashboard"
       description="Overview of your marketplace listings and users"
-      action={
-        <Link
-          href="/admin/products/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          <PlusCircle className="size-4" />
-          Add Product
-        </Link>
-      }
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total Listings" value={stats.totalListings} icon={Package} />

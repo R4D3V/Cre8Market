@@ -276,8 +276,89 @@ function AdminProductsPageInner() {
           </Link>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-xl overflow-x-auto">
-          <table className="w-full text-sm">
+        <>
+          <div className="mb-3 flex items-center gap-2 text-xs font-semibold text-muted-foreground lg:hidden">
+            <input
+              type="checkbox"
+              checked={
+                selectedIds.length === filteredProducts.length &&
+                filteredProducts.length > 0
+              }
+              onChange={toggleAll}
+              className="h-4 w-4 cursor-pointer rounded border-border bg-card text-primary"
+            />
+            Select all
+          </div>
+
+          {/* Mobile cards */}
+          <div className="space-y-3 lg:hidden">
+            {filteredProducts.map((p) => (
+              <div
+                key={`${p.id}-${p.slug}`}
+                className={`rounded-xl border border-border bg-card p-4 ${
+                  selected.has(p.id) ? "border-primary/40 bg-primary/5" : ""
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(p.id)}
+                    onChange={() => toggleSelected(p.id)}
+                    aria-label={`Select ${p.title}`}
+                    className="mt-1 h-4 w-4 cursor-pointer rounded border-border bg-card text-primary"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-semibold text-foreground">{p.title}</p>
+                      {p.featured && (
+                        <span className="shrink-0 text-xs font-bold text-featured">
+                          ★ Featured
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {p.category}
+                    </p>
+                    <p className="mt-1 text-sm font-bold text-primary">
+                      {formatPrice(p.price)}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {p.ownerType === "user"
+                        ? `Added by ${p.ownerName ?? "User"}`
+                        : "Store (Admin)"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
+                  <Link
+                    href={`/admin/products/${p.id}/edit`}
+                    className="neu-pill bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition-all"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleDuplicate(p.id)}
+                    disabled={busy}
+                    className="neu-pill bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition-all disabled:opacity-60"
+                  >
+                    Duplicate
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(p.id)}
+                    className="neu-pill bg-destructive px-3 py-1.5 text-xs font-semibold text-white transition-all"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto rounded-xl border border-border bg-card lg:block">
+            <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-muted-foreground text-xs uppercase tracking-wide">
                 <th className="pb-3 pr-4 font-semibold">
@@ -360,8 +441,9 @@ function AdminProductsPageInner() {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
