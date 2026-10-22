@@ -2,6 +2,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
+import EnableNotificationsButton from "@/components/EnableNotificationsButton";
 
 function AndroidPhoneSvg() {
   return (
@@ -868,6 +869,11 @@ export default function InstallPage() {
               <HomeScreenSvg />
             </div>
           </div>
+        </ScrollReveal>
+
+        {/* Notifications */}
+        <ScrollReveal delay={150}>
+          <EnableNotificationsButton />
         </ScrollReveal>
 
         {/* Tips */}
