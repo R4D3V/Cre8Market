@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { resetAdminPasswordAction } from "@/lib/actions/auth";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
@@ -62,8 +63,7 @@ export default function ResetPasswordPage() {
               <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                 New Password
               </label>
-              <input
-                type="password"
+              <PasswordInput
                 required
                 minLength={6}
                 value={password}
@@ -77,8 +77,7 @@ export default function ResetPasswordPage() {
               <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                 Backup Pin
               </label>
-              <input
-                type="password"
+              <PasswordInput
                 required
                 inputMode="numeric"
                 maxLength={4}

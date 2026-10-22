@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { registerUserAction } from "@/lib/actions/auth";
 import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
+import PasswordInput from "@/components/PasswordInput";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export default function RegisterPage() {
@@ -170,8 +171,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                   Password
                 </label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   minLength={6}
                   value={password}
@@ -184,8 +184,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                   Confirm Password
                 </label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
@@ -197,8 +196,7 @@ export default function RegisterPage() {
                 <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                   4-Digit Reset Pin
                 </label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   inputMode="numeric"
                   pattern="\d{4}"
@@ -209,7 +207,7 @@ export default function RegisterPage() {
                   className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  You'll use this pin to verify your identity when resetting
+                  You&apos;ll use this pin to verify your identity when resetting
                   your password.
                 </p>
               </div>

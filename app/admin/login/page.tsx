@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
+import PasswordInput from "@/components/PasswordInput";
 import Link from "next/link";
 
 export default function AdminLoginPage() {
@@ -78,8 +79,7 @@ export default function AdminLoginPage() {
               <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                 Password
               </label>
-              <input
-                type="password"
+              <PasswordInput
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

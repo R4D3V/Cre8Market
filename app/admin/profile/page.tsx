@@ -9,6 +9,7 @@ import {
 } from "@/lib/actions/admin";
 import type { AdminUserRow } from "@/lib/db/queries";
 import { compressImage } from "@/lib/imageCompress";
+import PasswordInput from "@/components/PasswordInput";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 
 export default function AdminProfilePage() {
@@ -211,8 +212,7 @@ export default function AdminProfilePage() {
             <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Current Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               required
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
@@ -223,8 +223,7 @@ export default function AdminProfilePage() {
             <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               New Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               required
               minLength={6}
               value={newPassword}

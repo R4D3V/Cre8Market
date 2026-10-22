@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ArrowLeft,
   LayoutDashboard,
   Package,
   PlusCircle,
@@ -34,7 +33,6 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 type AdminSidebarProps = {
-  backHref?: string;
   userName: string;
   userEmail: string;
   userAvatar?: string;
@@ -43,7 +41,6 @@ type AdminSidebarProps = {
 };
 
 export function AdminSidebar({
-  backHref = "/",
   userName,
   userEmail,
   userAvatar,
@@ -68,15 +65,6 @@ export function AdminSidebar({
           </span>
           CRE8<span className="text-primary">MARKET</span>
         </Link> */}
-
-        {/* Back to website */}
-        <Link
-          href={backHref}
-          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Back to website
-        </Link>
 
         {/* Nav items */}
         <nav className="mt-2 flex flex-col gap-2">

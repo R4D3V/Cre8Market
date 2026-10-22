@@ -10,6 +10,7 @@ import {
 } from "@/lib/actions/admin";
 import type { AdminUserRow } from "@/lib/db/queries";
 import { compressImage } from "@/lib/imageCompress";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function AdminUsersPage() {
   const { data: session } = useSession();
@@ -212,8 +213,7 @@ export default function AdminUsersPage() {
             <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               required
               minLength={6}
               value={form.password}

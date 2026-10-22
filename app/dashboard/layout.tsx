@@ -63,7 +63,6 @@ export default function DashboardLayout({
 
   const name = userName || session?.user?.name || "Seller";
   const contact = session?.user?.phone ?? "";
-  const initial = (name || "U")[0]?.toUpperCase() ?? "U";
   const pageTitle = getPageTitle(pathname);
   const handleSignOut = () => signOut().then(() => router.push("/login"));
 
@@ -110,7 +109,6 @@ export default function DashboardLayout({
         {/* Desktop sidebar */}
         <div className="sticky top-[4.5rem] hidden h-[calc(100vh-5.5rem)] lg:block">
           <DashboardSidebar
-            backHref="/"
             userName={name}
             userContact={contact}
             userAvatar={userAvatar}
@@ -138,7 +136,6 @@ export default function DashboardLayout({
               </div>
               <div className="h-[calc(100%-3.25rem)]">
                 <DashboardSidebar
-                  backHref="/"
                   userName={name}
                   userContact={contact}
                   userAvatar={userAvatar}

@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { resetUserPasswordAction } from "@/lib/actions/auth";
 import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
+import PasswordInput from "@/components/PasswordInput";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export default function ResetPasswordPage() {
@@ -86,8 +87,7 @@ export default function ResetPasswordPage() {
                 <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                   New Password
                 </label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   minLength={6}
                   value={password}
@@ -100,8 +100,7 @@ export default function ResetPasswordPage() {
                 <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                   4-Digit Reset Pin
                 </label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   inputMode="numeric"
                   pattern="\d{4}"

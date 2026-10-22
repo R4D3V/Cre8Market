@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ArrowLeft,
   Package,
   PlusCircle,
   UserCircle,
@@ -24,7 +23,6 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 type DashboardSidebarProps = {
-  backHref?: string;
   userName: string;
   userContact: string;
   userAvatar?: string;
@@ -33,7 +31,6 @@ type DashboardSidebarProps = {
 };
 
 export function DashboardSidebar({
-  backHref = "/",
   userName,
   userContact,
   userAvatar,
@@ -57,15 +54,6 @@ export function DashboardSidebar({
             C8
           </span>
           CRE8<span className="text-primary">MARKET</span>
-        </Link>
-
-        {/* Back to website */}
-        <Link
-          href={backHref}
-          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Back to website
         </Link>
 
         {/* Nav items */}

@@ -74,7 +74,6 @@ export default function AdminLayout({
 
   const name = adminName || session?.user?.name || "Admin";
   const email = session?.user?.email ?? "";
-  const initial = (name || email || "A")[0]?.toUpperCase() ?? "A";
   const pageTitle = getPageTitle(pathname);
   const handleSignOut = () => signOut().then(() => router.push("/admin/login"));
 
@@ -121,7 +120,6 @@ export default function AdminLayout({
         {/* Desktop sidebar */}
         <div className="sticky top-[4.5rem] hidden h-[calc(100vh-5.5rem)] lg:block">
           <AdminSidebar
-            backHref="/"
             userName={name}
             userEmail={email}
             userAvatar={adminAvatar}
@@ -149,7 +147,6 @@ export default function AdminLayout({
               </div>
               <div className="h-[calc(100%-3.25rem)]">
                 <AdminSidebar
-                  backHref="/"
                   userName={name}
                   userEmail={email}
                   userAvatar={adminAvatar}

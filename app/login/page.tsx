@@ -8,6 +8,7 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
+import PasswordInput from "@/components/PasswordInput";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export default function LoginPage() {
@@ -86,8 +87,7 @@ export default function LoginPage() {
                 <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
                   Password
                 </label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -122,7 +122,7 @@ export default function LoginPage() {
                 </Link>
               </p>
               <p className="text-sm text-muted-foreground">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link
                   href="/register"
                   className="text-primary font-bold hover:underline"

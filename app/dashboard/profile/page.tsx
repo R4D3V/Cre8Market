@@ -2,18 +2,17 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSession } from "@/lib/auth-client";
 import {
   fetchMyProfileAction,
   updateMyProfileAction,
   changeMyPasswordAction,
 } from "@/lib/actions/users";
 import { compressImage } from "@/lib/imageCompress";
+import PasswordInput from "@/components/PasswordInput";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { AppUser } from "@/lib/types";
 
 export default function ProfilePage() {
-  const { data: session } = useSession();
   const [profile, setProfile] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -263,8 +262,7 @@ export default function ProfilePage() {
             <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Current Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               required
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
@@ -275,8 +273,7 @@ export default function ProfilePage() {
             <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               New Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               required
               minLength={6}
               value={newPassword}
