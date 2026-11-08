@@ -1028,6 +1028,10 @@ export async function countAuditLog(
   return (rows[0]?.count as number) ?? 0;
 }
 
+export async function clearAuditLog(): Promise<void> {
+  await pool.query("DELETE FROM audit_log");
+}
+
 export async function getAuditFacets(): Promise<AuditFacets> {
   const { rows } = await pool.query(`
     SELECT

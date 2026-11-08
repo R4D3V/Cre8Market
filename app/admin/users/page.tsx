@@ -7,6 +7,7 @@ import {
   setUserActiveAction,
   setUserVerifiedAction,
   setUserVipAction,
+  setUserAdminAction,
   deleteUserAction,
 } from "@/lib/actions/users";
 import type { AppUser } from "@/lib/types";
@@ -14,6 +15,11 @@ import type { AppUser } from "@/lib/types";
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [search, setSearch] = useState("");
+  const [adminFilter, setAdminFilter] = useState<"all" | "admin" | "user">("all");
+  const [verifiedFilter, setVerifiedFilter] = useState<
+    "all" | "verified" | "unverified"
+  >("all");
+  const [vipFilter, setVipFilter] = useState<"all" | "vip" | "non-vip">("all");
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -49,6 +55,17 @@ export default function AdminUsersPage() {
     load();
   }
 
+  async function handleToggleAdmin(u: AppUser) {
+    if (
+      u.isAdmin &&
+      !confirm("Remove admin access from this user?")
+    )
+      return;
+    if (!u.isAdmin && !confirm("Grant admin access to this user?")) return;
+    await setUserAdminAction(u.id, !u.isAdmin);
+    load();
+  }
+
   async function handleDelete(id: string) {
     if (
       !confirm(
@@ -62,14 +79,23 @@ export default function AdminUsersPage() {
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return users;
-    return users.filter(
-      (u) =>
-        u.name.toLowerCase().includes(q) ||
-        u.phone.toLowerCase().includes(q) ||
-        (u.whatsapp ?? "").toLowerCase().includes(q),
-    );
-  }, [users, search]);
+    return users.filter((u) => {
+      if (q) {
+        const matches =
+          u.name.toLowerCase().includes(q) ||
+          u.phone.toLowerCase().includes(q) ||
+          (u.whatsapp ?? "").toLowerCase().includes(q);
+        if (!matches) return false;
+      }
+      if (adminFilter === "admin" && !u.isAdmin) return false;
+      if (adminFilter === "user" && u.isAdmin) return false;
+      if (verifiedFilter === "verified" && !u.isVerified) return false;
+      if (verifiedFilter === "unverified" && u.isVerified) return false;
+      if (vipFilter === "vip" && !u.isVip) return false;
+      if (vipFilter === "non-vip" && u.isVip) return false;
+      return true;
+    });
+  }, [users, search, adminFilter, verifiedFilter, vipFilter]);
 
   return (
     <div>
@@ -89,8 +115,8 @@ export default function AdminUsersPage() {
         </Link>
       </div>
 
-      {/* Search */}
-      <div className="mb-4">
+      {/* Search + filters */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <input
           type="text"
           value={search}
@@ -98,6 +124,39 @@ export default function AdminUsersPage() {
           placeholder="Search by name, phone or WhatsApp…"
           className="neu-inset w-full sm:w-80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
+        <select
+          value={adminFilter}
+          onChange={(e) =>
+            setAdminFilter(e.target.value as "all" | "admin" | "user")
+          }
+          className="neu-inset px-3 py-2 text-sm text-foreground focus:outline-none"
+        >
+          <option value="all">All roles</option>
+          <option value="admin">Admins only</option>
+          <option value="user">Non-admins</option>
+        </select>
+        <select
+          value={verifiedFilter}
+          onChange={(e) =>
+            setVerifiedFilter(e.target.value as "all" | "verified" | "unverified")
+          }
+          className="neu-inset px-3 py-2 text-sm text-foreground focus:outline-none"
+        >
+          <option value="all">All verification</option>
+          <option value="verified">Verified</option>
+          <option value="unverified">Not verified</option>
+        </select>
+        <select
+          value={vipFilter}
+          onChange={(e) =>
+            setVipFilter(e.target.value as "all" | "vip" | "non-vip")
+          }
+          className="neu-inset px-3 py-2 text-sm text-foreground focus:outline-none"
+        >
+          <option value="all">All VIP status</option>
+          <option value="vip">VIP only</option>
+          <option value="non-vip">Non-VIP</option>
+        </select>
       </div>
 
       {/* List */}
@@ -219,6 +278,25 @@ export default function AdminUsersPage() {
                       />
                     </button>
                   </div>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                    Admin
+                    <button
+                      type="button"
+                      onClick={() => handleToggleAdmin(u)}
+                      role="switch"
+                      aria-checked={u.isAdmin}
+                      title={u.isAdmin ? "Admin" : "Not admin"}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        u.isAdmin ? "bg-primary" : "bg-muted"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                          u.isAdmin ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -258,6 +336,7 @@ export default function AdminUsersPage() {
                 <th className="pb-3 pr-4 font-semibold">Status</th>
                 <th className="pb-3 pr-4 font-semibold">Verified</th>
                 <th className="pb-3 pr-4 font-semibold">VIP</th>
+                <th className="pb-3 pr-4 font-semibold">Admin</th>
                 <th className="pb-3 pr-4 font-semibold">Joined</th>
                 <th className="pb-3 pr-4 font-semibold">Actions</th>
               </tr>
@@ -354,6 +433,23 @@ export default function AdminUsersPage() {
                       <span
                         className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
                           u.isVip ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </td>
+                  <td className="py-3 pr-4">
+                    <button
+                      onClick={() => handleToggleAdmin(u)}
+                      role="switch"
+                      aria-checked={u.isAdmin}
+                      title={u.isAdmin ? "Admin" : "Not admin"}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        u.isAdmin ? "bg-primary" : "bg-muted"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                          u.isAdmin ? "translate-x-6" : "translate-x-1"
                         }`}
                       />
                     </button>

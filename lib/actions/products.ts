@@ -25,6 +25,7 @@ import {
   getAuditLog,
   countAuditLog,
   getAuditFacets,
+  clearAuditLog,
 } from "@/lib/db/queries";
 import { auth } from "@/lib/auth";
 import { sendPushNotification } from "@/lib/push";
@@ -159,6 +160,12 @@ export async function fetchAuditLogAction(filters: AuditLogFilters = {}) {
     getAuditFacets(),
   ]);
   return { entries, total, facets };
+}
+
+export async function clearAuditLogAction() {
+  await requireAdmin();
+  await clearAuditLog();
+  revalidatePath("/admin/audit");
 }
 
 // ── Admin-only product management (any product) ──

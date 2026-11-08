@@ -1,8 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Download, RefreshCw, Search, X } from "lucide-react";
-import { fetchAuditLogAction } from "@/lib/actions/products";
+import { Download, RefreshCw, Search, Trash2, X } from "lucide-react";
+import {
+  fetchAuditLogAction,
+  clearAuditLogAction,
+} from "@/lib/actions/products";
 
 interface AuditEntry {
   id: string;
@@ -131,6 +134,25 @@ export default function AdminAuditPage() {
     };
   }, [search, action, actorRole, targetType, from, to, limit, refreshKey]);
 
+  const [clearing, setClearing] = useState(false);
+
+  const clearLog = useCallback(async () => {
+    if (!confirm("Clear all audit log entries? This cannot be undone.")) return;
+    setClearing(true);
+    setError(null);
+    try {
+      await clearAuditLogAction();
+      setEntries([]);
+      setTotal(0);
+      setFacets(EMPTY_FACETS);
+      setRefreshKey((key) => key + 1);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to clear audit log");
+    } finally {
+      setClearing(false);
+    }
+  }, []);
+
   const clearFilters = useCallback(() => {
     setSearch("");
     setAction("");
@@ -210,6 +232,15 @@ export default function AdminAuditPage() {
           >
             <RefreshCw className="size-4" />
             Refresh
+          </button>
+          <button
+            type="button"
+            onClick={clearLog}
+            disabled={clearing || entries.length === 0}
+            className="inline-flex items-center gap-2 rounded-xl border border-red-500/40 px-3 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-500/10 disabled:opacity-40"
+          >
+            <Trash2 className="size-4" />
+            {clearing ? "Clearing…" : "Clear log"}
           </button>
           <button
             type="button"
