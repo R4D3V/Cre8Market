@@ -66,19 +66,14 @@ export default async function ProductDetailPage({
 }) {
   const { slug } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const product = await fetchProductBySlugAction(slug);
-
-  if (!product) {
-    notFound();
-  }
-
-  const related = await fetchRelatedProductsAction(product);
   const isFromDeals = resolvedSearchParams.from === "deals";
 
+  // Render the shell immediately; ProductDetailPageClient fetches the product
+  // (and related listings) on the client so the page shows a skeleton instead
+  // of blocking on the database round-trip.
   return (
     <ProductDetailPageClient
-      initialProduct={product}
-      initialRelated={related}
+      slug={slug}
       backHref={isFromDeals ? "/deals" : "/products"}
       backLabel={isFromDeals ? "Back to Deals" : "Back to Listings"}
     />

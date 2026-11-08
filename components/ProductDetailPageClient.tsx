@@ -8,20 +8,27 @@ import ProductCard from "@/components/ProductCard";
 import ScrollReveal from "@/components/ScrollReveal";
 import { formatPrice } from "@/lib/data";
 import type { Product } from "@/lib/types";
+import {
+  fetchProductBySlugAction,
+  fetchRelatedProductsAction,
+} from "@/lib/actions/products";
 
 export default function ProductDetailPageClient({
   initialProduct,
   initialRelated,
+  slug,
   backHref = "/products",
   backLabel = "Back to Listings",
 }: {
-  initialProduct: Product;
-  initialRelated: Product[];
+  initialProduct?: Product | null;
+  initialRelated?: Product[];
+  slug?: string;
   backHref?: string;
   backLabel?: string;
 }) {
-  const [product, setProduct] = useState<Product>(initialProduct);
-  const [related, setRelated] = useState<Product[]>(initialRelated);
+  const [product, setProduct] = useState<Product | null>(initialProduct ?? null);
+  const [related, setRelated] = useState<Product[]>(initialRelated ?? []);
+  const [loading, setLoading] = useState(!initialProduct);
   const [selectedImage, setSelectedImage] = useState(0);
   const [offerOpen, setOfferOpen] = useState(false);
   const [offerAmount, setOfferAmount] = useState("");
@@ -31,13 +38,78 @@ export default function ProductDetailPageClient({
   const [shareUrl, setShareUrl] = useState("");
 
   useEffect(() => {
-    setProduct(initialProduct);
-    setRelated(initialRelated);
-  }, [initialProduct, initialRelated]);
+    if (initialProduct) {
+      setProduct(initialProduct);
+      setRelated(initialRelated ?? []);
+      setLoading(false);
+      return;
+    }
+    if (!slug) return;
+    let active = true;
+    setLoading(true);
+    fetchProductBySlugAction(slug)
+      .then((p) => {
+        if (!active) return;
+        setProduct(p);
+        setLoading(false);
+        if (p) {
+          fetchRelatedProductsAction(p).then((r) => {
+            if (active) setRelated(r ?? []);
+          });
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setProduct(null);
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [initialProduct, initialRelated, slug]);
 
   useEffect(() => {
     setShareUrl(window.location.href);
   }, []);
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <main className="container py-6 pb-28 sm:pb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 animate-pulse">
+            <div className="md:col-span-3 space-y-4">
+              <div className="w-full rounded-2xl bg-muted" style={{ minHeight: 320 }} />
+              <div className="h-6 w-2/3 rounded bg-muted" />
+              <div className="h-4 w-1/2 rounded bg-muted" />
+              <div className="neu-card p-4 h-24 bg-muted" />
+            </div>
+            <div className="md:col-span-2 space-y-4">
+              <div className="neu-card p-5 h-40 bg-muted" />
+              <div className="neu-card p-5 h-32 bg-muted" />
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!product) {
+    return (
+      <>
+        <Navbar />
+        <main className="container py-6 pb-28 sm:pb-8">
+          <p className="text-muted-foreground">Listing not found.</p>
+          <Link href={backHref} className="text-primary font-semibold hover:underline">
+            ← {backLabel}
+          </Link>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   const icon = product.categoryIcon ?? "📦";
   const color = product.categoryColor ?? "#64748b";
@@ -58,6 +130,7 @@ export default function ProductDetailPageClient({
 
   function handleSendOffer(e: React.FormEvent) {
     e.preventDefault();
+    if (!product) return;
     const url = shareUrl || window.location.href;
     const text = encodeURIComponent(
       `Hi, I'd like to make an offer of UGX ${Number(offerAmount).toLocaleString()} for: ${product.title}.${offerMessage ? ` ${offerMessage}` : ""}\n\n${url}`,

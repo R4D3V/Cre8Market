@@ -44,7 +44,8 @@ export default function InstallPopup() {
     if (typeof window === "undefined") return;
     if (!("Notification" in window)) return;
     if (Notification.permission === "granted") {
-      subscribeToPush();
+      // Defer so subscription work can't interrupt an in-flight RSC stream.
+      setTimeout(() => subscribeToPush(), 0);
     }
   }, []);
 

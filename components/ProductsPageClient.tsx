@@ -108,12 +108,12 @@ function ProductsPageContent({
 
   useEffect(() => {
     if (skipInitialMetaRef.current) return;
-    fetchCategoriesAction().then((data) => {
-      setCategories(data ?? []);
-    });
-    fetchSellersAction().then((data) => {
-      setSellers(data ?? []);
-    });
+    fetchCategoriesAction()
+      .then((data) => setCategories(data ?? []))
+      .catch((err) => console.error("Failed to load categories:", err));
+    fetchSellersAction()
+      .then((data) => setSellers(data ?? []))
+      .catch((err) => console.error("Failed to load sellers:", err));
   }, []);
 
   // Debounce the search box so we don't hit the DB on every keystroke.
@@ -140,12 +140,20 @@ function ProductsPageContent({
       sort: sortParam,
       limit: ITEMS_PER_PAGE,
       offset: (page - 1) * ITEMS_PER_PAGE,
-    }).then(({ products: pageProducts, total: pageTotal }) => {
-      if (!active) return;
-      setProducts(pageProducts);
-      setTotal(pageTotal);
-      setLoading(false);
-    });
+    })
+      .then(({ products: pageProducts, total: pageTotal }) => {
+        if (!active) return;
+        setProducts(pageProducts ?? []);
+        setTotal(pageTotal ?? 0);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (!active) return;
+        console.error("Failed to load products:", err);
+        setProducts([]);
+        setTotal(0);
+        setLoading(false);
+      });
     return () => {
       active = false;
     };
