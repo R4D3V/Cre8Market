@@ -14,12 +14,16 @@ export default function DashboardLayout({
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/login");
-    } else if (status === "authenticated" && session?.user?.role !== "user") {
-      // Admins have their own panel — keep the two areas separate.
-      router.replace("/admin");
-    }
+    // Defer navigation so it can't interrupt an in-flight RSC stream.
+    const timer = setTimeout(() => {
+      if (status === "unauthenticated") {
+        router.replace("/login");
+      } else if (status === "authenticated" && session?.user?.role !== "user") {
+        // Admins have their own panel — keep the two areas separate.
+        router.replace("/admin");
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [status, session, router]);
 
   if (

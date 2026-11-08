@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function AdminLayout({
   children,
@@ -19,16 +20,27 @@ export default function AdminLayout({
   useEffect(() => {
     if (pathname === "/admin/login" || pathname === "/admin/reset-password")
       return;
-    if (status === "unauthenticated") {
-      router.replace("/admin/login");
-    } else if (status === "authenticated" && session?.user?.role !== "admin") {
-      // A signed-in regular user shouldn't be able to reach the admin panel.
-      router.replace("/dashboard");
-    }
+    // Defer navigation so it can't interrupt an in-flight RSC stream.
+    const timer = setTimeout(() => {
+      if (status === "unauthenticated") {
+        router.replace("/admin/login");
+      } else if (status === "authenticated" && session?.user?.role !== "admin") {
+        // A signed-in regular user shouldn't be able to reach the admin panel.
+        router.replace("/dashboard");
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [status, session, router, pathname]);
 
-  if (pathname === "/admin/login" || pathname === "/admin/reset-password")
-    return <>{children}</>;
+  if (pathname === "/admin/login" || pathname === "/admin/reset-password") {
+    return (
+      <>
+        <Navbar />
+        {children}
+        <Footer />
+      </>
+    );
+  }
 
   if (
     status === "loading" ||
