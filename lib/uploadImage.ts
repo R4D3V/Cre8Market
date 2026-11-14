@@ -33,3 +33,35 @@ export async function uploadProductImage(
     return dataUrl;
   }
 }
+
+// Upload a video file (≤5MB) to Cloudinary via the server route and return the
+// hosted URL. Falls back to the raw data URL if the endpoint is unavailable.
+export async function uploadProductVideo(file: File): Promise<string> {
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("Video must be 5MB or smaller.");
+  }
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Could not read video"));
+    reader.readAsDataURL(file);
+  });
+
+  try {
+    const res = await fetch("/api/upload-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: dataUrl, folder: "cre8market/products" }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data?.error || "Upload failed");
+    }
+    const data = await res.json();
+    if (typeof data?.url === "string" && data.url) return data.url;
+    throw new Error("No URL returned");
+  } catch (err) {
+    console.warn("Cloudinary upload failed, falling back to data URL:", err);
+    return dataUrl;
+  }
+}

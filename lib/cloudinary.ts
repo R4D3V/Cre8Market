@@ -28,11 +28,12 @@ export async function uploadImage(
       "Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET.",
     );
   }
+  const isVideo = source.startsWith("data:video/");
   const result = await cloudinary.uploader.upload(source, {
     folder,
-    resource_type: "image",
+    resource_type: isVideo ? "video" : "image",
     // Keep originals reasonably sized; Cloudinary also stores the original.
-    transformation: [{ quality: "auto", fetch_format: "auto" }],
+    ...(isVideo ? {} : { transformation: [{ quality: "auto", fetch_format: "auto" }] }),
   });
   return result.secure_url;
 }

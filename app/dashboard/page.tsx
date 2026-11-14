@@ -9,8 +9,11 @@ import {
   deleteMyProductsAction,
   duplicateMyProductsAction,
 } from "@/lib/actions/products";
+import { fetchMyProfileAction } from "@/lib/actions/users";
+import { fetchMySubscriptionAction } from "@/lib/actions/subscriptions";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { Product } from "@/lib/types";
+import { getCurrentPlanName, getPlanByName, PLANS } from "@/lib/plans";
 
 export default function MyProductsPage() {
   const { data: session } = useSession();
@@ -20,12 +23,16 @@ export default function MyProductsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [profile, setProfile] = useState<{ isVerified?: boolean; isVip?: boolean } | null>(null);
+  const [subscription, setSubscription] = useState<{ planName?: string; expiresAt: string | null; status: string } | null>(null);
 
   useEffect(() => {
     fetchMyProductsAction().then((data) => {
       setProducts(data);
       setLoading(false);
     });
+    fetchMyProfileAction().then((data) => setProfile(data)).catch(() => {});
+    fetchMySubscriptionAction().then((data) => setSubscription(data)).catch(() => {});
   }, []);
 
   async function handleDelete(id: string) {
@@ -146,6 +153,31 @@ export default function MyProductsPage() {
         </Link>
       }
     >
+      {/* Current plan */}
+      <div className="mb-6 bg-background/40 border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">
+            Your plan
+          </p>
+          <p className="font-bold text-foreground text-sm">
+            {(subscription?.planName ?? getCurrentPlanName(profile ?? {}))} plan
+          </p>
+          <p className="text-muted-foreground text-xs mt-0.5">
+            {subscription?.expiresAt
+              ? `Expires ${new Date(subscription.expiresAt).toLocaleDateString()}`
+              : (getPlanByName((subscription?.planName ?? getCurrentPlanName(profile ?? {})) as any)?.features[0])}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/subscription"
+            className="neu-pill bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 transition-all"
+          >
+            Upgrade / View Plans
+          </Link>
+        </div>
+      </div>
+
       <div className="mb-6 bg-background/40 border border-border rounded-xl p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shrink-0">

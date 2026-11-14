@@ -8,9 +8,10 @@ import {
   fetchMyProductsAction,
   updateMyProductAction,
   deleteMyProductAction,
+  fetchMyListingLimitAction,
 } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
-import { uploadProductImage } from "@/lib/uploadImage";
+import { uploadProductImage, uploadProductVideo } from "@/lib/uploadImage";
 import { ProductImagePicker } from "@/components/ProductImagePicker";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { CategoryDB } from "@/lib/types";
@@ -33,7 +34,17 @@ export default function EditMyProductPage() {
     specs: "",
     isDeal: false,
   });
-  const [images, setImages] = useState<string[]>(["", "", "", ""]);
+  const [images, setImages] = useState<string[]>(["", "", "", "", ""]);
+  const [video, setVideo] = useState<string>("");
+  const [limit, setLimit] = useState<{
+    productCount: number;
+    isVerified: boolean;
+    isVip: boolean;
+    limit: number | null;
+  } | null>(null);
+
+  const isVip = limit?.isVip ?? false;
+  const isVerified = limit?.isVerified ?? false;
   const [categories, setCategories] = useState<CategoryDB[]>([]);
 
   async function handleImageUpload(index: number, file: File) {
@@ -49,6 +60,20 @@ export default function EditMyProductPage() {
     }
   }
 
+  async function handleVideoUpload(file: File | null) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Video must be 5MB or smaller.");
+      return;
+    }
+    try {
+      const url = await uploadProductVideo(file);
+      setVideo(url);
+    } catch {
+      setError("Could not read that video. Please try a different file.");
+    }
+  }
+
   function removeImage(index: number) {
     setImages((prev) => {
       const next = [...prev];
@@ -59,6 +84,7 @@ export default function EditMyProductPage() {
 
   useEffect(() => {
     fetchCategoriesAction().then((data) => setCategories(data ?? []));
+    fetchMyListingLimitAction().then(setLimit).catch(() => {});
     // fetchMyProductsAction only returns products owned by the current session's user,
     // so looking the id up in that list doubles as an ownership check.
     fetchMyProductsAction().then((products) => {
@@ -70,9 +96,10 @@ export default function EditMyProductPage() {
       }
       if (Array.isArray(p.images)) {
         const imgArr = [...p.images];
-        while (imgArr.length < 4) imgArr.push("");
+        while (imgArr.length < 5) imgArr.push("");
         setImages(imgArr);
       }
+      if (p.video) setVideo(p.video);
       setForm({
         title: p.title ?? "",
         price: String(p.price ?? ""),
@@ -134,6 +161,7 @@ export default function EditMyProductPage() {
           whatsapp: session?.user?.whatsapp ?? session?.user?.phone ?? "",
         },
         images: imgs,
+        video: video || null,
       });
       router.push("/dashboard");
     } catch (err: unknown) {
@@ -206,14 +234,49 @@ export default function EditMyProductPage() {
 
         <div>
           <label className="block text-sm font-semibold text-muted-foreground mb-2">
-            Product Images (up to 4)
+            Product Images (up to {isVip || isVerified ? 5 : 3})
           </label>
           <ProductImagePicker
             images={images}
             onFile={handleImageUpload}
             onRemove={removeImage}
+            max={isVip || isVerified ? 5 : 3}
           />
         </div>
+
+        {isVip && (
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-muted-foreground mb-2">
+              Product Video (up to 1, max 5MB)
+            </label>
+            <label className="neu-inset aspect-video flex flex-col items-center justify-center cursor-pointer hover:bg-muted transition-colors overflow-hidden">
+              {video ? (
+                <video src={video} controls className="w-full h-full object-cover" />
+              ) : (
+                <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                  <span className="text-xl">🎬</span>
+                  <span className="text-[10px] font-semibold">Add Video</span>
+                </div>
+              )}
+              <input
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={(e) => handleVideoUpload(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            {video && (
+              <button
+                type="button"
+                onClick={() => setVideo("")}
+                className="mt-2 text-xs text-destructive font-semibold hover:underline"
+              >
+                Remove video
+              </button>
+            )}
+          </div>
+        )}
+
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>

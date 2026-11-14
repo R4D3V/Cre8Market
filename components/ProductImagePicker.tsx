@@ -4,14 +4,18 @@ export function ProductImagePicker({
   images,
   onFile,
   onRemove,
+  max,
 }: {
   images: string[];
   onFile: (index: number, file: File) => void;
   onRemove: (index: number) => void;
+  max?: number;
 }) {
+  const limit = max ?? images.length;
+  const slots = images.slice(0, limit);
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      {images.map((src, i) => (
+      {slots.map((src, i) => (
         <div key={i} className="relative aspect-square">
           {src ? (
             <div className="relative w-full h-full neu-inset overflow-hidden">

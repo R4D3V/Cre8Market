@@ -100,6 +100,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false;
 
 -- Migration: deal flag for products shown on the /deals page.
 ALTER TABLE products ADD COLUMN IF NOT EXISTS is_deal BOOLEAN DEFAULT false;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS video TEXT;
 
 -- Migration: user avatar (profile picture shown on listings).
 ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT;

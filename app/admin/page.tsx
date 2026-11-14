@@ -4,6 +4,7 @@ import {
   FolderTree,
   Users,
   ShieldCheck,
+  CreditCard,
   Tag,
   UserCircle,
   ClipboardList,
@@ -48,6 +49,12 @@ const QUICK_ACTIONS = [
     description: "Manage marketplace categories",
     href: "/admin/categories",
     icon: FolderTree,
+  },
+  {
+    label: "Subscriptions",
+    description: "Manage seller subscription plans",
+    href: "/admin/subscriptions",
+    icon: CreditCard,
   },
   {
     label: "Users",

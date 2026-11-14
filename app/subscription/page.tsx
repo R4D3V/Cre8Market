@@ -5,6 +5,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 import CopyButton from "@/components/CopyButton";
+import { PLANS, PLAN_BENEFITS, PLAN_SLOGAN } from "@/lib/plans";
+import { fetchSubscriptionPlansAction } from "@/lib/actions/subscriptions";
 
 export const metadata: Metadata = {
   title: "Seller Subscriptions | CRE8MARKET Entebbe",
@@ -13,56 +15,36 @@ export const metadata: Metadata = {
   alternates: { canonical: "/subscription" },
 };
 
-const plans = [
-  {
-    name: "Free",
-    price: "UGX 0",
-    period: "Free Forever",
-    highlight: false,
-    icon: "user",
-    features: ["Up to 3 active product listings", "Direct WhatsApp and phone contact"],
-    cta: "Start Free",
-  },
-  {
-    name: "Standard",
-    price: "UGX 10,000",
-    period: "2 Months",
-    highlight: true,
-    icon: "star",
-    features: [
-      "Up to 20 active product listings",
-      "Verified seller badge (after verification)",
-      "Direct WhatsApp and phone contact",
-    ],
-    cta: "Get Standard",
-  },
-  {
-    name: "Premium",
-    price: "UGX 35,000",
-    period: "2 Months",
-    highlight: false,
-    icon: "rocket",
-    features: [
-      "Unlimited active product listings",
-      "Verified seller badge (after verification)",
-      "Featured product opportunities",
-    ],
-    cta: "Get Premium",
-  },
-];
+const benefits = PLAN_BENEFITS;
 
-const benefits = [
-  "No commission on sales.",
-  "Deal directly with buyers.",
-  "Manage your own products and prices.",
-  "Reach more potential customers.",
-  "Choose a subscription that suits your business.",
-];
-
-export default function SubscriptionPage() {
+export default async function SubscriptionPage() {
   const waUrl = "https://wa.me/256767155113?text=" + encodeURIComponent(
     "Hi CRE8MARKET ENTEBBE! I'd like to subscribe to a seller plan. Please guide me.",
   );
+
+  let dbPlans: Awaited<ReturnType<typeof fetchSubscriptionPlansAction>> = [];
+  try {
+    dbPlans = await fetchSubscriptionPlansAction(true);
+  } catch {
+    dbPlans = [];
+  }
+  const plans =
+    dbPlans.length > 0
+      ? dbPlans.map((p) => ({
+          name: p.name,
+          price: `UGX ${Number(p.price).toLocaleString()}`,
+          period: p.period,
+          highlight: p.highlight,
+          icon: p.icon as "user" | "star" | "rocket",
+          features: p.features,
+          cta:
+            p.name === "Free"
+              ? "Start Free"
+              : p.name === "Standard"
+                ? "Get Standard"
+                : "Get Premium",
+        }))
+      : PLANS;
 
   return (
     <>
@@ -376,7 +358,7 @@ export default function SubscriptionPage() {
         <ScrollReveal delay={160}>
           <div className="neu-dark-card text-center py-10 px-6 mb-6">
             <p className="font-heading text-xl font-extrabold text-foreground">
-              CRE8 MARKET – Your Marketplace, Your Business, Your Rules!
+              {PLAN_SLOGAN}
             </p>
             <p className="text-muted-foreground text-sm mt-2">
               Ready to start selling? Pick a plan and message us on WhatsApp to get

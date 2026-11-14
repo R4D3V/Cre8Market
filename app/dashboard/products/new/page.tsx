@@ -10,7 +10,7 @@ import {
   fetchMyListingLimitAction,
 } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
-import { uploadProductImage } from "@/lib/uploadImage";
+import { uploadProductImage, uploadProductVideo } from "@/lib/uploadImage";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { CategoryDB } from "@/lib/types";
 
@@ -27,7 +27,8 @@ export default function NewMyProductPage() {
     specs: [{ label: "", value: "" }],
     isDeal: false,
   });
-  const [images, setImages] = useState<string[]>(["", "", "", ""]);
+  const [images, setImages] = useState<string[]>(["", "", "", "", ""]);
+  const [video, setVideo] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -39,6 +40,10 @@ export default function NewMyProductPage() {
     isVip: boolean;
     limit: number | null;
   } | null>(null);
+
+  const isVip = limit?.isVip ?? false;
+  const isVerified = limit?.isVerified ?? false;
+  const maxImages = isVip || isVerified ? 5 : 3;
 
   useEffect(() => {
     fetchCategoriesAction().then((data) => setCategories(data ?? []));
@@ -58,6 +63,20 @@ export default function NewMyProductPage() {
       });
     } catch {
       setError("Could not read that image. Please try a different file.");
+    }
+  }
+
+  async function handleVideoUpload(file: File | null) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Video must be 5MB or smaller.");
+      return;
+    }
+    try {
+      const url = await uploadProductVideo(file);
+      setVideo(url);
+    } catch {
+      setError("Could not read that video. Please try a different file.");
     }
   }
 
@@ -217,6 +236,7 @@ export default function NewMyProductPage() {
           whatsapp: session?.user?.whatsapp ?? session?.user?.phone ?? "",
         },
         images: imgs,
+        video: video || null,
         daysAgo: 0,
         timeAgo: "Just now",
       });
@@ -315,10 +335,10 @@ export default function NewMyProductPage() {
           {/* Images */}
           <div>
             <label className="block text-sm font-semibold text-muted-foreground mb-2">
-              Product Images (up to 4)
+              Product Images (up to {maxImages})
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[0, 1, 2, 3].map((i) => (
+              {Array.from({ length: maxImages }).map((_, i) => (
                 <label
                   key={i}
                   className="neu-inset aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-muted transition-colors overflow-hidden"
@@ -349,6 +369,45 @@ export default function NewMyProductPage() {
               ))}
             </div>
           </div>
+
+          {isVip && (
+            <div>
+              <label className="block text-sm font-semibold text-muted-foreground mb-2">
+                Product Video (up to 1, max 5MB)
+              </label>
+              <label className="neu-inset aspect-video flex flex-col items-center justify-center cursor-pointer hover:bg-muted transition-colors overflow-hidden">
+                {video ? (
+                  <video
+                    src={video}
+                    controls
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                    <span className="text-xl">🎬</span>
+                    <span className="text-[10px] font-semibold">Add Video</span>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={(e) =>
+                    handleVideoUpload(e.target.files?.[0] ?? null)
+                  }
+                />
+              </label>
+              {video && (
+                <button
+                  type="button"
+                  onClick={() => setVideo("")}
+                  className="mt-2 text-xs text-destructive font-semibold hover:underline"
+                >
+                  Remove video
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>

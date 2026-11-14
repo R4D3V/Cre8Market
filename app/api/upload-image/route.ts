@@ -24,18 +24,21 @@ export async function POST(request: Request) {
 
   const image = typeof body.image === "string" ? body.image.trim() : "";
   if (!image) {
-    return NextResponse.json({ error: "Missing image" }, { status: 400 });
+    return NextResponse.json({ error: "Missing file" }, { status: 400 });
   }
-  // Allow data URLs or remote http(s) URLs.
-  if (
-    !image.startsWith("data:image/") &&
-    !image.startsWith("http://") &&
-    !image.startsWith("https://")
-  ) {
-    return NextResponse.json({ error: "Invalid image" }, { status: 400 });
+  const isImage =
+    image.startsWith("data:image/") ||
+    image.startsWith("http://") ||
+    image.startsWith("https://");
+  const isVideo = image.startsWith("data:video/");
+  // Allow image data URLs, remote http(s) URLs, or video data URLs.
+  if (!isImage && !isVideo) {
+    return NextResponse.json({ error: "Invalid file" }, { status: 400 });
   }
-  if (image.length > 10 * 1024 * 1024) {
-    return NextResponse.json({ error: "Image too large" }, { status: 413 });
+  // Videos can be up to ~5MB (base64 inflates by ~33%).
+  const limit = isVideo ? 7 * 1024 * 1024 : 10 * 1024 * 1024;
+  if (image.length > limit) {
+    return NextResponse.json({ error: "File too large" }, { status: 413 });
   }
 
   const folder =

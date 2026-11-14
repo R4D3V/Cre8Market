@@ -31,6 +31,7 @@ export interface Product {
   seller?: Seller;
   user_id?: string | null;
   images?: string[];
+  video?: string | null;
   ownerName?: string | null;
   ownerPhone?: string | null;
   ownerWhatsapp?: string | null;
@@ -40,6 +41,30 @@ export interface Product {
   categoryIcon?: string;
   categoryColor?: string;
   categoryBg?: string;
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: number;
+  period: string;
+  features: string[];
+  highlight: boolean;
+  icon: "user" | "star" | "rocket";
+  sortOrder: number;
+  active: boolean;
+  createdAt?: string;
+}
+
+export interface UserSubscription {
+  id: string;
+  userId: string;
+  planId: string;
+  planName?: string;
+  startedAt: string;
+  expiresAt: string | null;
+  status: "active" | "expired" | "cancelled";
+  createdAt?: string;
 }
 
 // A product joined with the registered user who added it (used in the admin dashboard

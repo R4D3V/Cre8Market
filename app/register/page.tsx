@@ -11,6 +11,7 @@ import { registerUserAction } from "@/lib/actions/auth";
 import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
 import PasswordInput from "@/components/PasswordInput";
 import ScrollReveal from "@/components/ScrollReveal";
+import { PLANS } from "@/lib/plans";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -231,9 +232,11 @@ export default function RegisterPage() {
                   Seller plans
                 </p>
                 <ul className="space-y-0.5">
-                  <li>• Free — up to 3 listings, forever</li>
-                  <li>• Standard — UGX 10,000 / 2 months, up to 20 listings</li>
-                  <li>• Premium — UGX 35,000 / 2 months, unlimited listings</li>
+                  {PLANS.map((p) => (
+                    <li key={p.name}>
+                      • {p.name} — {p.price} / {p.period.toLowerCase()}, {p.features[0].toLowerCase()}
+                    </li>
+                  ))}
                 </ul>
                 <Link
                   href="/subscription"

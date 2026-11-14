@@ -11,6 +11,11 @@ import {
   setUserAdminAction,
   resetUserPasswordByAdminAction,
 } from "@/lib/actions/users";
+import {
+  fetchAllSubscriptionPlansAction,
+  assignSubscriptionAction,
+  fetchUserSubscriptionAction,
+} from "@/lib/actions/subscriptions";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import { PhoneInput, toLocalPart, toFullNumber } from "@/components/PhoneInput";
 import { compressImage } from "@/lib/imageCompress";
@@ -60,6 +65,9 @@ export default function EditUserPage() {
   const [isActive, setIsActive] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [plans, setPlans] = useState<{ id: string; name: string }[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState("");
+  const [expiresAt, setExpiresAt] = useState("");
 
   useEffect(() => {
     fetchUserByIdAction(id as string)
@@ -81,6 +89,19 @@ export default function EditUserPage() {
         setLoading(false);
       })
       .catch(() => router.push("/admin/users"));
+
+    fetchAllSubscriptionPlansAction()
+      .then((data) => setPlans((data as { id: string; name: string }[]) ?? []))
+      .catch(() => {});
+
+    fetchUserSubscriptionAction(id as string)
+      .then((s) => {
+        if (s) {
+          setSelectedPlanId(s.planId);
+          setExpiresAt(s.expiresAt ? s.expiresAt.slice(0, 10) : "");
+        }
+      })
+      .catch(() => {});
   }, [id, router]);
 
   async function handleAvatarUpload(file: File | null) {
@@ -262,6 +283,68 @@ export default function EditUserPage() {
               Making this user an admin grants them access to the admin panel.
             </p>
           )}
+        </div>
+
+        {/* Subscription */}
+        <div>
+          <h2 className="mb-3 font-heading text-lg font-bold text-foreground">
+            Subscription
+          </h2>
+          <div className="max-w-md space-y-3">
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-muted-foreground">
+                Plan
+              </label>
+              <select
+                value={selectedPlanId}
+                onChange={(e) => setSelectedPlanId(e.target.value)}
+                className="neu-inset w-full px-4 py-2.5 text-sm text-foreground focus:outline-none"
+              >
+                <option value="">— None —</option>
+                {plans.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-muted-foreground">
+                Expires (optional)
+              </label>
+              <input
+                type="date"
+                value={expiresAt}
+                onChange={(e) => setExpiresAt(e.target.value)}
+                className="neu-inset w-full px-4 py-2.5 text-sm text-foreground focus:outline-none"
+              />
+            </div>
+            <button
+              type="button"
+              disabled={saving || !selectedPlanId}
+              onClick={async () => {
+                if (!selectedPlanId) return;
+                setSaving(true);
+                setError("");
+                try {
+                  await assignSubscriptionAction(
+                    id as string,
+                    selectedPlanId,
+                    expiresAt ? new Date(expiresAt).toISOString() : null,
+                  );
+                  setSaved(true);
+                  setTimeout(() => setSaved(false), 2000);
+                } catch (e) {
+                  setError(e instanceof Error ? e.message : "Failed to assign plan");
+                } finally {
+                  setSaving(false);
+                }
+              }}
+              className="neu-pill bg-primary text-primary-foreground font-bold px-4 py-2 text-sm transition-all disabled:opacity-60"
+            >
+              Assign Plan
+            </button>
+          </div>
         </div>
 
         {/* Security */}

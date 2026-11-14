@@ -191,6 +191,15 @@ export default function ProductDetailPageClient({
                   ))}
                 </div>
               )}
+              {product.video && (
+                <div className="rounded-2xl overflow-hidden bg-black">
+                  <video
+                    src={product.video}
+                    controls
+                    className="w-full max-h-96"
+                  />
+                </div>
+              )}
             </div>
 
             <div>

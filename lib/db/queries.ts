@@ -1,5 +1,5 @@
 import { pool } from "./pool";
-import type { Product, CategoryDB, ProductWithOwner, AppUser } from "../types";
+import type { Product, CategoryDB, ProductWithOwner, AppUser, SubscriptionPlan, UserSubscription } from "../types";
 
 export interface PushSubscriptionRow {
   id: string;
@@ -193,8 +193,8 @@ export async function createProduct(
   data: Record<string, unknown>,
 ): Promise<Product> {
   const { rows } = await pool.query(
-    `INSERT INTO products (slug, title, price, category, category_slug, featured, is_deal, description, specs, condition, location, seller, images, "daysAgo", "timeAgo", user_id)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
+    `INSERT INTO products (slug, title, price, category, category_slug, featured, is_deal, description, specs, condition, location, seller, images, video, "daysAgo", "timeAgo", user_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING *`,
     [
       data.slug,
       data.title,
@@ -209,6 +209,7 @@ export async function createProduct(
       data.location ?? "Entebbe",
       JSON.stringify(data.seller ?? {}),
       JSON.stringify(data.images ?? []),
+      data.video ?? null,
       data.daysAgo ?? 0,
       data.timeAgo ?? "Just now",
       data.user_id ?? null,
@@ -223,9 +224,9 @@ export async function updateProduct(
 ): Promise<Product> {
   const { rows } = await pool.query(
     `UPDATE products SET slug=$1, title=$2, price=$3, category=$4, category_slug=$5, featured=$6,
-     is_deal=$7, description=$8, specs=$9, condition=$10, location=$11, seller=$12, images=$13,
-     "daysAgo"=$14, "timeAgo"=$15, user_id=$16, updated_at=now()
-     WHERE id=$17 RETURNING *`,
+     is_deal=$7, description=$8, specs=$9, condition=$10, location=$11, seller=$12, images=$13, video=$14,
+     "daysAgo"=$15, "timeAgo"=$16, user_id=$17, updated_at=now()
+     WHERE id=$18 RETURNING *`,
     [
       data.slug,
       data.title,
@@ -240,6 +241,7 @@ export async function updateProduct(
       data.location ?? "Entebbe",
       JSON.stringify(data.seller ?? {}),
       JSON.stringify(data.images ?? []),
+      data.video ?? null,
       data.daysAgo ?? 0,
       data.timeAgo ?? "Just now",
       data.user_id ?? null,
@@ -825,6 +827,7 @@ function mapProduct(row: Record<string, unknown>): Product {
         : undefined,
     user_id: (row.user_id as string) ?? null,
     images: Array.isArray(row.images) ? row.images : [],
+    video: (row.video as string) ?? null,
     daysAgo,
     timeAgo: formatTimeAgo(createdAt ?? row.timeAgo),
     createdAt: createdAt ? new Date(createdAt as string).toISOString() : undefined,
@@ -1078,4 +1081,133 @@ export async function setFeatureFlag(key: string, enabled: boolean): Promise<voi
      ON CONFLICT (key) DO UPDATE SET enabled = $2, updated_at = now()`,
     [key, enabled],
   );
+}
+
+// ── Subscription Plans ──
+
+export async function getSubscriptionPlans(activeOnly = false): Promise<SubscriptionPlan[]> {
+  const { rows } = await pool.query(
+    `SELECT * FROM subscription_plans ${activeOnly ? "WHERE active = true" : ""} ORDER BY sort_order ASC, name ASC`,
+  );
+  return rows.map(mapSubscriptionPlan);
+}
+
+export async function getSubscriptionPlanById(id: string): Promise<SubscriptionPlan | null> {
+  const { rows } = await pool.query("SELECT * FROM subscription_plans WHERE id = $1", [id]);
+  return rows[0] ? mapSubscriptionPlan(rows[0]) : null;
+}
+
+export async function upsertSubscriptionPlan(data: {
+  id?: string;
+  name: string;
+  price: number;
+  period: string;
+  features: string[];
+  highlight?: boolean;
+  icon?: string;
+  sortOrder?: number;
+  active?: boolean;
+}): Promise<SubscriptionPlan> {
+  if (data.id) {
+    const { rows } = await pool.query(
+      `UPDATE subscription_plans SET name=$1, price=$2, period=$3, features=$4, highlight=$5, icon=$6, sort_order=$7, active=$8, updated_at=now()
+       WHERE id=$9 RETURNING *`,
+      [
+        data.name,
+        data.price,
+        data.period,
+        JSON.stringify(data.features ?? []),
+        data.highlight ?? false,
+        data.icon ?? "user",
+        data.sortOrder ?? 0,
+        data.active ?? true,
+        data.id,
+      ],
+    );
+    return mapSubscriptionPlan(rows[0]);
+  }
+  const { rows } = await pool.query(
+    `INSERT INTO subscription_plans (name, price, period, features, highlight, icon, sort_order, active)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+    [
+      data.name,
+      data.price,
+      data.period,
+      JSON.stringify(data.features ?? []),
+      data.highlight ?? false,
+      data.icon ?? "user",
+      data.sortOrder ?? 0,
+      data.active ?? true,
+    ],
+  );
+  return mapSubscriptionPlan(rows[0]);
+}
+
+export async function deleteSubscriptionPlan(id: string): Promise<void> {
+  await pool.query("DELETE FROM subscription_plans WHERE id = $1", [id]);
+}
+
+// ── User Subscriptions ──
+
+export async function getUserSubscription(userId: string): Promise<UserSubscription | null> {
+  const { rows } = await pool.query(
+    `SELECT us.*, sp.name AS plan_name
+     FROM user_subscriptions us
+     JOIN subscription_plans sp ON sp.id = us.plan_id
+     WHERE us.user_id = $1
+     ORDER BY us.started_at DESC
+     LIMIT 1`,
+    [userId],
+  );
+  return rows[0] ? mapUserSubscription(rows[0]) : null;
+}
+
+export async function setUserSubscription(
+  userId: string,
+  planId: string,
+  expiresAt: string | null = null,
+  status: "active" | "expired" | "cancelled" = "active",
+): Promise<UserSubscription> {
+  // Expire any existing active subscriptions for this user first.
+  await pool.query(
+    `UPDATE user_subscriptions SET status='expired', updated_at=now()
+     WHERE user_id = $1 AND status = 'active'`,
+    [userId],
+  );
+  const { rows } = await pool.query(
+    `INSERT INTO user_subscriptions (user_id, plan_id, expires_at, status)
+     VALUES ($1,$2,$3,$4) RETURNING *`,
+    [userId, planId, expiresAt, status],
+  );
+  // Fetch with plan name.
+  const full = await getUserSubscription(userId);
+  return full ?? mapUserSubscription(rows[0]);
+}
+
+export function mapSubscriptionPlan(row: Record<string, unknown>): SubscriptionPlan {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    price: Number(row.price),
+    period: row.period as string,
+    features: Array.isArray(row.features) ? (row.features as string[]) : [],
+    highlight: (row.highlight as boolean) ?? false,
+    icon: (row.icon as SubscriptionPlan["icon"]) ?? "user",
+    sortOrder: Number(row.sort_order ?? 0),
+    active: (row.active as boolean) ?? true,
+    createdAt: row.created_at ? new Date(row.created_at as string).toISOString() : undefined,
+  };
+}
+
+export function mapUserSubscription(row: Record<string, unknown>): UserSubscription {
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    planId: row.plan_id as string,
+    planName: (row.plan_name as string) ?? undefined,
+    startedAt: new Date(row.started_at as string).toISOString(),
+    expiresAt: row.expires_at ? new Date(row.expires_at as string).toISOString() : null,
+    status: (row.status as UserSubscription["status"]) ?? "active",
+    createdAt: row.created_at ? new Date(row.created_at as string).toISOString() : undefined,
+  };
 }
