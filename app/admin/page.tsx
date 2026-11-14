@@ -87,6 +87,11 @@ export default async function AdminDashboardPage() {
   if (session?.user?.role !== "admin") return null;
 
   const stats = await getDashboardStats();
+  const admins = await getAdminUsers();
+  const isMainAdmin = admins.length > 0 && admins[0].id === session?.user?.id;
+  const quickActions = isMainAdmin
+    ? QUICK_ACTIONS
+    : QUICK_ACTIONS.filter((a) => a.href !== "/admin/admins");
 
   return (
     <AdminPanel
@@ -105,7 +110,7 @@ export default async function AdminDashboardPage() {
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {QUICK_ACTIONS.map(({ label, description, href, icon: Icon }) => (
+          {quickActions.map(({ label, description, href, icon: Icon }) => (
             <Link
               key={href}
               href={href}

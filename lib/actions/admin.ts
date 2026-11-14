@@ -24,7 +24,7 @@ async function requireAdmin() {
 }
 
 export async function fetchAdminUsersAction() {
-  await requireAdmin();
+  await requireMainAdmin();
   return getAdminUsers();
 }
 
@@ -36,7 +36,7 @@ export async function createAdminUserAction(data: {
   avatar?: string | null;
   password: string;
 }) {
-  const actorId = await requireAdmin();
+  const actorId = await requireMainAdmin();
 
   if (!data.email || !data.email.trim() || !data.password) {
     throw new Error("Email and password are required");
@@ -75,7 +75,7 @@ export async function createAdminUserAction(data: {
 }
 
 export async function deleteAdminUserAction(id: string) {
-  const currentAdminId = await requireAdmin();
+  const currentAdminId = await requireMainAdmin();
   if (id === currentAdminId) {
     throw new Error("You cannot delete your own admin account");
   }
@@ -141,4 +141,24 @@ export async function changeMyAdminPasswordAction(currentPassword: string, newPa
     targetId: adminId,
   });
   return { success: true };
+}
+
+// Main admin = the earliest created admin (the original). Only this account
+// may manage other admins.
+export async function isMainAdminAction(): Promise<boolean> {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "admin") return false;
+  const currentId = session.user.id;
+  const admins = await getAdminUsers();
+  if (admins.length === 0) return false;
+  return admins[0].id === currentId;
+}
+
+async function requireMainAdmin() {
+  const adminId = await requireAdmin();
+  const admins = await getAdminUsers();
+  if (admins.length === 0 || admins[0].id !== adminId) {
+    throw new Error("Only the main admin can manage admin accounts");
+  }
+  return adminId;
 }

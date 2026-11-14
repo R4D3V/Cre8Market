@@ -21,6 +21,8 @@ import {
   getProductOwnerIds,
   getSellers,
   getUserById,
+  getStoreProducts,
+  getUserSubscription,
   logAudit,
   getAuditLog,
   countAuditLog,
@@ -54,6 +56,39 @@ async function requireUser() {
 // verified by an admin, the limit is lifted.
 const MAX_FREE_PRODUCTS = 3;
 const MAX_VERIFIED_PRODUCTS = 20;
+
+// helper
+async function getEffectivePerks(userId: string): Promise<{ isVerified: boolean; isVip: boolean }> {
+  const user = await getUserById(userId);
+  let subVerified = false;
+  let subVip = false;
+  let subExpired = false;
+  let hasSub = false;
+  try {
+    const sub = await getUserSubscription(userId);
+    if (sub) {
+      hasSub = true;
+      const active =
+        sub.status === "active" &&
+        (!sub.expiresAt || new Date(sub.expiresAt).getTime() > Date.now());
+      if (active && sub.planName) {
+        const name = sub.planName.toLowerCase();
+        if (name.includes("premium")) subVip = true;
+        else if (name.includes("standard")) subVerified = true;
+      }
+      if (!active) subExpired = true;
+    }
+  } catch {
+    // ignore
+  }
+  if (hasSub && subExpired) {
+    return { isVerified: false, isVip: false };
+  }
+  return {
+    isVerified: (user?.isVerified ?? false) || subVerified,
+    isVip: (user?.isVip ?? false) || subVip,
+  };
+}
 
 // Generate a slug that doesn't collide with an existing one (e.g. `x-copy-2`).
 async function uniqueSlug(base: string): Promise<string> {
@@ -91,10 +126,8 @@ function buildDuplicateData(source: Product, ownerUserId: string | null) {
 
 export async function fetchMyListingLimitAction() {
   const userId = await requireUser();
-  const user = await getUserById(userId);
+  const { isVerified, isVip } = await getEffectivePerks(userId);
   const products = await getProductsByUserId(userId);
-  const isVip = user?.isVip ?? false;
-  const isVerified = user?.isVerified ?? false;
   const limit = isVip
     ? null
     : isVerified
@@ -142,6 +175,9 @@ export async function fetchProductByIdAction(id: string) {
 
 // Public: every listing added by a specific seller (their storefront page).
 export async function fetchPublicUserProductsAction(userId: string) {
+  if (userId === "store") {
+    return getStoreProducts();
+  }
   return getUserProductsWithOwner(userId);
 }
 
@@ -319,17 +355,15 @@ export async function fetchMyProductsAction() {
 export async function createMyProductAction(data: Record<string, unknown>) {
   const userId = await requireUser();
 
-  const user = await getUserById(userId);
-  const isVip = user?.isVip ?? false;
-  const isVerified = user?.isVerified ?? false;
+  const { isVip, isVerified } = await getEffectivePerks(userId);
   if (!isVip) {
     const max = isVerified ? MAX_VERIFIED_PRODUCTS : MAX_FREE_PRODUCTS;
     const existing = await getProductsByUserId(userId);
     if (existing.length >= max) {
       throw new Error(
         isVerified
-          ? `You've reached the limit of ${MAX_VERIFIED_PRODUCTS} listings as a verified seller. Contact the admin to become a VIP for unlimited listings.`
-          : `You've reached the limit of ${MAX_FREE_PRODUCTS} listings as a free seller. Contact the admin to get verified so you can post more.`,
+          ? `You've reached the limit of ${MAX_VERIFIED_PRODUCTS} listings as a verified seller. Upgrade your subscription to post more.`
+          : `You've reached the limit of ${MAX_FREE_PRODUCTS} listings as a free seller. Subscribe to a plan to post more listings.`,
       );
     }
   }
@@ -449,15 +483,13 @@ export async function duplicateMyProductsAction(ids: string[]) {
     }
   }
 
-  const user = await getUserById(userId);
-  const isVip = user?.isVip ?? false;
-  const isVerified = user?.isVerified ?? false;
+  const { isVip, isVerified } = await getEffectivePerks(userId);
   if (!isVip) {
     const max = isVerified ? MAX_VERIFIED_PRODUCTS : MAX_FREE_PRODUCTS;
     const existing = await getProductsByUserId(userId);
     if (existing.length + ids.length > max) {
       throw new Error(
-        `Duplicating ${ids.length} product${ids.length !== 1 ? "s" : ""} would put you past the ${max} listing limit. Contact the admin to upgrade your account.`,
+        `Duplicating ${ids.length} product${ids.length !== 1 ? "s" : ""} would put you past the ${max} listing limit. Subscribe to a plan to post more listings.`,
       );
     }
   }

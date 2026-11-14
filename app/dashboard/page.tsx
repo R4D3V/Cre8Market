@@ -18,7 +18,16 @@ export default function DashboardHubPage() {
     fetchMySubscriptionAction().then((data) => setSubscription(data)).catch(() => {});
   }, []);
 
-  const planName = (subscription?.planName ?? getCurrentPlanName(profile ?? {})) as string;
+  const subscriptionActive =
+    !!subscription &&
+    subscription.status === "active" &&
+    (!subscription.expiresAt || new Date(subscription.expiresAt).getTime() > Date.now());
+  const subscriptionExpired = !!subscription && !subscriptionActive;
+  const planName = (subscriptionActive
+    ? subscription?.planName
+    : subscriptionExpired
+      ? "Free"
+      : getCurrentPlanName(profile ?? {})) as string;
 
   return (
     <DashboardPanel title="Dashboard" description="Manage your account and listings">
@@ -31,7 +40,9 @@ export default function DashboardHubPage() {
           <p className="font-bold text-foreground text-sm">{planName} plan</p>
           <p className="text-muted-foreground text-xs mt-0.5">
             {subscription?.expiresAt
-              ? `Expires ${new Date(subscription.expiresAt).toLocaleDateString()}`
+              ? subscriptionActive
+                ? `Expires ${new Date(subscription.expiresAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`
+                : `Expired ${new Date(subscription.expiresAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} — subscribe to restore perks`
               : getPlanByName(planName as any)?.features[0]}
           </p>
         </div>

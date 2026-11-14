@@ -332,6 +332,8 @@ export default function EditUserPage() {
                     selectedPlanId,
                     expiresAt ? new Date(expiresAt).toISOString() : null,
                   );
+                  const s2 = await fetchUserSubscriptionAction(id as string);
+                  if (s2?.expiresAt) setExpiresAt(s2.expiresAt.slice(0, 10));
                   setSaved(true);
                   setTimeout(() => setSaved(false), 2000);
                 } catch (e) {

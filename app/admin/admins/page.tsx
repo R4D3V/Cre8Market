@@ -7,6 +7,7 @@ import {
   fetchAdminUsersAction,
   createAdminUserAction,
   deleteAdminUserAction,
+  isMainAdminAction,
 } from "@/lib/actions/admin";
 import type { AdminUserRow } from "@/lib/db/queries";
 import { compressImage } from "@/lib/imageCompress";
@@ -15,6 +16,7 @@ import PasswordInput from "@/components/PasswordInput";
 export default function AdminUsersPage() {
   const { data: session } = useSession();
   const [admins, setAdmins] = useState<AdminUserRow[]>([]);
+  const [isMain, setIsMain] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     name: "",
@@ -29,6 +31,9 @@ export default function AdminUsersPage() {
   const [msg, setMsg] = useState("");
 
   const load = useCallback(async () => {
+    const main = await isMainAdminAction();
+    setIsMain(main);
+    if (!main) { setLoading(false); return; }
     const data = await fetchAdminUsersAction();
     setAdmins(data ?? []);
     setLoading(false);
@@ -96,6 +101,17 @@ export default function AdminUsersPage() {
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to remove admin");
     }
+  }
+
+  if (isMain === false) {
+    return (
+      <div className="neu-card p-8 text-center">
+        <h1 className="text-xl font-bold text-foreground mb-2">Access denied</h1>
+        <p className="text-muted-foreground text-sm">
+          Only the main admin can manage admin accounts.
+        </p>
+      </div>
+    );
   }
 
   return (

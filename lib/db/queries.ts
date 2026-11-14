@@ -319,6 +319,19 @@ export async function getUserProductsWithOwner(
   return rows.map(mapProductWithOwner);
 }
 
+export async function getStoreProducts(): Promise<Product[]> {
+  const { rows } = await pool.query(
+    `SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
+            'CRE8MARKET' AS owner_name, NULL AS owner_phone, NULL AS owner_whatsapp, NULL AS owner_avatar, true AS owner_verified,
+            true AS owner_vip
+     FROM products p
+     LEFT JOIN categories c ON c.slug = p.category_slug
+     WHERE p.user_id IS NULL
+     ORDER BY p.created_at DESC`,
+  );
+  return rows.map(mapProductWithOwner);
+}
+
 // Products joined with the registered user who added them — powers the admin dashboard's
 // "Added by" column and per-user sorting/grouping.
 export async function getProductsWithOwners(): Promise<ProductWithOwner[]> {
@@ -576,7 +589,28 @@ export async function getPublicUsers(): Promise<AppUser[]> {
     HAVING COUNT(p.id) > 0 AND u.is_active = true
     ORDER BY u.name ASC
   `);
-  return rows.map(mapUser);
+  const users = rows.map(mapUser);
+  const storeCount = await pool.query(
+    "SELECT COUNT(*)::int AS count FROM products WHERE user_id IS NULL",
+  );
+  const storeProducts = Number(storeCount.rows[0]?.count ?? 0);
+  if (storeProducts > 0) {
+    users.push({
+      id: "store",
+      name: "CRE8MARKET",
+      phone: "",
+      whatsapp: null,
+      avatar: null,
+      banner: null,
+      isActive: true,
+      isAdmin: true,
+      isVerified: true,
+      isVip: true,
+      createdAt: new Date().toISOString(),
+      productCount: storeProducts,
+    });
+  }
+  return users;
 }
 
 // Public: sellers for the /products filter — registered users with listings,
@@ -1159,7 +1193,20 @@ export async function getUserSubscription(userId: string): Promise<UserSubscript
      LIMIT 1`,
     [userId],
   );
-  return rows[0] ? mapUserSubscription(rows[0]) : null;
+  if (!rows[0]) return null;
+  // Auto-expire subscriptions whose end date has passed.
+  if (
+    rows[0].status === "active" &&
+    rows[0].expires_at &&
+    new Date(rows[0].expires_at as string).getTime() < Date.now()
+  ) {
+    await pool.query(
+      "UPDATE user_subscriptions SET status='expired', updated_at=now() WHERE id=$1",
+      [rows[0].id],
+    );
+    rows[0].status = "expired";
+  }
+  return mapUserSubscription(rows[0]);
 }
 
 export async function setUserSubscription(
@@ -1168,6 +1215,22 @@ export async function setUserSubscription(
   expiresAt: string | null = null,
   status: "active" | "expired" | "cancelled" = "active",
 ): Promise<UserSubscription> {
+  if (!expiresAt && status === "active") {
+    const plan = await getSubscriptionPlanById(planId);
+    if (plan && plan.period) {
+      const m = plan.period.match(/(d+)s*(month|months|year|years|day|days|week|weeks)/i);
+      if (m) {
+        const n = parseInt(m[1], 10);
+        const unit = m[2].toLowerCase();
+        const d = new Date();
+        if (unit.startsWith("month")) d.setMonth(d.getMonth() + n);
+        else if (unit.startsWith("year")) d.setFullYear(d.getFullYear() + n);
+        else if (unit.startsWith("week")) d.setDate(d.getDate() + n * 7);
+        else if (unit.startsWith("day")) d.setDate(d.getDate() + n);
+        expiresAt = d.toISOString();
+      }
+    }
+  }
   // Expire any existing active subscriptions for this user first.
   await pool.query(
     `UPDATE user_subscriptions SET status='expired', updated_at=now()

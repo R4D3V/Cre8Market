@@ -48,6 +48,21 @@ export async function fetchPublicUsersAction() {
 }
 
 export async function fetchPublicUserAction(id: string) {
+  if (id === "store") {
+    return {
+      id: "store",
+      name: "CRE8MARKET",
+      phone: "",
+      whatsapp: null,
+      avatar: null,
+      banner: null,
+      isActive: true,
+      isAdmin: true,
+      isVerified: true,
+      isVip: true,
+      createdAt: new Date().toISOString(),
+    } as any;
+  }
   return getUserById(id);
 }
 

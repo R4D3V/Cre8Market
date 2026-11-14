@@ -1,15 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import Providers from "@/components/Providers";
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
 
 // Sora is self-hosted (see app/fonts/) so the build no longer depends on
 // reaching fonts.googleapis.com at build time. The files are Google's own
@@ -87,7 +80,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${sora.variable}`}
+      className={`${sora.variable}`}
       data-scroll-behavior="smooth"
     >
       <body className="min-h-dvh bg-background font-body antialiased">

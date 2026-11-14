@@ -275,8 +275,14 @@ export default function NewMyProductPage() {
             You've reached the limit of {limit.limit} listings for your account.
           </p>
           <p className="text-muted-foreground text-sm mb-6">
-            Contact the admin to upgrade your account so you can post more items.
+            Your current plan has reached its listing limit. Subscribe to a plan to post more items.
           </p>
+          <Link
+            href="/subscription"
+            className="neu-pill inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold px-6 py-3 text-sm transition-all"
+          >
+            View Subscription Plans
+          </Link>
           <a
             href="https://wa.me/256767155113?text=Hi+I+would+like+to+get+verified+so+I+can+post+more+listings"
             target="_blank"
