@@ -135,9 +135,9 @@ export default function Footer() {
         <div className="container flex flex-col items-center justify-between gap-2 py-5 text-center text-xs text-muted-foreground sm:flex-row">
           <p>
             <Link href="/admin" className="hover:text-primary">
-              ©
+              © 2026
             </Link>{" "}
-            2026 CRE8MARKET ENTEBBE. All rights reserved.
+            CRE8MARKET ENTEBBE. All rights reserved.
           </p>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:text-primary">
