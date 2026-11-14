@@ -6,7 +6,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import ScrollReveal from "@/components/ScrollReveal";
-import { ChevronUp } from "lucide-react";
+import { SlidersHorizontal, WifiOff } from "lucide-react";
+import BottomSheet from "@/components/BottomSheet";
 import {
   fetchProductsPageAction,
   fetchSellersAction,
@@ -81,6 +82,8 @@ function ProductsPageContent({
     { id: string; name: string; productCount: number }[]
   >(initialSellers ?? []);
   const [loading, setLoading] = useState(initialProducts ? false : true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const [search, setSearch] = useState(qParam);
   const [debouncedSearch, setDebouncedSearch] = useState(qParam);
@@ -130,6 +133,7 @@ function ProductsPageContent({
     }
     let active = true;
     setLoading(true);
+    setLoadError(false);
     fetchProductsPageAction({
       search: debouncedSearch,
       categorySlug: selectedCategory,
@@ -152,6 +156,7 @@ function ProductsPageContent({
         console.error("Failed to load products:", err);
         setProducts([]);
         setTotal(0);
+        setLoadError(true);
         setLoading(false);
       });
     return () => {
@@ -166,6 +171,7 @@ function ProductsPageContent({
     featuredParam,
     sortParam,
     page,
+    reloadKey,
   ]);
 
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
@@ -179,127 +185,122 @@ function ProductsPageContent({
     setPage(1);
   }
 
+  const activeFilterCount = [
+    search,
+    selectedCategory,
+    selectedSeller,
+    minPrice,
+    maxPrice,
+  ].filter(Boolean).length;
+
+  const filterFields = (
+    <>
+    <div className="mb-4">
+      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
+        Search
+      </label>
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
+        placeholder="Search listings…"
+        className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+      />
+    </div>
+
+    <div className="mb-4">
+      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
+        Category
+      </label>
+      <select
+        value={selectedCategory}
+        onChange={(e) => {
+          setSelectedCategory(e.target.value);
+          setPage(1);
+        }}
+        className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+      >
+        <option value="">All Categories</option>
+        {categories.map((c) => (
+          <option key={c.id} value={c.slug}>
+            {c.icon} {c.name}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <div className="mb-4">
+      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
+        Seller
+      </label>
+      <select
+        value={selectedSeller}
+        onChange={(e) => {
+          setSelectedSeller(e.target.value);
+          setPage(1);
+        }}
+        className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+      >
+        <option value="">All Sellers</option>
+        {sellers.map((s) => (
+          <option key={s.id} value={s.id}>
+            {s.name} ({s.productCount})
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <div className="mb-4">
+      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
+        Price (UGX)
+      </label>
+      <div className="flex gap-2">
+        <input
+          type="number"
+          value={minPrice}
+          onChange={(e) => {
+            setMinPrice(e.target.value);
+            setPage(1);
+          }}
+          placeholder="Min"
+          className="neu-inset w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+        />
+        <input
+          type="number"
+          value={maxPrice}
+          onChange={(e) => {
+            setMaxPrice(e.target.value);
+            setPage(1);
+          }}
+          placeholder="Max"
+          className="neu-inset w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+        />
+      </div>
+    </div>
+    </>
+  );
+
   return (
     <>
       <Navbar />
       <main className="container py-6 pb-24 sm:pb-8">
         <ScrollReveal className="flex flex-col lg:flex-row gap-6">
-          <aside className="lg:w-56 shrink-0">
+          {/* Desktop: persistent sidebar. Mobile uses the bottom sheet below. */}
+          <aside className="hidden shrink-0 lg:block lg:w-56">
             <div className="neu-card p-4 lg:sticky lg:top-24">
-              <div
-                className={`flex items-center justify-between ${filtersOpen ? "mb-4" : "mb-0 lg:mb-4"}`}
-              >
-                <h2 className="font-heading font-bold text-foreground">
-                  Filters
-                </h2>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={resetFilters}
-                    className="text-xs text-primary font-semibold hover:underline"
-                  >
-                    Reset
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFiltersOpen((o) => !o)}
-                    aria-expanded={filtersOpen}
-                    className="lg:hidden flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                  >
-                    {filtersOpen ? "Hide filters" : "Show filters"}
-                    <ChevronUp
-                      className={`size-4 transition-transform duration-300 ${filtersOpen ? "" : "rotate-180"}`}
-                    />
-                  </button>
-                </div>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="font-heading font-bold text-foreground">Filters</h2>
+                <button
+                  onClick={resetFilters}
+                  className="text-xs text-primary font-semibold hover:underline"
+                >
+                  Reset
+                </button>
               </div>
-
-              <div className={filtersOpen ? "block" : "hidden lg:block"}>
-                <div className="mb-4">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
-                    Search
-                  </label>
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      setPage(1);
-                    }}
-                    placeholder="Search listings…"
-                    className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
-                    Category
-                  </label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => {
-                      setSelectedCategory(e.target.value);
-                      setPage(1);
-                    }}
-                    className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  >
-                    <option value="">All Categories</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.slug}>
-                        {c.icon} {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mb-4">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
-                    Seller
-                  </label>
-                  <select
-                    value={selectedSeller}
-                    onChange={(e) => {
-                      setSelectedSeller(e.target.value);
-                      setPage(1);
-                    }}
-                    className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  >
-                    <option value="">All Sellers</option>
-                    {sellers.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} ({s.productCount})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mb-4">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
-                    Price (UGX)
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      value={minPrice}
-                      onChange={(e) => {
-                        setMinPrice(e.target.value);
-                        setPage(1);
-                      }}
-                      placeholder="Min"
-                      className="neu-inset w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-                    />
-                    <input
-                      type="number"
-                      value={maxPrice}
-                      onChange={(e) => {
-                        setMaxPrice(e.target.value);
-                        setPage(1);
-                      }}
-                      placeholder="Max"
-                      className="neu-inset w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
+              {filterFields}
             </div>
           </aside>
 
@@ -319,6 +320,21 @@ function ProductsPageContent({
                     ` in ${categories.find((c) => c.slug === selectedCategory)?.name}`}
                 </p>
               </div>
+              <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setFiltersOpen(true)}
+                aria-haspopup="dialog"
+                className="neu-inset press relative flex min-h-11 items-center gap-1.5 px-3 text-sm font-semibold text-foreground lg:hidden"
+              >
+                <SlidersHorizontal className="size-4" aria-hidden="true" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="grid size-5 place-items-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
               <select
                 value={sortParam || "latest"}
                 onChange={(e) => {
@@ -334,6 +350,7 @@ function ProductsPageContent({
                 <option value="price-desc">Price: High to Low</option>
                 <option value="featured">Featured first</option>
               </select>
+              </div>
             </div>
 
             {loading ? (
@@ -341,6 +358,22 @@ function ProductsPageContent({
                 {Array.from({ length: 8 }).map((_, i) => (
                   <ProductCardSkeleton key={i} />
                 ))}
+              </div>
+            ) : loadError ? (
+              <div className="neu-card text-center py-16 px-4" role="alert">
+                <WifiOff className="mx-auto mb-4 size-10 text-muted-foreground" aria-hidden="true" />
+                <h3 className="font-heading text-lg font-bold text-foreground mb-2">
+                  Couldn&apos;t load listings
+                </h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Check your connection and try again.
+                </p>
+                <button
+                  onClick={() => setReloadKey((k) => k + 1)}
+                  className="neu-pill press bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm hover:bg-primary/90 transition-all"
+                >
+                  Try again
+                </button>
               </div>
             ) : products.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -411,6 +444,32 @@ function ProductsPageContent({
           </div>
         </ScrollReveal>
       </main>
+
+      <BottomSheet
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        title="Filters"
+        footer={
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="press min-h-12 flex-1 rounded-full border border-border text-sm font-bold text-foreground"
+            >
+              Reset
+            </button>
+            <button
+              type="button"
+              onClick={() => setFiltersOpen(false)}
+              className="press min-h-12 flex-[2] rounded-full bg-primary text-sm font-bold text-primary-foreground"
+            >
+              {loading ? "Show results" : `Show ${total} ${total === 1 ? "result" : "results"}`}
+            </button>
+          </div>
+        }
+      >
+        {filterFields}
+      </BottomSheet>
 
       <Footer />
     </>

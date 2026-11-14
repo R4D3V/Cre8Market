@@ -1,48 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore, useState, useEffect } from "react";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
+import { isIOS, isStandalone } from "@/lib/pwa";
 
-function isStandalone(): boolean {
-  if (typeof window === "undefined") return false;
-  // iOS Safari
-  if ((window.navigator as { standalone?: boolean }).standalone === true) return true;
-  // Standard
-  if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
-  return false;
-}
+const noopSubscribe = () => () => {};
 
 export default function EnableNotificationsButton() {
-  const { status, setStatus, subscribe } = usePushSubscription();
-  const [standalone, setStandalone] = useState<boolean | null>(null);
+  const { status, subscribe, unsubscribe } = usePushSubscription();
+  const [successToast, setSuccessToast] = useState(false);
 
+  // null on the server and during hydration, so the markup always matches.
+  const env = useSyncExternalStore(
+    noopSubscribe,
+    () => (isStandalone() ? "standalone" : isIOS() ? "ios" : "browser"),
+    () => null,
+  );
+
+  // Auto-hide the success toast.
   useEffect(() => {
-    setStandalone(isStandalone());
-    if (typeof window !== "undefined" && "Notification" in window) {
-      if (Notification.permission === "granted") setStatus("granted");
-      else if (Notification.permission === "denied") setStatus("denied");
-    } else {
-      setStatus("unsupported");
-    }
-  }, [setStatus]);
+    if (!successToast) return;
+    const timer = setTimeout(() => setSuccessToast(false), 4000);
+    return () => clearTimeout(timer);
+  }, [successToast]);
 
-  async function turnOn() {
-    if (!("Notification" in window) || !("PushManager" in window)) {
-      setStatus("unsupported");
-      return;
-    }
-    await subscribe();
-  }
+  if (env === null) return null;
 
-  // Avoid hydration mismatch: render nothing until client knows standalone state.
-  if (standalone === null) return null;
-
-  if (!standalone) {
+  // iPhone/iPad only allow push for apps added to the Home Screen.
+  if (env === "ios") {
     return (
       <div className="neu-card p-4 text-sm text-muted-foreground">
         <p className="font-semibold text-foreground mb-1">Enable notifications</p>
         <p>
-          To receive push notifications on iPhone, first install this app: tap the
+          On iPhone, notifications need the installed app: tap the
           <span className="font-semibold"> Share </span> button, then
           <span className="font-semibold"> Add to Home Screen</span>. Open the app from
           your Home Screen, then come back here to turn on notifications.
@@ -51,27 +41,53 @@ export default function EnableNotificationsButton() {
     );
   }
 
+  async function handleSubscribe() {
+    const ok = await subscribe();
+    if (ok) setSuccessToast(true);
+  }
+
   return (
-    <div className="neu-card p-4">
+    <div className="neu-card p-4 w-full">
       <p className="font-semibold text-foreground mb-2">Enable notifications</p>
       {status === "granted" ? (
-        <p className="text-sm text-primary font-semibold">✓ Notifications enabled</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-primary font-semibold">✓ Notifications enabled</p>
+          <button
+            type="button"
+            onClick={unsubscribe}
+            className="press min-h-11 text-sm font-semibold text-muted-foreground underline underline-offset-4"
+          >
+            Turn off
+          </button>
+        </div>
       ) : status === "denied" ? (
         <p className="text-sm text-secondary">
-          Notifications blocked — enable them in your browser settings.
+          Notifications are blocked — allow them in your browser or phone settings, then come back.
         </p>
       ) : status === "unsupported" ? (
         <p className="text-sm text-muted-foreground">
-          Push notifications are not supported in this browser.
+          Push notifications are not supported in this browser or environment.
         </p>
       ) : (
         <button
-          onClick={turnOn}
+          onClick={handleSubscribe}
           disabled={status === "loading"}
-          className="neu-pill bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-5 py-2.5 text-sm transition-all disabled:opacity-60"
+          className="neu-pill press bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-5 py-3 text-sm transition-all disabled:opacity-60 w-full sm:w-auto"
         >
           {status === "loading" ? "Enabling…" : "Turn on notifications"}
         </button>
+      )}
+
+      {successToast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[200] neu-card px-4 py-3 shadow-lg animate-slide-up pointer-events-auto max-w-sm w-[calc(100%-2rem)]"
+        >
+          <p className="text-sm font-semibold text-primary text-center">
+            ✓ Notifications enabled successfully
+          </p>
+        </div>
       )}
     </div>
   );

@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 import EnableNotificationsButton from "@/components/EnableNotificationsButton";
+import InstallAppButton from "@/components/pwa/InstallAppButton";
 
 function AndroidPhoneSvg() {
   return (
@@ -658,6 +659,9 @@ export default function InstallPage() {
               experience — directly from your browser, no Play Store or App
               Store needed.
             </p>
+            <div className="mt-6 flex justify-center">
+              <InstallAppButton />
+            </div>
           </div>
         </ScrollReveal>
 
@@ -872,9 +876,9 @@ export default function InstallPage() {
         </ScrollReveal>
 
         {/* Notifications */}
-        <ScrollReveal delay={150}>
+        <div className="w-full">
           <EnableNotificationsButton />
-        </ScrollReveal>
+        </div>
 
         {/* Tips */}
         <ScrollReveal delay={200}>

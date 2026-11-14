@@ -35,7 +35,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-dvh bg-background text-foreground">
       <Navbar />
       <main className="mx-auto w-full max-w-7xl p-4 sm:p-6">{children}</main>
     </div>

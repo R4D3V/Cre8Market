@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#021e40" />
+  <meta name="robots" content="noindex" />
+  <title>You're offline | CRE8MARKET</title>
+  <!-- Fully self-contained: no framework CSS/JS, so it renders offline even
+       right after a deploy changes the hashed asset filenames. -->
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: flex; align-items: center; justify-content: center;
+      padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+      background: #001f3d; color: #f7f7f7;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    main { width: 100%; max-width: 360px; text-align: center; }
+    img { height: 34px; width: auto; margin-bottom: 32px; }
+    .card { background: #062537; border: 1px solid #1d3550; border-radius: 16px; padding: 28px 22px; }
+    .icon { font-size: 44px; line-height: 1; margin-bottom: 12px; }
+    h1 { font-size: 20px; margin: 0 0 8px; }
+    p { margin: 0 0 20px; color: #93a5b8; font-size: 14px; line-height: 1.5; }
+    button, a.link {
+      display: block; width: 100%; padding: 14px; border-radius: 999px; border: 0;
+      font: inherit; font-weight: 700; font-size: 15px; text-decoration: none; cursor: pointer;
+      touch-action: manipulation;
+    }
+    button { background: #6de87c; color: #001f3d; }
+    button:active { transform: scale(.97); }
+    a.link { margin-top: 10px; background: transparent; color: #6de87c; border: 1px solid #1d3550; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/brand/cre8-market-logo-transparent.svg" alt="Cre8 Market" />
+    <div class="card">
+      <div class="icon" aria-hidden="true">📡</div>
+      <h1>You're offline</h1>
+      <p>This page isn't saved on your phone yet. Pages you've already opened are still available — reconnect to see new listings.</p>
+      <button type="button" id="retry">Try again</button>
+      <a class="link" href="/">Go to home</a>
+    </div>
+  </main>
+  <script>
+    document.getElementById("retry").addEventListener("click", function () { location.reload(); });
+    // Come back automatically as soon as the connection returns.
+    window.addEventListener("online", function () { location.reload(); });
+  </script>
+</body>
+</html>

@@ -8,7 +8,7 @@ import { Pool } from "pg";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 
-const img = (slug) => `https://picsum.photos/seed/${slug}/600/450`;
+const img = () => "/placeholder-deal.svg";
 
 const deals = [
   {

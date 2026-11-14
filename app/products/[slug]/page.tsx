@@ -35,7 +35,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description: description.slice(0, 160),
-      url: `https://cre8market.com/products/${product.slug}`,
+      url: `https://www.cre8-market.com/products/${product.slug}`,
       type: "website",
       images: product.images?.[0]
         ? [

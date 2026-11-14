@@ -12,7 +12,10 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-background shadow-lg lg:shadow-none">
+    <header
+      className="sticky top-0 z-50 bg-background shadow-lg lg:shadow-none"
+      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+    >
       <div className="container flex items-center justify-between gap-x-4 py-3">
         <Link
           href="/"
@@ -119,7 +122,7 @@ export default function Navbar() {
                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
-              <span className="hidden sm:inline">Account</span>
+              <span className="hidden sm:inline">Login</span>
             </Link>
           )}
 

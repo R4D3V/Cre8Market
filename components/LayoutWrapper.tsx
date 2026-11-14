@@ -1,22 +1,16 @@
 'use client'
 
-import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import FloatingIcons from './FloatingIcons'
-import InstallPopup from './InstallPopup'
+import InstallPrompt from './pwa/InstallPrompt'
+import NotificationPrompt from './pwa/NotificationPrompt'
+import NetworkStatus from './pwa/NetworkStatus'
+import AppBadgeClearer from './pwa/AppBadgeClearer'
 import MobileBottomNav from './MobileBottomNav'
 import InAppNotificationToast from './InAppNotificationToast'
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch((err) => {
-        console.error("Service worker registration failed:", err);
-      });
-    }
-  }, [])
 
   const hideBottomNav =
     pathname.startsWith('/admin') || pathname.startsWith('/dashboard')
@@ -30,12 +24,21 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         Skip to content
       </a>
       <FloatingIcons />
-      <InstallPopup />
+      <NetworkStatus />
+      <AppBadgeClearer />
+      <InstallPrompt />
+      <NotificationPrompt />
       <InAppNotificationToast />
       <div id="main-content" className="relative z-10" tabIndex={-1}>
         {children}
       </div>
-      {!hideBottomNav && <MobileBottomNav />}
+      {!hideBottomNav && (
+        <>
+          {/* Room for the floating tab bar plus the home-indicator inset. */}
+          <div className="sm:hidden" style={{ height: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }} aria-hidden="true" />
+          <MobileBottomNav />
+        </>
+      )}
     </>
   )
 }

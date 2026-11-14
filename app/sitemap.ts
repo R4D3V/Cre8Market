@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getProducts, getSellers } from "@/lib/db/queries";
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL || "https://cre8market.com";
+const BASE = process.env.NEXT_PUBLIC_APP_URL || "https://www.cre8-market.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [

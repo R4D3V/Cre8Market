@@ -30,8 +30,16 @@ export default function MyProductsPage() {
 
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this product?")) return;
-    await deleteMyProductsAction([id]);
+    // Optimistic: the row disappears instantly; restored if the server refuses.
+    const previous = products;
+    setError("");
     setProducts((p) => p.filter((x) => x.id !== id));
+    try {
+      await deleteMyProductsAction([id]);
+    } catch (e) {
+      setProducts(previous);
+      setError(e instanceof Error ? e.message : "Couldn't delete that product. It has been restored.");
+    }
   }
 
   function toggleSelected(id: string) {
@@ -75,10 +83,21 @@ export default function MyProductsPage() {
     )
       return;
     setBusy(true);
-    await deleteMyProductsAction(selectedIds);
+    setError("");
+    const previous = products;
+    const previousSelected = selected;
+    // Optimistic: remove immediately, roll back if the request fails.
     setProducts((p) => p.filter((x) => !selected.has(x.id)));
     setSelected(new Set());
-    setBusy(false);
+    try {
+      await deleteMyProductsAction(selectedIds);
+    } catch (e) {
+      setProducts(previous);
+      setSelected(previousSelected);
+      setError(e instanceof Error ? e.message : "Couldn't delete those products. They have been restored.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function refreshProducts() {

@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 // Better Auth stores the session token in a cookie named
 // `better-auth.session_token`. On HTTPS deployments it prefixes that name with
 // `__Secure-`, and large tokens may be chunked (`.0`, `.1`, …). Checking only
-// the unprefixed name makes the middleware bounce already-authenticated admins
+// the unprefixed name makes the proxy bounce already-authenticated admins
 // back to /admin/login in production.
 function hasSessionCookie(request: NextRequest) {
   return request.cookies.getAll().some(({ name }) => {
@@ -16,7 +16,7 @@ function hasSessionCookie(request: NextRequest) {
   });
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasSession = hasSessionCookie(request);
 

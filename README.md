@@ -17,7 +17,7 @@ accounts.
 | Auth       | **better-auth** (email + password, phone-based legacy accounts, bcrypt) |
 | AI         | **OpenAI** `gpt-4o-mini` — auto-fills listing details on `/sell` |
 | Push       | **web-push** (VAPID) — browser notifications |
-| PWA        | `public/manifest.json` + install prompt |
+| PWA        | `app/manifest.ts`, Serwist service worker (`app/sw.ts`), install prompt |
 | Scripts    | `scripts/seed-deals.mjs` (seeds the `/deals` page) |
 
 ## Getting Started

@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { CirclePlus, House, ShoppingBag, Tag, User, Users } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { haptic } from "@/lib/haptics";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
@@ -17,43 +19,51 @@ export default function MobileBottomNav() {
       : "/dashboard/products/new";
 
   const navItems = [
-    { href: "/", label: "Home", icon: "🏠" },
-    { href: "/products", label: "Shop", icon: "🛒" },
-    { href: "/deals", label: "Deals", icon: "🏷️" },
-    { href: "/sellers", label: "Sellers", icon: "👥" },
-    ...(isLoggedIn
-      ? [
-          {
-            href: addProductHref,
-            label: "Add",
-            icon: "➕",
-          },
-        ]
-      : []),
+    { href: "/", label: "Home", Icon: House },
+    { href: "/products", label: "Shop", Icon: ShoppingBag },
+    { href: "/deals", label: "Deals", Icon: Tag },
+    { href: "/sellers", label: "Sellers", Icon: Users },
+    ...(isLoggedIn ? [{ href: addProductHref, label: "Add", Icon: CirclePlus }] : []),
     {
       href: isLoggedIn ? "/dashboard" : "/login",
       label: isLoggedIn ? "Dashboard" : "Login",
-      icon: "👤",
+      Icon: User,
     },
   ];
 
+  // The most specific matching item wins, so /dashboard/products/new lights up
+  // "Add" rather than "Dashboard", and /products/some-phone lights up "Shop".
+  const matches = navItems.filter((item) =>
+    item.href === "/"
+      ? pathname === "/"
+      : pathname === item.href || pathname.startsWith(`${item.href}/`),
+  );
+  const activeHref = matches.sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
   return (
-    <nav className="fixed bottom-2 left-2 right-2 z-50 sm:hidden">
-      <div className="neu-dark-card flex items-center px-1 py-1">
-        {navItems.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
-            className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors ${
-              pathname === item.href
-                ? "text-primary"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <span className="text-xl leading-none">{item.icon}</span>
-            <span className="text-[10px] font-medium">{item.label}</span>
-          </Link>
-        ))}
+    <nav
+      aria-label="Primary"
+      className="fixed inset-x-2 z-50 sm:hidden"
+      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 0.5rem)" }}
+    >
+      <div className="neu-dark-card flex items-center gap-0.5 p-1 shadow-xl">
+        {navItems.map(({ href, label, Icon }) => {
+          const active = href === activeHref;
+          return (
+            <Link
+              key={label}
+              href={href}
+              aria-current={active ? "page" : undefined}
+              onClick={() => haptic(8)}
+              className={`press flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 transition-colors ${
+                active ? "bg-primary/10 text-primary" : "text-muted-foreground"
+              }`}
+            >
+              <Icon className="size-[22px]" strokeWidth={active ? 2.4 : 1.9} aria-hidden="true" />
+              <span className="text-[10px] font-semibold leading-none">{label}</span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

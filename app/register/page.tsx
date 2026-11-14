@@ -226,6 +226,23 @@ export default function RegisterPage() {
                 </div>
               )}
 
+              <div className="neu-inset p-3.5 text-xs text-muted-foreground space-y-1">
+                <p className="font-semibold text-foreground text-sm">
+                  Seller plans
+                </p>
+                <ul className="space-y-0.5">
+                  <li>• Free — up to 3 listings, forever</li>
+                  <li>• Standard — UGX 10,000 / 2 months, up to 20 listings</li>
+                  <li>• Premium — UGX 35,000 / 2 months, unlimited listings</li>
+                </ul>
+                <Link
+                  href="/subscription"
+                  className="inline-block text-primary font-bold hover:underline mt-1"
+                >
+                  View subscription plans →
+                </Link>
+              </div>
+
               <button
                 type="submit"
                 disabled={loading}
