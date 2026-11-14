@@ -286,7 +286,7 @@ function ProductsPageContent({
   return (
     <>
       <Navbar />
-      <main className="container py-6 pb-24 sm:pb-8">
+      <main className="container py-6 pb-24 sm:pb-8 overflow-x-hidden max-w-full">
         <ScrollReveal className="flex flex-col lg:flex-row gap-6">
           {/* Desktop: persistent sidebar. Mobile uses the bottom sheet below. */}
           <aside className="hidden shrink-0 lg:block lg:w-56">
@@ -400,7 +400,7 @@ function ProductsPageContent({
             )}
 
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-8">
+              <div className="flex flex-wrap justify-center items-center gap-2 mt-8">
                 <button
                   onClick={() => {
                     setPage((p) => Math.max(1, p - 1));
