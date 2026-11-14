@@ -47,10 +47,10 @@ export default function EnableNotificationsButton() {
   }
 
   return (
-    <div className="neu-card p-4 w-full">
+    <div className="neu-card p-4 w-full text-center">
       <p className="font-semibold text-foreground mb-2">Enable notifications</p>
       {status === "granted" ? (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <p className="text-sm text-primary font-semibold">✓ Notifications enabled</p>
           <button
             type="button"

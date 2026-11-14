@@ -665,6 +665,13 @@ export default function InstallPage() {
           </div>
         </ScrollReveal>
 
+        {/* Notifications */}
+        <div className="flex justify-center mb-6">
+          <div className="w-full max-w-md">
+            <EnableNotificationsButton />
+          </div>
+        </div>
+
         {/* Why install */}
         <ScrollReveal delay={80}>
           <div className="neu-card p-6 sm:p-8 mb-6 text-center">
@@ -874,11 +881,6 @@ export default function InstallPage() {
             </div>
           </div>
         </ScrollReveal>
-
-        {/* Notifications */}
-        <div className="w-full">
-          <EnableNotificationsButton />
-        </div>
 
         {/* Tips */}
         <ScrollReveal delay={200}>
