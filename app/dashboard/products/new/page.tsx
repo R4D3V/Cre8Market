@@ -241,7 +241,7 @@ export default function NewMyProductPage() {
         timeAgo: "Just now",
       });
 
-      router.push("/dashboard");
+      router.push("/dashboard/products");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save product");
       setSaving(false);
