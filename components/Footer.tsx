@@ -89,7 +89,10 @@ export default function Footer() {
       <div className="container relative py-12 sm:py-16">
         {/* Footer CTA */}
         <div className="relative overflow-hidden rounded-[1.75rem] border border-primary/20 bg-[#04202b] p-6 sm:rounded-[2rem] sm:p-8 lg:p-10">
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+          >
             <div className="absolute -right-24 -top-28 h-64 w-64 rounded-full bg-primary/20 blur-[100px]" />
             <div className="absolute -bottom-24 left-1/4 h-56 w-56 rounded-full bg-secondary/20 blur-[110px]" />
           </div>
@@ -219,9 +222,9 @@ export default function Footer() {
               href="/admin"
               className="font-semibold text-foreground/80 transition hover:text-primary"
             >
-              © 2026 CRE8MARKET ENTEBBE
+              © 2026
             </Link>
-            . All rights reserved.
+            .CRE8MARKET ENTEBBE. All rights reserved.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
