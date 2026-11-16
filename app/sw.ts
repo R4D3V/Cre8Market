@@ -111,14 +111,20 @@ self.addEventListener("push", (event) => {
 
   event.waitUntil(
     (async () => {
-      // Browsers (iOS especially) require a visible notification for every push.
-      await self.registration.showNotification(title, {
-        body,
-        icon: "/icons/icon-192.png",
-        badge: "/icons/badge-96.png",
-        tag: data.tag,
-        data: { url: target.href },
-      });
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const hasVisibleClient = windows.some((client) => client.visibilityState === "visible");
+
+      // Avoid a duplicate: when the app is in the foreground we show an in-app
+      // toast instead of a system notification; otherwise show the system one.
+      if (!hasVisibleClient) {
+        await self.registration.showNotification(title, {
+          body,
+          icon: "/icons/icon-192.png",
+          badge: "/icons/badge-96.png",
+          tag: data.tag,
+          data: { url: target.href },
+        });
+      }
 
       // Dot on the installed app's icon where supported; cleared when the app opens.
       try {
@@ -128,7 +134,6 @@ self.addEventListener("push", (event) => {
       }
 
       // Let open, visible windows show an in-app toast too.
-      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
       for (const client of windows) {
         if (client.visibilityState === "visible") {
           client.postMessage({ type: "push", title, body, url: target.pathname + target.search });
