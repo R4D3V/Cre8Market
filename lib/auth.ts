@@ -104,11 +104,12 @@ export async function syncLegacyUserToBetterAuth(phone: string) {
   const email = `${user.phone.replace(/\D/g, "")}@cre8market.local`;
   await pool.query(
     `INSERT INTO "user" (id, name, email, "emailVerified", image, "createdAt", "updatedAt", phone, whatsapp, role)
-     VALUES ($1, $2, $3, true, NULL, NOW(), NOW(), $4, $5, $6)
+     VALUES ($1, $2, $3, true, $4, NOW(), NOW(), $5, $6, $7)
      ON CONFLICT (id) DO UPDATE SET
        name = EXCLUDED.name,
        email = EXCLUDED.email,
        "emailVerified" = EXCLUDED."emailVerified",
+       image = EXCLUDED.image,
        phone = EXCLUDED.phone,
        whatsapp = EXCLUDED.whatsapp,
        role = EXCLUDED.role,
@@ -117,6 +118,7 @@ export async function syncLegacyUserToBetterAuth(phone: string) {
       user.id,
       user.name,
       email,
+      user.avatar ?? null,
       user.phone,
       user.whatsapp ?? user.phone,
       user.is_admin ? "admin" : "user",

@@ -1,24 +1,59 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { Suspense, useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   fetchUsersAction,
   setUserActiveAction,
-  setUserVerifiedAction,
-  setUserVipAction,
-  setUserAdminAction,
+  setUserPlanAction,
   deleteUserAction,
 } from "@/lib/actions/users";
 import type { AppUser } from "@/lib/types";
 
+type PlanFilter = "all" | "free" | "standard" | "premium";
+
+function planOf(user: AppUser): "Free" | "Standard" | "Premium" {
+  if (user.isVip) return "Premium";
+  if (user.isVerified) return "Standard";
+  return "Free";
+}
+
+function planChipClass(plan: "Free" | "Standard" | "Premium") {
+  if (plan === "Premium") {
+    return "border-amber-500/30 bg-amber-500/10 text-amber-700";
+  }
+  if (plan === "Standard") {
+    return "border-sky-500/30 bg-sky-500/10 text-sky-700";
+  }
+  return "border-border bg-muted text-muted-foreground";
+}
+
 export default function AdminUsersPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminUsersPageInner />
+    </Suspense>
+  );
+}
+
+function AdminUsersPageInner() {
+  const searchParams = useSearchParams();
+  const verifiedFromUrl = searchParams.get("verified");
+  const statusFromUrl = searchParams.get("status");
+
   const [users, setUsers] = useState<AppUser[]>([]);
   const [search, setSearch] = useState("");
-  const [verifiedFilter, setVerifiedFilter] = useState<
-    "all" | "verified" | "unverified"
-  >("all");
-  const [vipFilter, setVipFilter] = useState<"all" | "vip" | "non-vip">("all");
+  const [planFilter, setPlanFilter] = useState<PlanFilter>(
+    verifiedFromUrl === "unverified" ? "free" : "all",
+  );
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >(
+    statusFromUrl === "active" || statusFromUrl === "inactive"
+      ? statusFromUrl
+      : "all",
+  );
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -44,13 +79,8 @@ export default function AdminUsersPage() {
     load();
   }
 
-  async function handleToggleVerified(u: AppUser) {
-    await setUserVerifiedAction(u.id, !u.isVerified);
-    load();
-  }
-
-  async function handleToggleVip(u: AppUser) {
-    await setUserVipAction(u.id, !u.isVip);
+  async function handleTogglePlan(u: AppUser, plan: "Standard" | "Premium") {
+    await setUserPlanAction(u.id, planOf(u) === plan ? "Free" : plan);
     load();
   }
 
@@ -75,27 +105,35 @@ export default function AdminUsersPage() {
           (u.whatsapp ?? "").toLowerCase().includes(q);
         if (!matches) return false;
       }
-      if (verifiedFilter === "verified" && !u.isVerified) return false;
-      if (verifiedFilter === "unverified" && u.isVerified) return false;
-      if (vipFilter === "vip" && !u.isVip) return false;
-      if (vipFilter === "non-vip" && u.isVip) return false;
+      if (planFilter !== "all") {
+        const plan = planOf(u).toLowerCase();
+        if (planFilter === "free" && plan !== "free") return false;
+        if (planFilter === "standard" && plan !== "standard") return false;
+        if (planFilter === "premium" && plan !== "premium") return false;
+      }
+      if (statusFilter === "active" && !u.isActive) return false;
+      if (statusFilter === "inactive" && u.isActive) return false;
       return true;
     });
-  }, [users, search, verifiedFilter, vipFilter]);
+  }, [users, search, planFilter, statusFilter]);
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-extrabold text-foreground font-heading">
-          Users
-        </h1>
-      </div>
-
-      {/* Add user button */}
-      <div className="mb-6">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
+            Admin · Community
+          </p>
+          <h1 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            Users
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Manage every registered seller account.
+          </p>
+        </div>
         <Link
           href="/admin/users/new"
-          className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2 text-sm inline-block"
+          className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90"
         >
           + Add User
         </Link>
@@ -111,26 +149,25 @@ export default function AdminUsersPage() {
           className="neu-inset w-full sm:w-80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
         <select
-          value={verifiedFilter}
-          onChange={(e) =>
-            setVerifiedFilter(e.target.value as "all" | "verified" | "unverified")
-          }
+          value={planFilter}
+          onChange={(e) => setPlanFilter(e.target.value as PlanFilter)}
           className="neu-inset px-3 py-2 text-sm text-foreground focus:outline-none"
         >
-          <option value="all">All verification</option>
-          <option value="verified">Verified</option>
-          <option value="unverified">Not verified</option>
+          <option value="all">All plans</option>
+          <option value="free">Free</option>
+          <option value="standard">Standard</option>
+          <option value="premium">Premium</option>
         </select>
         <select
-          value={vipFilter}
+          value={statusFilter}
           onChange={(e) =>
-            setVipFilter(e.target.value as "all" | "vip" | "non-vip")
+            setStatusFilter(e.target.value as "all" | "active" | "inactive")
           }
           className="neu-inset px-3 py-2 text-sm text-foreground focus:outline-none"
         >
-          <option value="all">All VIP status</option>
-          <option value="vip">VIP only</option>
-          <option value="non-vip">Non-VIP</option>
+          <option value="all">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Disabled</option>
         </select>
       </div>
 
@@ -150,7 +187,7 @@ export default function AdminUsersPage() {
             {filteredUsers.map((u) => (
               <div
                 key={u.id}
-                className="rounded-xl border border-border bg-card p-4"
+                className="rounded-xl border border-border/70 bg-card/80 p-4"
               >
                 <div className="flex items-start gap-3">
                   <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-bold text-primary-foreground">
@@ -168,6 +205,13 @@ export default function AdminUsersPage() {
                     <p className="truncate font-semibold text-foreground">
                       {u.name}
                     </p>
+                    <span
+                      className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${planChipClass(
+                        planOf(u),
+                      )}`}
+                    >
+                      {planOf(u)} plan
+                    </span>
 
                     <p className="mt-1 text-xs text-muted-foreground">
                       {u.phone}
@@ -212,39 +256,51 @@ export default function AdminUsersPage() {
 
                 <div className="mt-3 flex flex-wrap items-center gap-4 border-t border-border pt-3">
                   <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                    Verified
+                    Standard
                     <button
                       type="button"
-                      onClick={() => handleToggleVerified(u)}
+                      onClick={() => handleTogglePlan(u, "Standard")}
                       role="switch"
-                      aria-checked={u.isVerified}
-                      title={u.isVerified ? "Verified" : "Not verified"}
+                      aria-checked={planOf(u) === "Standard"}
+                      title={
+                        planOf(u) === "Standard"
+                          ? "Standard plan active — click for Free"
+                          : "Set Standard plan"
+                      }
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        u.isVerified ? "bg-secondary" : "bg-muted"
+                        planOf(u) === "Standard" ? "bg-sky-500" : "bg-muted"
                       }`}
                     >
                       <span
                         className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                          u.isVerified ? "translate-x-6" : "translate-x-1"
+                          planOf(u) === "Standard"
+                            ? "translate-x-6"
+                            : "translate-x-1"
                         }`}
                       />
                     </button>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                    VIP
+                    Premium
                     <button
                       type="button"
-                      onClick={() => handleToggleVip(u)}
+                      onClick={() => handleTogglePlan(u, "Premium")}
                       role="switch"
-                      aria-checked={u.isVip ?? false}
-                      title={u.isVip ? "VIP" : "Not VIP"}
+                      aria-checked={planOf(u) === "Premium"}
+                      title={
+                        planOf(u) === "Premium"
+                          ? "Premium plan active — click for Free"
+                          : "Set Premium plan"
+                      }
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        u.isVip ? "bg-amber-500" : "bg-muted"
+                        planOf(u) === "Premium" ? "bg-amber-500" : "bg-muted"
                       }`}
                     >
                       <span
                         className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                          u.isVip ? "translate-x-6" : "translate-x-1"
+                          planOf(u) === "Premium"
+                            ? "translate-x-6"
+                            : "translate-x-1"
                         }`}
                       />
                     </button>
@@ -278,7 +334,7 @@ export default function AdminUsersPage() {
             ))}
           </div>
 
-          <div className="hidden overflow-x-auto rounded-xl border border-border bg-card lg:block">
+          <div className="hidden overflow-x-auto rounded-xl border border-border/70 bg-card/80 lg:block">
             <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-muted-foreground text-xs uppercase tracking-wide">
@@ -287,8 +343,8 @@ export default function AdminUsersPage() {
                 <th className="pb-3 pr-4 font-semibold">WhatsApp</th>
                 <th className="pb-3 pr-4 font-semibold">Products</th>
                 <th className="pb-3 pr-4 font-semibold">Status</th>
-                <th className="pb-3 pr-4 font-semibold">Verified</th>
-                <th className="pb-3 pr-4 font-semibold">VIP</th>
+                <th className="pb-3 pr-4 font-semibold">Standard</th>
+                <th className="pb-3 pr-4 font-semibold">Premium</th>
                 <th className="pb-3 pr-4 font-semibold">Joined</th>
                 <th className="pb-3 pr-4 font-semibold">Actions</th>
               </tr>
@@ -313,7 +369,13 @@ export default function AdminUsersPage() {
                         <p className="font-semibold text-foreground truncate">
                           {u.name}
                         </p>
-
+                        <span
+                          className={`mt-0.5 inline-flex rounded-full border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${planChipClass(
+                            planOf(u),
+                          )}`}
+                        >
+                          {planOf(u)}
+                        </span>
                       </div>
                     </div>
                   </td>
@@ -353,34 +415,46 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="py-3 pr-4">
                     <button
-                      onClick={() => handleToggleVerified(u)}
+                      onClick={() => handleTogglePlan(u, "Standard")}
                       role="switch"
-                      aria-checked={u.isVerified}
-                      title={u.isVerified ? "Verified" : "Not verified"}
+                      aria-checked={planOf(u) === "Standard"}
+                      title={
+                        planOf(u) === "Standard"
+                          ? "Standard plan active — click for Free"
+                          : "Set Standard plan"
+                      }
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        u.isVerified ? "bg-secondary" : "bg-muted"
+                        planOf(u) === "Standard" ? "bg-sky-500" : "bg-muted"
                       }`}
                     >
                       <span
                         className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                          u.isVerified ? "translate-x-6" : "translate-x-1"
+                          planOf(u) === "Standard"
+                            ? "translate-x-6"
+                            : "translate-x-1"
                         }`}
                       />
                     </button>
                   </td>
                   <td className="py-3 pr-4">
                     <button
-                      onClick={() => handleToggleVip(u)}
+                      onClick={() => handleTogglePlan(u, "Premium")}
                       role="switch"
-                      aria-checked={u.isVip ?? false}
-                      title={u.isVip ? "VIP" : "Not VIP"}
+                      aria-checked={planOf(u) === "Premium"}
+                      title={
+                        planOf(u) === "Premium"
+                          ? "Premium plan active — click for Free"
+                          : "Set Premium plan"
+                      }
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        u.isVip ? "bg-amber-500" : "bg-muted"
+                        planOf(u) === "Premium" ? "bg-amber-500" : "bg-muted"
                       }`}
                     >
                       <span
                         className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                          u.isVip ? "translate-x-6" : "translate-x-1"
+                          planOf(u) === "Premium"
+                            ? "translate-x-6"
+                            : "translate-x-1"
                         }`}
                       />
                     </button>

@@ -33,6 +33,7 @@ export interface Product {
   images?: string[];
   video?: string | null;
   ownerName?: string | null;
+  ownerHandle?: string | null;
   ownerPhone?: string | null;
   ownerWhatsapp?: string | null;
   ownerAvatar?: string | null;
@@ -80,6 +81,7 @@ export interface ProductWithOwner extends Product {
 export interface AppUser {
   id: string;
   name: string;
+  handle?: string | null;
   phone: string;
   whatsapp: string | null;
   avatar?: string | null;
@@ -88,6 +90,7 @@ export interface AppUser {
   isAdmin: boolean;
   isVerified: boolean;
   isVip?: boolean;
+  hasPin?: boolean;
   createdAt: string;
   productCount?: number;
 }

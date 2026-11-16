@@ -1,33 +1,48 @@
-import Link from 'next/link'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import ScrollReveal from '@/components/ScrollReveal'
+import type { Metadata } from "next";
+import LegalPage from "@/components/LegalPage";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | CRE8MARKET Entebbe",
+  description:
+    "How CRE8MARKET ENTEBBE collects, uses, and protects your personal information.",
+  alternates: {
+    canonical: "/privacy",
+  },
+};
 
 export default function PrivacyPage() {
   return (
-    <>
-      <Navbar />
-      <main className="container py-10 pb-28 sm:pb-10">
-        <ScrollReveal>
-          <Link href="/" className="text-sm text-primary font-semibold hover:underline mb-6 inline-block">← Home</Link>
-          <h1 className="text-2xl font-extrabold font-heading text-foreground mb-6">Privacy Policy</h1>
-        </ScrollReveal>
-        <ScrollReveal delay={100}>
-          <div className="neu-card p-6 sm:p-8 prose prose-sm text-muted-foreground space-y-4">
-          <p>Last updated: October 22, 2026</p>
-          <p>CRE8MARKET ENTEBBE ("we", "us", or "our") operates the cre8market.com website. This page informs you of our policies regarding the collection, use, and disclosure of personal information we receive from users of the Site.</p>
-          <h2 className="text-base font-bold text-foreground mt-6">Information We Collect</h2>
-          <p>We collect information you provide directly to us, such as your name, phone number, and the content of listings you post. We also collect usage data through cookies and similar technologies.</p>
-          <h2 className="text-base font-bold text-foreground mt-6">How We Use Your Information</h2>
-          <p>We use the information we collect to operate and improve our marketplace, communicate with you about listings and transactions, and send deal alerts you've subscribed to.</p>
-          <h2 className="text-base font-bold text-foreground mt-6">WhatsApp</h2>
-          <p>When you subscribe to deal alerts or contact sellers through WhatsApp links on our platform, you are subject to WhatsApp's Privacy Policy in addition to ours.</p>
-          <h2 className="text-base font-bold text-foreground mt-6">Contact Us</h2>
-          <p>If you have any questions about this Privacy Policy, contact us at raymonjohns@gmail.com</p>
-        </div>
-        </ScrollReveal>
-      </main>
-      <Footer />
-    </>
-  )
+    <LegalPage
+      title="Privacy Policy"
+      description="This policy explains what information we collect, how we use it, and the choices you have when using CRE8MARKET ENTEBBE."
+      updated="October 22, 2026"
+      sections={[
+        {
+          title: "Information We Collect",
+          paragraphs: [
+            "CRE8MARKET ENTEBBE (\"we\", \"us\", or \"our\") operates the cre8market.com website. This page informs you of our policies regarding the collection, use, and disclosure of personal information we receive from users of the Site.",
+            "We collect information you provide directly to us, such as your name, phone number, and the content of listings you post. We also collect usage data through cookies and similar technologies.",
+          ],
+        },
+        {
+          title: "How We Use Your Information",
+          paragraphs: [
+            "We use the information we collect to operate and improve our marketplace, communicate with you about listings and transactions, and send deal alerts you've subscribed to.",
+          ],
+        },
+        {
+          title: "WhatsApp",
+          paragraphs: [
+            "When you subscribe to deal alerts or contact sellers through WhatsApp links on our platform, you are subject to WhatsApp's Privacy Policy in addition to ours.",
+          ],
+        },
+        {
+          title: "Contact Us",
+          paragraphs: [
+            "If you have any questions about this Privacy Policy, contact us at raymonjohns@gmail.com.",
+          ],
+        },
+      ]}
+    />
+  );
 }

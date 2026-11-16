@@ -85,6 +85,9 @@ ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS whatsapp TEXT;
 -- Migration: admin avatar (profile picture shown in the admin dashboard).
 ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS avatar TEXT;
 
+-- Migration: admin store banner (shown on the public /sellers/store page).
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS banner TEXT;
+
 -- Migration: link products to the registered user who added them.
 -- Safe to re-run — only adds the column/index if missing.
 ALTER TABLE products ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(id) ON DELETE SET NULL;

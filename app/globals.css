@@ -97,38 +97,43 @@ body {
   /* Card on the dark surface */
   .neu-card {
     background: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: 1rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+    border-radius: 1.25rem;
+    box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.9);
     transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
   }
   .neu-card-sm {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
   }
   .neu-card-hover:hover {
-    border-color: var(--color-primary);
-    transform: translateY(-2px);
-    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
+    border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+    transform: translateY(-4px);
+    box-shadow: 0 32px 70px -34px rgba(0, 0, 0, 0.95);
   }
 
   /* Inputs, search bars, pressed states */
   .neu-inset {
-    background: var(--color-muted);
-    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-muted) 45%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
     border-radius: 0.75rem;
     color: var(--color-foreground);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .neu-inset:focus-within,
+  .neu-inset:focus {
+    border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
   }
 
   /* Pill button */
   .neu-pill {
     background: var(--color-card);
-    border: 1px solid var(--color-border);
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
     border-radius: 9999px;
     transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease,
       transform 0.2s ease;
   }
   .neu-pill:hover {
-    border-color: var(--color-primary);
+    border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
     color: var(--color-primary);
   }
   .neu-pill:active {
@@ -138,23 +143,48 @@ body {
   /* Elevation / dark-panel variants */
   .neu-dark-card {
     background: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+    border-radius: 1.25rem;
   }
   .neu-dark-pill {
     background: var(--color-card);
-    border: 1px solid var(--color-border);
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
     border-radius: 9999px;
     transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
   }
   .neu-dark-pill:hover {
-    border-color: var(--color-primary);
+    border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
   }
   .neu-dark-inset {
-    background: var(--color-background);
-    border: 1px solid var(--color-border);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+    background: color-mix(in srgb, var(--color-muted) 45%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+    border-radius: 0.75rem;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
   }
+}
+
+/* Ambient page backdrop used by inner pages, admin and dashboard. */
+.page-ambient {
+  position: relative;
+  isolation: isolate;
+}
+.page-ambient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 60% 50% at 88% 0%,
+      color-mix(in srgb, var(--color-primary) 11%, transparent),
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 55% 45% at 0% 18%,
+      color-mix(in srgb, var(--color-secondary) 13%, transparent),
+      transparent 65%
+    );
 }
 
 /* Slide-up animation for install popup */
@@ -164,6 +194,30 @@ body {
 }
 .animate-slide-up {
   animation: slide-up 0.35s ease-out;
+}
+
+/* Gentle drifting used by the home-page hero cards and floating badges. */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-14px); }
+}
+@keyframes float-y-soft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float-y 8s ease-in-out infinite;
+}
+.animate-float-soft {
+  animation: float-y-soft 6s ease-in-out 1.2s infinite;
+}
+
+/* Thin, unobtrusive scrollbar for horizontal shelves. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Floating icons animation — continuous left to right */
@@ -177,9 +231,9 @@ body {
   display: inline-block;
   font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--color-accent-dark);
+  color: var(--color-primary);
   margin-bottom: 0.35rem;
 }
 

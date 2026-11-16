@@ -1,41 +1,34 @@
 import Link from "next/link";
 import {
-  Package,
-  FolderTree,
-  Users,
-  ShieldCheck,
+  ArrowUpRight,
+  ClipboardList,
   CreditCard,
+  FolderTree,
+  Package,
+  ShieldCheck,
   Tag,
   UserCircle,
-  ClipboardList,
+  Users,
 } from "lucide-react";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import { AdminStatCard } from "@/components/admin/AdminStatCard";
+import { SubscriptionHealth } from "@/components/admin/SubscriptionHealth";
+import { NeedsAttention } from "@/components/admin/NeedsAttention";
+import { RecentActivity } from "@/components/admin/RecentActivity";
+import { RecentListings } from "@/components/admin/RecentListings";
+import { StoreIdentityCard } from "@/components/admin/StoreIdentityCard";
+import { FeatureFlagsPanel } from "@/components/admin/FeatureFlagsPanel";
 import { auth } from "@/lib/auth";
 import {
-  getProducts,
-  getDeals,
-  getUsers,
+  getAdminOverview,
   getAdminUsers,
+  getAuditLog,
+  getFeatureFlags,
+  getRecentProductsWithOwners,
+  getStoreAdminProfile,
 } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
-
-async function getDashboardStats() {
-  const [products, deals, users, admins] = await Promise.all([
-    getProducts(),
-    getDeals(),
-    getUsers(),
-    getAdminUsers(),
-  ]);
-
-  return {
-    totalListings: products.length,
-    activeDeals: deals.length,
-    totalUsers: users.length,
-    totalAdmins: admins.length,
-  };
-}
 
 const QUICK_ACTIONS = [
   {
@@ -86,8 +79,16 @@ export default async function AdminDashboardPage() {
   const session = await auth();
   if (session?.user?.role !== "admin") return null;
 
-  const stats = await getDashboardStats();
-  const admins = await getAdminUsers();
+  const [overview, admins, auditEntries, recentProducts, storeProfile, flags] =
+    await Promise.all([
+      getAdminOverview(),
+      getAdminUsers(),
+      getAuditLog({ limit: 8 }),
+      getRecentProductsWithOwners(5),
+      getStoreAdminProfile(),
+      getFeatureFlags(),
+    ]);
+
   const isMainAdmin = admins.length > 0 && admins[0].id === session?.user?.id;
   const quickActions = isMainAdmin
     ? QUICK_ACTIONS
@@ -96,17 +97,68 @@ export default async function AdminDashboardPage() {
   return (
     <AdminPanel
       title="Admin Dashboard"
-      description="Overview of your marketplace listings and users"
+      description="What needs your attention across the marketplace."
+      action={
+        <Link
+          href="/"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/80 px-4 py-2 text-xs font-bold text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+        >
+          View live site
+          <ArrowUpRight className="size-3.5" />
+        </Link>
+      }
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminStatCard label="Total Listings" value={stats.totalListings} icon={Package} />
-        <AdminStatCard label="Active Deals" value={stats.activeDeals} icon={Tag} />
-        <AdminStatCard label="Users" value={stats.totalUsers} icon={Users} />
-        <AdminStatCard label="Admins" value={stats.totalAdmins} icon={ShieldCheck} />
+        <AdminStatCard
+          label="Total Listings"
+          value={overview.totalListings}
+          icon={Package}
+          hint={`${overview.featuredListings} featured`}
+        />
+        <AdminStatCard
+          label="Active Deals"
+          value={overview.activeDeals}
+          icon={Tag}
+          hint="Live on the deals page"
+        />
+        <AdminStatCard
+          label="Users"
+          value={overview.totalUsers}
+          icon={Users}
+          hint={`${overview.subscriptions.free} on the free plan`}
+        />
+        <AdminStatCard
+          label="Admins"
+          value={overview.totalAdmins}
+          icon={ShieldCheck}
+          hint={`${overview.needsAttention.unverifiedSellers} sellers unverified`}
+        />
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <SubscriptionHealth overview={overview} />
+        </div>
+        <NeedsAttention needsAttention={overview.needsAttention} />
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <RecentActivity entries={auditEntries} />
+        <RecentListings products={recentProducts} />
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <StoreIdentityCard
+          avatar={storeProfile.avatar}
+          banner={storeProfile.banner}
+        />
+        <FeatureFlagsPanel initialFlags={flags} />
       </div>
 
       <div className="mt-8">
-        <h2 className="mb-3 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+        <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -114,14 +166,18 @@ export default async function AdminDashboardPage() {
             <Link
               key={href}
               href={href}
-              className="flex items-start gap-3 rounded-2xl border border-border bg-background/40 p-4 transition-colors hover:border-primary/40 hover:bg-primary/5"
+              className="group flex items-start gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4 transition duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
                 <Icon className="size-4" />
               </span>
               <span className="min-w-0">
-                <span className="block font-semibold text-foreground">{label}</span>
-                <span className="block text-sm text-muted-foreground">{description}</span>
+                <span className="block font-semibold text-foreground">
+                  {label}
+                </span>
+                <span className="block text-sm text-muted-foreground">
+                  {description}
+                </span>
               </span>
             </Link>
           ))}

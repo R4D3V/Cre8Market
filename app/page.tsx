@@ -2,19 +2,20 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-// import HeroCarousel from "@/components/HeroCarousel";
-// import CategoryTiles from "@/components/CategoryTiles";
-import AppleCta from "@/components/AppleCta";
-import TopSellingTabs, { type ProductGroup } from "@/components/TopSellingTabs";
-import Recommendations from "@/components/Recommendations";
-import NewsletterSignup from "@/components/NewsletterSignup";
 import ScrollReveal from "@/components/ScrollReveal";
+import HomeHero from "@/components/home/HomeHero";
+import TrustStrip from "@/components/home/TrustStrip";
+import CategoryShowcase from "@/components/home/CategoryShowcase";
+import TrendingSection, {
+  type ProductGroup,
+} from "@/components/home/TrendingSection";
+import CollectionShowcase from "@/components/home/CollectionShowcase";
+import BrandSpotlight from "@/components/home/BrandSpotlight";
+import Recommendations from "@/components/home/Recommendations";
+import SellCta from "@/components/home/SellCta";
 import { latestProducts } from "@/lib/data";
 import { getProducts } from "@/lib/db/queries";
 import type { Product } from "@/lib/types";
-import Laptops from "@/components/Laptops";
-import Gaming from "@/components/Gaming";
-import Hero2 from "@/components/Hero2";
 
 export const metadata: Metadata = {
   title: "CRE8MARKET Entebbe | Trusted Marketplace for Local Deals",
@@ -44,7 +45,7 @@ function groupByCategory(products: Product[], limit = 4): ProductGroup[] {
     }));
 }
 
-async function HomeSections() {
+async function ProductSections() {
   let products: Product[] = [];
 
   try {
@@ -58,28 +59,55 @@ async function HomeSections() {
     );
   }
 
-  const topGroups = groupByCategory(
-    products.length > 0 ? products : latestProducts,
-  );
+  const source = products.length > 0 ? products : latestProducts;
 
   return (
-    <ScrollReveal delay={100}>
-      <TopSellingTabs groups={topGroups} />
-    </ScrollReveal>
+    <>
+      <ScrollReveal delay={80}>
+        <CategoryShowcase products={source} />
+      </ScrollReveal>
+      <ScrollReveal delay={120}>
+        <TrendingSection groups={groupByCategory(source)} />
+      </ScrollReveal>
+    </>
   );
 }
 
-function HomeSectionsSkeleton() {
+function ProductSectionsSkeleton() {
   return (
-    <div className="container py-10" aria-busy="true">
-      <div className="h-8 w-56 animate-pulse rounded-md bg-muted" />
-      <div className="mt-6 grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div
-            key={i}
-            className="aspect-[3/4] animate-pulse rounded-xl bg-muted/60"
-          />
-        ))}
+    <div aria-busy="true">
+      <div className="container pt-14 sm:pt-20">
+        <div className="h-3 w-28 animate-pulse rounded-full bg-muted" />
+        <div className="mt-4 h-8 w-64 animate-pulse rounded-lg bg-muted" />
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-32 animate-pulse rounded-2xl border border-border/60 bg-card/50"
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="container pt-14 sm:pt-20">
+        <div className="h-3 w-24 animate-pulse rounded-full bg-muted" />
+        <div className="mt-4 h-8 w-72 animate-pulse rounded-lg bg-muted" />
+        <div className="mt-7 flex gap-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-9 w-28 animate-pulse rounded-full bg-muted/70"
+            />
+          ))}
+        </div>
+        <div className="mt-6 grid grid-cols-2 gap-3.5 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="aspect-[4/5] animate-pulse rounded-2xl border border-border/60 bg-card/50"
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -90,30 +118,29 @@ export default function HomePage() {
     <div className="bg-background text-foreground">
       <Navbar />
       <main className="flex-1">
-        <ScrollReveal delay={150}>
-          <AppleCta />
-        </ScrollReveal>
-        <Suspense fallback={<HomeSectionsSkeleton />}>
-          <HomeSections />
+        <HomeHero />
+        <TrustStrip />
+
+        <Suspense fallback={<ProductSectionsSkeleton />}>
+          <ProductSections />
         </Suspense>
-        <ScrollReveal delay={150}>
-          <Laptops />
+
+        <ScrollReveal delay={80}>
+          <CollectionShowcase />
         </ScrollReveal>
-        {/* <ScrollReveal>
-          <Hero2 />
-        </ScrollReveal> */}
-        <ScrollReveal delay={150}>
-          <Gaming />
+
+        <ScrollReveal delay={80}>
+          <BrandSpotlight />
         </ScrollReveal>
-        {/* <ScrollReveal>
-          <HeroCarousel />
-        </ScrollReveal> */}
-        {/* <CategoryTiles categories={categories} /> */}
-        <ScrollReveal delay={200}>
+
+        <ScrollReveal delay={80}>
           <Recommendations />
         </ScrollReveal>
+
+        <ScrollReveal delay={80}>
+          <SellCta />
+        </ScrollReveal>
       </main>
-      {/* <NewsletterSignup /> */}
       <Footer />
     </div>
   );

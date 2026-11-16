@@ -85,6 +85,9 @@ ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS whatsapp TEXT;
 -- Migration: admin avatar (profile picture shown in the admin dashboard).
 ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS avatar TEXT;
 
+-- Migration: admin store banner (shown on the public /sellers/store page).
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS banner TEXT;
+
 -- Migration: link products to the registered user who added them.
 -- Safe to re-run — only adds the column/index if missing.
 ALTER TABLE products ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(id) ON DELETE SET NULL;
@@ -101,6 +104,46 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false;
 -- Migration: deal flag for products shown on the /deals page.
 ALTER TABLE products ADD COLUMN IF NOT EXISTS is_deal BOOLEAN DEFAULT false;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS video TEXT;
+
+-- Migration: name-based seller storefront handles (/sellers/<handle>).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS handle TEXT;
+
+DO $$
+DECLARE
+  seller RECORD;
+  base TEXT;
+  candidate TEXT;
+  suffix INTEGER;
+BEGIN
+  FOR seller IN
+    SELECT id, name
+    FROM users
+    WHERE handle IS NULL OR handle = ''
+    ORDER BY created_at, id
+  LOOP
+    base := COALESCE(
+      NULLIF(
+        trim(both '-' from regexp_replace(lower(seller.name), '[^a-z0-9]+', '-', 'g')),
+        ''
+      ),
+      'seller'
+    );
+
+    candidate := base;
+    suffix := 1;
+
+    WHILE EXISTS (
+      SELECT 1 FROM users WHERE handle = candidate AND id <> seller.id
+    ) LOOP
+      suffix := suffix + 1;
+      candidate := base || '-' || suffix;
+    END LOOP;
+
+    UPDATE users SET handle = candidate WHERE id = seller.id;
+  END LOOP;
+END $$;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_handle ON users(handle);
 
 -- ── Subscription plans ──
 CREATE TABLE IF NOT EXISTS subscription_plans (

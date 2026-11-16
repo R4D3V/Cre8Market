@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
 import {
   fetchAdminUsersAction,
@@ -116,12 +115,15 @@ export default function AdminUsersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-foreground font-heading">
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
+            Admin · Access control
+          </p>
+          <h1 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             Admins
           </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Add another person to manage the dashboard
           </p>
         </div>

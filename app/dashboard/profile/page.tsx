@@ -117,7 +117,7 @@ export default function ProfilePage() {
       }
     >
       {/* Info card */}
-      <div className="bg-card border border-border rounded-xl p-6 mb-6">
+      <div className="border border-border/70 bg-card/80 rounded-xl p-6 mb-6">
         <h2 className="font-bold text-foreground mb-4">Account Information</h2>
         <form onSubmit={handleInfoSubmit} className="space-y-4">
           <div className="flex items-center gap-4">
@@ -255,7 +255,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Password card */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <div className="border border-border/70 bg-card/80 rounded-xl p-6">
         <h2 className="font-bold text-foreground mb-4">Change Password</h2>
         <form onSubmit={handlePasswordSubmit} className="space-y-4">
           <div>

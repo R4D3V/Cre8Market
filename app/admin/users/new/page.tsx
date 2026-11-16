@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Camera, CheckCircle2, ImagePlus } from "lucide-react";
 import { createUserByAdminAction } from "@/lib/actions/users";
 import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
+import { compressImage } from "@/lib/imageCompress";
 
 export default function AdminNewUserPage() {
   const router = useRouter();
@@ -18,6 +20,28 @@ export default function AdminNewUserPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [avatar, setAvatar] = useState("");
+  const [banner, setBanner] = useState("");
+
+  async function handleAvatarUpload(file: File | null) {
+    if (!file) return;
+    try {
+      setAvatar(await compressImage(file, 400, 0.7));
+      setError("");
+    } catch {
+      setError("Could not read that image. Please try a different file.");
+    }
+  }
+
+  async function handleBannerUpload(file: File | null) {
+    if (!file) return;
+    try {
+      setBanner(await compressImage(file, 1200, 0.75));
+      setError("");
+    } catch {
+      setError("Could not read that image. Please try a different file.");
+    }
+  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -30,6 +54,8 @@ export default function AdminNewUserPage() {
         whatsapp: form.whatsapp ? toFullNumber(form.whatsapp) : undefined,
         password: form.password,
         pin: form.pin || undefined,
+        avatar: avatar || null,
+        banner: banner || null,
       });
       setSuccess(true);
       setTimeout(() => router.push("/admin/users"), 1200);
@@ -56,7 +82,9 @@ export default function AdminNewUserPage() {
 
       {success ? (
         <div className="neu-card p-8 text-center">
-          <p className="text-4xl mb-3">✅</p>
+          <span className="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+            <CheckCircle2 className="h-6 w-6" />
+          </span>
           <h2 className="font-heading text-xl font-bold text-foreground mb-2">
             User added successfully
           </h2>
@@ -139,6 +167,97 @@ export default function AdminNewUserPage() {
                 placeholder="e.g. 1234"
               />
             </div>
+          </div>
+
+          <div className="rounded-xl border border-border/70 bg-muted/20 p-3">
+            <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Profile media (optional)
+            </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <p className="mb-2 text-xs font-semibold text-muted-foreground">
+                  Profile photo
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xl font-bold text-primary-foreground">
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt="Profile preview"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      (form.name || "U")[0].toUpperCase()
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border/70 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/10">
+                      <Camera className="h-3.5 w-3.5" />
+                      {avatar ? "Change" : "Upload"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) =>
+                          handleAvatarUpload(e.target.files?.[0] ?? null)
+                        }
+                      />
+                    </label>
+                    {avatar && (
+                      <button
+                        type="button"
+                        onClick={() => setAvatar("")}
+                        className="text-left text-[11px] font-semibold text-destructive hover:underline"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs font-semibold text-muted-foreground">
+                  Seller page banner
+                </p>
+                {banner && (
+                  <div className="mb-2 overflow-hidden rounded-lg border border-border">
+                    <img
+                      src={banner}
+                      alt="Banner preview"
+                      className="h-16 w-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border/70 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/10">
+                    <ImagePlus className="h-3.5 w-3.5" />
+                    {banner ? "Change banner" : "Upload banner"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        handleBannerUpload(e.target.files?.[0] ?? null)
+                      }
+                    />
+                  </label>
+                  {banner && (
+                    <button
+                      type="button"
+                      onClick={() => setBanner("")}
+                      className="text-[11px] font-semibold text-destructive hover:underline"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Shown on this seller&apos;s public profile. Wide images work best
+              for banners.
+            </p>
           </div>
 
           {error && (

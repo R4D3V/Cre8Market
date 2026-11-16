@@ -2,14 +2,47 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn, getSession } from "@/lib/auth-client";
 import Link from "next/link";
-import Image from "next/image";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  BadgeCheck,
+  Loader2,
+  LockKeyhole,
+  LogIn,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+  Zap,
+} from "lucide-react";
+import { signIn, getSession } from "@/lib/auth-client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
 import PasswordInput from "@/components/PasswordInput";
 import ScrollReveal from "@/components/ScrollReveal";
+
+const FIELD_CLASS =
+  "w-full rounded-xl border border-border/70 bg-muted/30 py-3 pl-10 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-muted/50";
+
+const BENEFITS = [
+  {
+    icon: ShieldCheck,
+    title: "Secure access",
+    description: "Your account, listings, and messages stay protected.",
+  },
+  {
+    icon: MessageCircle,
+    title: "Direct conversations",
+    description: "Chat with buyers and sellers on WhatsApp without middlemen.",
+  },
+  {
+    icon: Zap,
+    title: "Fresh local deals",
+    description: "New listings from around Entebbe land every day.",
+  },
+];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,112 +80,255 @@ export default function LoginPage() {
   }
 
   return (
-    <>
+    <div className="min-h-dvh bg-background text-foreground">
       <Navbar />
-      <main className="min-h-[70vh] flex items-center justify-center px-4 py-12 pb-28 sm:pb-12">
-        <ScrollReveal className="w-full max-w-sm">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <Link href="/" className="inline-block">
-              <Image
-                src="/brand/logo.webp"
-                alt="Cre8 Market"
-                width={1080}
-                height={1080}
-                className="w-24 h-24 object-contain mx-auto"
-              />
-            </Link>
-            <h1 className="font-heading text-xl font-extrabold text-foreground mt-4 mb-1">
-              Sign in to your account
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Access your listings and messages
-            </p>
-          </div>
 
-          <div className="neu-card p-7">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
-                  Phone Number
-                </label>
-                <PhoneInput
-                  required
-                  value={phone}
-                  onChange={setPhone}
-                  placeholder="700 000 000"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
-                  Password
-                </label>
-                <PasswordInput
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
-                />
-              </div>
+      <main className="page-ambient relative overflow-hidden">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-44 right-[-8%] h-[480px] w-[480px] rounded-full bg-primary/15 blur-[130px]" />
+          <div className="absolute -left-36 top-16 h-[380px] w-[380px] rounded-full bg-secondary/20 blur-[120px]" />
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
+              backgroundSize: "56px 56px",
+              maskImage:
+                "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
+              WebkitMaskImage:
+                "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
+            }}
+          />
+        </div>
 
-              {error && (
-                <div className="bg-destructive/10 border border-destructive/40 text-destructive text-sm rounded-xl px-4 py-3">
-                  {error}
+        <div className="container relative py-10 pb-28 sm:py-14 sm:pb-14">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground transition hover:text-primary"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to home
+          </Link>
+
+          <div className="mt-7 grid gap-6 lg:grid-cols-12 lg:items-start">
+            {/* Intro panel */}
+            <ScrollReveal className="lg:col-span-5">
+              <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/70 p-6 backdrop-blur-sm sm:p-8">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-primary/12 blur-[90px]"
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -bottom-24 -left-16 h-48 w-48 rounded-full bg-secondary/15 blur-[90px]"
+                />
+
+                <div className="relative">
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl border border-primary/25 bg-primary/10 text-primary">
+                    <LogIn className="h-5 w-5" />
+                  </span>
+
+                  <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
+                    Welcome back
+                  </p>
+                  <h1 className="mt-3 font-heading text-[2rem] font-extrabold leading-[1.08] tracking-[-0.03em] text-foreground sm:text-4xl">
+                    Sign in and keep the{" "}
+                    <span className="bg-gradient-to-r from-primary via-emerald-300 to-teal-200 bg-clip-text text-transparent">
+                      deals moving.
+                    </span>
+                  </h1>
+                  <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
+                    Pick up where you left off — manage your listings, reply to
+                    buyers, and discover fresh finds across Entebbe.
+                  </p>
+
+                  <ul className="mt-7 space-y-3">
+                    {BENEFITS.map(({ icon: Icon, title, description }) => (
+                      <li
+                        key={title}
+                        className="flex items-start gap-3 rounded-2xl border border-border/50 bg-muted/20 p-3.5"
+                      >
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">
+                            {title}
+                          </p>
+                          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                            {description}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-6 flex items-center gap-2 text-[11px] text-muted-foreground">
+                    <BadgeCheck className="h-3.5 w-3.5 text-primary" />
+                    Trusted by local buyers and sellers
+                  </div>
                 </div>
-              )}
+              </div>
+            </ScrollReveal>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="neu-pill w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold py-3 text-sm transition-all disabled:opacity-60"
-              >
-                {loading ? "Signing in…" : "Sign In"}
-              </button>
-            </form>
+            {/* Form */}
+            <ScrollReveal delay={100} className="lg:col-span-7">
+              <div className="mx-auto w-full max-w-md lg:mr-0">
+                <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 backdrop-blur-sm sm:p-8">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-primary/10 blur-[80px]"
+                  />
 
-            <div className="mt-5 pt-4 border-t border-border text-center space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Forgot your password?{" "}
-                <Link
-                  href="/reset-password"
-                  className="text-primary font-bold hover:underline"
-                >
-                  Reset it
-                </Link>
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Don&apos;t have an account?{" "}
-                <Link
-                  href="/register"
-                  className="text-primary font-bold hover:underline"
-                >
-                  Register Free
-                </Link>
-              </p>
-            </div>
+                  <div className="relative">
+                    <div className="mb-6 flex items-center gap-3 border-b border-border/60 pb-5">
+                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+                        <ShieldCheck className="h-5 w-5" />
+                      </span>
+                      <div>
+                        <h2 className="text-sm font-bold text-foreground">
+                          Sign in to your account
+                        </h2>
+                        <p className="text-xs text-muted-foreground">
+                          Use the phone number linked to your account.
+                        </p>
+                      </div>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div>
+                        <label
+                          htmlFor="login-phone"
+                          className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
+                        >
+                          Phone number
+                        </label>
+                        <PhoneInput
+                          id="login-phone"
+                          required
+                          autoComplete="tel-national"
+                          value={phone}
+                          onChange={setPhone}
+                          placeholder="700 000 000"
+                          outerClassName="h-11"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="mb-1.5 flex items-center justify-between gap-3">
+                          <label
+                            htmlFor="login-password"
+                            className="block text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
+                          >
+                            Password
+                          </label>
+                          <Link
+                            href="/reset-password"
+                            className="text-[11px] font-semibold text-primary transition hover:text-primary/80"
+                          >
+                            Forgot password?
+                          </Link>
+                        </div>
+                        <div className="relative">
+                          <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <PasswordInput
+                            id="login-password"
+                            required
+                            autoComplete="current-password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter your password"
+                            className={FIELD_CLASS}
+                          />
+                        </div>
+                      </div>
+
+                      {error && (
+                        <div
+                          role="alert"
+                          className="flex items-start gap-2.5 rounded-2xl border border-destructive/40 bg-destructive/10 p-3.5 text-sm text-destructive"
+                        >
+                          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                          <span>{error}</span>
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-[0_18px_40px_-22px_rgba(109,232,124,0.9)] transition hover:bg-primary/90 disabled:opacity-60"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Signing in…
+                          </>
+                        ) : (
+                          <>
+                            Sign In
+                            <ArrowRight className="h-4 w-4" />
+                          </>
+                        )}
+                      </button>
+                    </form>
+
+                    <div className="mt-5 border-t border-border/60 pt-5 text-center">
+                      <p className="text-sm text-muted-foreground">
+                        Don&apos;t have an account?{" "}
+                        <Link
+                          href="/register"
+                          className="font-bold text-primary transition hover:text-primary/80"
+                        >
+                          Register free
+                        </Link>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* WhatsApp hint */}
+                <div className="relative mt-4 overflow-hidden rounded-3xl border border-wa/25 bg-wa/5 p-4">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full bg-wa/15 blur-[55px]"
+                  />
+                  <div className="relative flex flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
+                    <div className="flex items-center gap-3">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-wa/30 bg-wa/10 text-wa">
+                        <MessageCircle className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <p className="text-xs font-bold text-foreground">
+                          Prefer to buy or sell via WhatsApp?
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          Our team can help with your account.
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href="https://wa.me/256767155113"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-wa px-3.5 py-2 text-xs font-bold text-white transition hover:bg-wa-dark"
+                    >
+                      Chat now
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+                  <Sparkles className="h-3 w-3 text-primary/80" />
+                  One account for buying, selling, and saving deals.
+                </p>
+              </div>
+            </ScrollReveal>
           </div>
-
-          {/* WhatsApp login hint */}
-          <div className="mt-4 neu-card p-4 text-center">
-            <p className="text-sm text-muted-foreground mb-2">
-              Prefer to buy or sell via WhatsApp?
-            </p>
-            <a
-              href="https://wa.me/256767155113"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 text-wa font-bold text-sm hover:underline"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-              </svg>
-              Chat with us on WhatsApp
-            </a>
-          </div>
-        </ScrollReveal>
+        </div>
       </main>
+
       <Footer />
-    </>
+    </div>
   );
 }

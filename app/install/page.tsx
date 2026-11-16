@@ -1,9 +1,23 @@
-import Link from "next/link";
+import {
+  Apple,
+  Bell,
+  Check,
+  Download,
+  Globe,
+  Home,
+  Lightbulb,
+  ShieldCheck,
+  Smartphone,
+  Sparkles,
+  Zap,
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import EnableNotificationsButton from "@/components/EnableNotificationsButton";
 import InstallAppButton from "@/components/pwa/InstallAppButton";
+import { isFeatureEnabled } from "@/lib/db/queries";
 
 function AndroidPhoneSvg() {
   return (
@@ -636,73 +650,169 @@ function ConfirmInstallSvg() {
   );
 }
 
-export default function InstallPage() {
+const WHY_INSTALL = [
+  {
+    icon: Zap,
+    title: "Faster access",
+    description:
+      "Open the app directly from your home screen — no typing a URL.",
+  },
+  {
+    icon: Bell,
+    title: "Push notifications",
+    description: "Get notified about new deals, messages, and offers.",
+  },
+];
+
+const ANDROID_STEPS = [
+  {
+    step: "1",
+    title: "Open in Chrome",
+    desc: "Make sure you are viewing this site in the Google Chrome browser on your Android phone or tablet.",
+  },
+  {
+    step: "2",
+    title: "Tap the Menu",
+    desc: "Tap the three-dot menu icon (⋮) in the top-right corner of the Chrome browser.",
+  },
+  {
+    step: "3",
+    title: 'Select "Install App"',
+    desc: 'From the dropdown menu, tap "Install app" or "Add to Home screen". You may see an install banner at the bottom — tap "Install".',
+  },
+  {
+    step: "4",
+    title: "Confirm Installation",
+    desc: 'A pop-up will appear showing the app name and icon. Tap "Install" again to confirm. The app will be downloaded and added to your home screen.',
+  },
+  {
+    step: "5",
+    title: "Launch the App",
+    desc: "Find the CRE8MARKET ENTEBBE icon on your home screen and tap it to open. It will launch like a native app, with no browser address bar.",
+  },
+];
+
+const IOS_STEPS = [
+  {
+    step: "1",
+    title: "Open in Google Chrome",
+    desc: "For the best results, open this site in Google Chrome on your iPhone or iPad. Chrome offers the smoothest install flow and better push notification support.",
+  },
+  {
+    step: "2",
+    title: "Tap the Menu",
+    desc: "Tap the three-dot menu icon in the Chrome browser, then choose the install option or share menu depending on your device version.",
+  },
+  {
+    step: "3",
+    title: 'Choose "Install App" or "Add to Home Screen"',
+    desc: 'From the menu or share sheet, tap "Install app" or "Add to Home Screen" to continue the setup.',
+  },
+  {
+    step: "4",
+    title: "Confirm & Add",
+    desc: 'Review the app name, then tap "Install" or "Add". Your CRE8MARKET shortcut will appear on the home screen.',
+  },
+  {
+    step: "5",
+    title: "Enable Push Notifications",
+    desc: "After installation, allow notifications when prompted so you get deal alerts, messages, and updates even when you are not using the app.",
+  },
+];
+
+const TIPS = [
+  "Make sure your browser is up to date for the best install experience.",
+  "On Android, you may need to dismiss the install banner if you want to use the menu method.",
+  "On iPhone/iPad, Google Chrome is recommended for a smoother install flow and better push notification support.",
+  "Once installed, the app will auto-update every time you open it while online.",
+  'You can uninstall it like any other app — long-press the icon and select "Remove" or "Uninstall".',
+];
+
+export default async function InstallPage() {
+  const pushEnabled = await isFeatureEnabled("push-notifications");
+
   return (
-    <>
+    <div className="min-h-dvh bg-background text-foreground">
       <Navbar />
-      <main className="container py-8 pb-28 sm:pb-8">
-        <Link
-          href="/"
-          className="text-sm text-primary font-semibold hover:underline mb-6 inline-block"
-        >
-          ← Home
-        </Link>
 
-        <ScrollReveal>
-          <div className="neu-dark-card text-foreground text-center py-12 px-6 mb-8">
-            <span className="text-5xl block mb-4">📲</span>
-            <h1 className="font-heading text-3xl font-extrabold mb-3">
-              Install the App
-            </h1>
-            <p className="text-muted-foreground text-base max-w-lg mx-auto">
-              Install CRE8MARKET ENTEBBE on your phone for a faster, app-like
-              experience — directly from your browser, no Play Store or App
-              Store needed.
-            </p>
-            <div className="mt-6 flex justify-center">
-              <InstallAppButton />
-            </div>
-          </div>
-        </ScrollReveal>
-
-        {/* Notifications */}
-        <div className="flex justify-center mb-6">
-          <div className="w-full max-w-md">
-            <EnableNotificationsButton />
-          </div>
+      <PageHero
+        backHref="/"
+        backLabel="Back to home"
+        eyebrow="Get the app"
+        eyebrowIcon={Sparkles}
+        align="center"
+        size="large"
+        title={
+          <>
+            Install the app.{" "}
+            <span className="mt-1 block bg-gradient-to-r from-primary via-emerald-300 to-teal-200 bg-clip-text text-transparent">
+              Skip the store.
+            </span>
+          </>
+        }
+        description="Install CRE8MARKET ENTEBBE on your phone for a faster, app-like experience — directly from your browser, no Play Store or App Store needed."
+      >
+        <div className="flex justify-center">
+          <InstallAppButton />
         </div>
+
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-2">
+            <Smartphone className="h-4 w-4 text-primary" />
+            Android &amp; iOS
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <Download className="h-4 w-4 text-primary" />
+            Add to home screen
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            No store required
+          </span>
+        </div>
+      </PageHero>
+
+      <main className="page-ambient container py-10 pb-28 sm:py-14 sm:pb-14">
+        {/* Notifications */}
+        {pushEnabled && (
+          <ScrollReveal delay={60}>
+            <div className="mx-auto max-w-md text-center">
+              <p className="mb-3 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-primary/80">
+                <Bell className="h-3.5 w-3.5" />
+                Stay in the loop
+              </p>
+              <EnableNotificationsButton />
+            </div>
+          </ScrollReveal>
+        )}
 
         {/* Why install */}
         <ScrollReveal delay={80}>
-          <div className="neu-card p-6 sm:p-8 mb-6 text-center">
-            <h2 className="font-heading text-lg font-extrabold text-foreground mb-4 text-center">
-              Why Install?
-            </h2>
-            <div className="flex flex-wrap justify-center items-stretch gap-4 text-center">
-              {[
-                {
-                  icon: "⚡",
-                  title: "Faster Access",
-                  desc: "Open the app directly from your home screen — no typing a URL.",
-                },
-                // { icon: '📦', title: 'Works Offline', desc: 'Browse previously viewed listings even without internet.' },
-                {
-                  icon: "🔔",
-                  title: "Push Notifications",
-                  desc: "Get notified about new deals, messages, and offers.",
-                },
-              ].map((f) => (
+          <div className="mt-12">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
+                Why install
+              </p>
+              <h2 className="mt-3 font-heading text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+                A faster way to browse.
+              </h2>
+            </div>
+
+            <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {WHY_INSTALL.map(({ icon: Icon, title, description }) => (
                 <div
-                  key={f.title}
-                  className="neu-card p-4 text-center flex w-full max-w-[320px] flex-col items-center justify-center mx-auto"
+                  key={title}
+                  className="flex items-start gap-4 rounded-2xl border border-border/70 bg-card/70 p-5 transition hover:border-primary/40"
                 >
-                  <span className="text-3xl block mb-2">{f.icon}</span>
-                  <h3 className="font-bold text-foreground text-sm mb-1 text-center">
-                    {f.title}
-                  </h3>
-                  <p className="text-muted-foreground text-xs text-center">
-                    {f.desc}
-                  </p>
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground">{title}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      {description}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -711,209 +821,189 @@ export default function InstallPage() {
 
         {/* Android */}
         <ScrollReveal delay={120}>
-          <div className="neu-card p-6 sm:p-8 mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl">🤖</span>
-              <h2 className="font-heading text-xl font-extrabold text-foreground">
-                Install on Android
-              </h2>
-            </div>
-            <p className="text-muted-foreground text-sm mb-5">
-              Android devices (Chrome browser) support adding this website to
-              your home screen as an app. Follow the steps below:
-            </p>
-
-            {/* Visual steps for Android */}
-            <div className="grid sm:grid-cols-2 gap-6 mb-8">
-              <div className="neu-inset p-4 text-center">
-                <p className="eyebrow text-center !mb-2">Steps 1 – 3</p>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Open in Chrome → Tap the menu → Select "Install app"
-                </p>
-                <AndroidPhoneSvg />
+          <section className="relative mt-10 overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 backdrop-blur-sm sm:p-8">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-primary/10 blur-[80px]"
+            />
+            <div className="relative">
+              <div className="flex items-center gap-3">
+                <span className="grid h-11 w-11 place-items-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+                  <Smartphone className="h-5 w-5" />
+                </span>
+                <div>
+                  <h2 className="font-heading text-xl font-extrabold tracking-tight text-foreground">
+                    Install on Android
+                  </h2>
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Globe className="h-3.5 w-3.5" />
+                    Best in Google Chrome
+                  </p>
+                </div>
               </div>
-              <div className="neu-inset p-4 text-center">
-                <p className="eyebrow text-center !mb-2">Step 4</p>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Tap "Install" to confirm
-                </p>
-                <ConfirmInstallSvg />
-              </div>
-            </div>
 
-            <ol className="grid sm:grid-cols-2 gap-4">
-              {[
-                {
-                  step: "1",
-                  title: "Open in Chrome",
-                  desc: "Make sure you are viewing this site in the Google Chrome browser on your Android phone or tablet.",
-                },
-                {
-                  step: "2",
-                  title: "Tap the Menu",
-                  desc: "Tap the three-dot menu icon (⋮) in the top-right corner of the Chrome browser.",
-                },
-                {
-                  step: "3",
-                  title: 'Select "Install App"',
-                  desc: 'From the dropdown menu, tap "Install app" or "Add to Home screen". You may see an install banner at the bottom — tap "Install".',
-                },
-                {
-                  step: "4",
-                  title: "Confirm Installation",
-                  desc: 'A pop-up will appear showing the app name and icon. Tap "Install" again to confirm. The app will be downloaded and added to your home screen.',
-                },
-                {
-                  step: "5",
-                  title: "Launch the App",
-                  desc: "Find the CRE8MARKET ENTEBBE icon on your home screen and tap it to open. It will launch like a native app, with no browser address bar.",
-                },
-              ].map((s) => (
-                <li key={s.step} className="flex gap-4">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">
-                    {s.step}
-                  </span>
-                  <div>
-                    <p className="font-bold text-foreground text-sm">
-                      {s.title}
-                    </p>
-                    <p className="text-muted-foreground text-sm mt-0.5">
-                      {s.desc}
-                    </p>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                Android devices (Chrome browser) support adding this website to
+                your home screen as an app. Follow the steps below:
+              </p>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-border/60 bg-muted/20 p-4 text-center">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                    Steps 1 – 3
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Open in Chrome → Tap the menu → Select &quot;Install app&quot;
+                  </p>
+                  <div className="mt-3">
+                    <AndroidPhoneSvg />
                   </div>
-                </li>
-              ))}
-            </ol>
-          </div>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-muted/20 p-4 text-center">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                    Step 4
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Tap &quot;Install&quot; to confirm
+                  </p>
+                  <div className="mt-3">
+                    <ConfirmInstallSvg />
+                  </div>
+                </div>
+              </div>
+
+              <ol className="mt-6 grid gap-4 sm:grid-cols-2">
+                {ANDROID_STEPS.map((s) => (
+                  <li key={s.step} className="flex gap-3.5">
+                    <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full border border-primary/30 bg-primary/10 text-xs font-bold text-primary">
+                      {s.step}
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold text-foreground">
+                        {s.title}
+                      </p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                        {s.desc}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </section>
         </ScrollReveal>
 
         {/* iOS */}
         <ScrollReveal delay={160}>
-          <div className="neu-card p-6 sm:p-8 mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl">🍎</span>
-              <h2 className="font-heading text-xl font-extrabold text-foreground">
-                Install on iPhone / iPad (iOS)
-              </h2>
+          <section className="mt-6 overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 backdrop-blur-sm sm:p-8">
+            <div className="flex items-center gap-3">
+              <span className="grid h-11 w-11 place-items-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+                <Apple className="h-5 w-5" />
+              </span>
+              <div>
+                <h2 className="font-heading text-xl font-extrabold tracking-tight text-foreground">
+                  Install on iPhone / iPad (iOS)
+                </h2>
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Globe className="h-3.5 w-3.5" />
+                  Recommended flow
+                </p>
+              </div>
             </div>
-            <div className="mb-5 rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm text-muted-foreground">
-              <p className="font-semibold text-foreground mb-1">
+
+            <div className="mt-5 rounded-2xl border border-primary/25 bg-primary/5 p-4 text-sm text-muted-foreground">
+              <p className="font-semibold text-foreground">
                 For the best experience, use Google Chrome on iPhone/iPad.
               </p>
-              <p>
+              <p className="mt-1 leading-relaxed">
                 Chrome gives a smoother install flow and supports push
                 notifications so you can receive deal alerts and updates even
                 when the app is not open.
               </p>
             </div>
 
-            {/* Visual for iOS */}
-            <div className="neu-inset p-4 text-center mb-8">
-              <p className="eyebrow text-center !mb-2">Recommended flow</p>
-              <p className="text-xs text-muted-foreground mb-3">
-                Open in Chrome → Tap the menu → Choose "Install app" or "Add to
-                Home Screen"
+            <div className="mt-6 rounded-2xl border border-border/60 bg-muted/20 p-4 text-center">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                Recommended flow
               </p>
-              <IPhoneSvg />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Open in Chrome → Tap the menu → Choose &quot;Install app&quot; or
+                &quot;Add to Home Screen&quot;
+              </p>
+              <div className="mt-3">
+                <IPhoneSvg />
+              </div>
             </div>
 
-            <ol className="grid sm:grid-cols-2 gap-4">
-              {[
-                {
-                  step: "1",
-                  title: "Open in Google Chrome",
-                  desc: "For the best results, open this site in Google Chrome on your iPhone or iPad. Chrome offers the smoothest install flow and better push notification support.",
-                },
-                {
-                  step: "2",
-                  title: "Tap the Menu",
-                  desc: "Tap the three-dot menu icon in the Chrome browser, then choose the install option or share menu depending on your device version.",
-                },
-                {
-                  step: "3",
-                  title: 'Choose "Install App" or "Add to Home Screen"',
-                  desc: 'From the menu or share sheet, tap "Install app" or "Add to Home Screen" to continue the setup.',
-                },
-                {
-                  step: "4",
-                  title: "Confirm & Add",
-                  desc: 'Review the app name, then tap "Install" or "Add". Your CRE8MARKET shortcut will appear on the home screen.',
-                },
-                {
-                  step: "5",
-                  title: "Enable Push Notifications",
-                  desc: "After installation, allow notifications when prompted so you get deal alerts, messages, and updates even when you are not using the app.",
-                },
-              ].map((s) => (
-                <li key={s.step} className="flex gap-4">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">
+            <ol className="mt-6 grid gap-4 sm:grid-cols-2">
+              {IOS_STEPS.map((s) => (
+                <li key={s.step} className="flex gap-3.5">
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full border border-primary/30 bg-primary/10 text-xs font-bold text-primary">
                     {s.step}
                   </span>
                   <div>
-                    <p className="font-bold text-foreground text-sm">
-                      {s.title}
-                    </p>
-                    <p className="text-muted-foreground text-sm mt-0.5">
+                    <p className="text-sm font-bold text-foreground">{s.title}</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                       {s.desc}
                     </p>
                   </div>
                 </li>
               ))}
             </ol>
-          </div>
+          </section>
         </ScrollReveal>
 
-        {/* Final home screen preview */}
+        {/* Final result */}
         <ScrollReveal delay={180}>
-          <div className="neu-card p-6 sm:p-8 mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl">🏠</span>
-              <h2 className="font-heading text-xl font-extrabold text-foreground">
-                Final Result
-              </h2>
+          <section className="mt-6 grid gap-6 overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 backdrop-blur-sm sm:p-8 lg:grid-cols-2 lg:items-center">
+            <div>
+              <div className="flex items-center gap-3">
+                <span className="grid h-11 w-11 place-items-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+                  <Home className="h-5 w-5" />
+                </span>
+                <h2 className="font-heading text-xl font-extrabold tracking-tight text-foreground">
+                  Final Result
+                </h2>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                Once installed, the app icon appears on your home screen just
+                like any other app. Tap it to launch directly — no browser
+                needed.
+              </p>
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
+                <Check className="h-3.5 w-3.5" />
+                App-like experience
+              </div>
             </div>
-            <p className="text-muted-foreground text-sm mb-5">
-              Once installed, the app icon appears on your home screen just like
-              any other app. Tap it to launch directly — no browser needed.
-            </p>
-            <div className="max-w-xs mx-auto">
+            <div className="mx-auto w-full max-w-xs rounded-2xl border border-border/60 bg-muted/20 p-4">
               <HomeScreenSvg />
             </div>
-          </div>
+          </section>
         </ScrollReveal>
 
         {/* Tips */}
         <ScrollReveal delay={200}>
-          <div className="bg-secondary/10 border border-secondary/40 rounded-2xl p-5">
-            <p className="text-xs font-bold text-secondary uppercase tracking-wide mb-3">
-              💡 Tips
+          <div className="mt-6 rounded-3xl border border-secondary/30 bg-secondary/10 p-5 sm:p-6">
+            <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-secondary">
+              <Lightbulb className="h-3.5 w-3.5" />
+              Tips
             </p>
-            <ul className="space-y-2 text-sm text-secondary">
-              <li>
-                • Make sure your browser is up to date for the best install
-                experience.
-              </li>
-              <li>
-                • On Android, you may need to dismiss the install banner if you
-                want to use the menu method.
-              </li>
-              <li>
-                • On iPhone/iPad, Google Chrome is recommended for a smoother
-                install flow and better push notification support.
-              </li>
-              <li>
-                • Once installed, the app will auto-update every time you open
-                it while online.
-              </li>
-              <li>
-                • You can uninstall it like any other app — long-press the icon
-                and select "Remove" or "Uninstall".
-              </li>
+            <ul className="mt-4 space-y-2.5">
+              {TIPS.map((tip) => (
+                <li
+                  key={tip}
+                  className="flex items-start gap-2.5 text-sm text-muted-foreground"
+                >
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+                  <span className="leading-relaxed">{tip}</span>
+                </li>
+              ))}
             </ul>
           </div>
         </ScrollReveal>
       </main>
+
       <Footer />
-    </>
+    </div>
   );
 }

@@ -11,6 +11,8 @@ import {
   updateAdminProfile,
   getAdminUserPasswordHash,
   updateAdminUserPassword,
+  getFeatureFlags,
+  setFeatureFlag,
   logAudit,
 } from "@/lib/db/queries";
 import { revalidatePath } from "next/cache";
@@ -106,6 +108,7 @@ export async function updateMyAdminProfileAction(data: {
   phone?: string;
   whatsapp?: string;
   avatar?: string | null;
+  banner?: string | null;
 }) {
   const adminId = await requireAdmin();
   const admin = await updateAdminProfile(adminId, data);
@@ -118,6 +121,8 @@ export async function updateMyAdminProfileAction(data: {
     metadata: { name: admin?.name, phone: admin?.phone },
   });
   revalidatePath("/admin/profile");
+  revalidatePath("/sellers");
+  revalidatePath("/sellers/store");
   return admin;
 }
 
@@ -141,6 +146,37 @@ export async function changeMyAdminPasswordAction(currentPassword: string, newPa
     targetId: adminId,
   });
   return { success: true };
+}
+
+// ── Feature flags ──
+
+export async function fetchFeatureFlagsAction() {
+  await requireAdmin();
+  return getFeatureFlags();
+}
+
+export async function toggleFeatureFlagAction(key: string, enabled: boolean) {
+  const adminId = await requireAdmin();
+  const cleanKey = key.trim().toLowerCase();
+
+  if (!/^[a-z0-9][a-z0-9-]{1,48}$/.test(cleanKey)) {
+    throw new Error("Flag keys use lowercase letters, numbers and dashes");
+  }
+
+  await setFeatureFlag(cleanKey, enabled);
+  await logAudit({
+    actorId: adminId,
+    actorRole: "admin",
+    action: "feature_flag.update",
+    targetType: "feature_flag",
+    targetId: cleanKey,
+    metadata: { enabled },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/deals");
+  revalidatePath("/install");
+  return getFeatureFlags();
 }
 
 // Main admin = the earliest created admin (the original). Only this account

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Package, SearchX } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { formatPrice } from "@/lib/data";
 import {
@@ -141,22 +142,22 @@ export default function MyProductsListPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-muted"
+            className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/80 px-4 py-2.5 text-sm font-bold text-foreground transition-colors hover:border-primary/40"
           >
             ← Dashboard
           </Link>
           <Link
             href="/dashboard/products/new"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             + Add Product
           </Link>
         </div>
       }
     >
-      <div className="mb-6 bg-background/40 border border-border rounded-xl p-4 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between rounded-2xl border border-border/70 bg-gradient-to-br from-primary/10 via-card/60 to-card/40 p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shrink-0">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary/15 text-lg font-bold text-primary">
             {(session?.user?.name ?? "U")[0].toUpperCase()}
           </div>
           <div>
@@ -173,7 +174,7 @@ export default function MyProductsListPage() {
         </div>
       )}
       {selectedIds.length > 0 && (
-        <div className="bg-card border border-border rounded-xl p-3 mb-4 flex flex-wrap items-center gap-3">
+        <div className="border border-border/70 bg-card/80 rounded-xl p-3 mb-4 flex flex-wrap items-center gap-3">
           <span className="text-sm font-bold text-foreground">
             {selectedIds.length} selected
           </span>
@@ -207,13 +208,13 @@ export default function MyProductsListPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search your products..."
-            className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-primary"
+            className="w-full rounded-xl border border-border/70 bg-muted/30 px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:border-primary"
           />
         </div>
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="w-full sm:w-auto rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition focus:border-primary"
+          className="w-full sm:w-auto rounded-xl border border-border/70 bg-muted/30 px-3.5 py-2.5 text-sm text-foreground outline-none transition focus:border-primary"
         >
           <option value="">All Categories</option>
           {dashboardCategories.map((c) => (
@@ -229,8 +230,10 @@ export default function MyProductsListPage() {
           Loading…
         </div>
       ) : products.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl text-center py-12">
-          <p className="text-4xl mb-3">📦</p>
+        <div className="border border-border/70 bg-card/80 rounded-xl text-center py-12">
+          <span className="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+            <Package className="h-6 w-6" />
+          </span>
           <h3 className="font-bold text-foreground mb-1">
             You haven&apos;t added any products yet
           </h3>
@@ -245,8 +248,10 @@ export default function MyProductsListPage() {
           </Link>
         </div>
       ) : filteredProducts.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl text-center py-12">
-          <p className="text-4xl mb-3">🔎</p>
+        <div className="border border-border/70 bg-card/80 rounded-xl text-center py-12">
+          <span className="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+            <SearchX className="h-6 w-6" />
+          </span>
           <h3 className="font-bold text-foreground mb-1">
             No matching products
           </h3>
@@ -282,7 +287,7 @@ export default function MyProductsListPage() {
             {filteredProducts.map((p) => (
               <div
                 key={p.id}
-                className={`rounded-xl border border-border bg-background/40 p-4 ${
+                className={`rounded-xl border border-border/70 bg-muted/30 p-4 ${
                   selected.has(p.id) ? "border-primary/40 bg-primary/5" : ""
                 }`}
               >

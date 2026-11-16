@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { ImagePlus, Star } from "lucide-react";
 import {
   fetchUserByIdAction,
   updateUserByAdminAction,
   setUserActiveAction,
-  setUserVerifiedAction,
+  setUserPlanAction,
   setUserAdminAction,
   resetUserPasswordByAdminAction,
 } from "@/lib/actions/users";
@@ -29,8 +30,8 @@ function Toggle({
 }: {
   checked: boolean;
   onChange: (v: boolean) => void;
-  onLabel: string;
-  offLabel: string;
+  onLabel: ReactNode;
+  offLabel: ReactNode;
 }) {
   return (
     <button
@@ -50,6 +51,16 @@ function Toggle({
   );
 }
 
+function planIdFor(
+  user: AppUser,
+  planList: { id: string; name: string }[],
+): string {
+  const tier = user.isVip ? "Premium" : user.isVerified ? "Standard" : "Free";
+  return (
+    planList.find((p) => p.name.toLowerCase() === tier.toLowerCase())?.id ?? ""
+  );
+}
+
 export default function EditUserPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -61,21 +72,35 @@ export default function EditUserPage() {
 
   const [form, setForm] = useState({ name: "", phone: "", whatsapp: "" });
   const [avatar, setAvatar] = useState("");
+  const [banner, setBanner] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
+  const [isVip, setIsVip] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [plans, setPlans] = useState<{ id: string; name: string }[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
 
+  const currentPlan = isVip ? "Premium" : isVerified ? "Standard" : "Free";
+
   useEffect(() => {
-    fetchUserByIdAction(id as string)
-      .then((u) => {
+    let active = true;
+
+    Promise.all([
+      fetchUserByIdAction(id as string),
+      fetchAllSubscriptionPlansAction().catch(
+        () => [] as { id: string; name: string }[],
+      ),
+      fetchUserSubscriptionAction(id as string).catch(() => null),
+    ])
+      .then(([u, planData, s]) => {
+        if (!active) return;
         if (!u) {
           router.push("/admin/users");
           return;
         }
+        const planList = (planData as { id: string; name: string }[]) ?? [];
         setUser(u);
         setForm({
           name: u.name,
@@ -83,25 +108,23 @@ export default function EditUserPage() {
           whatsapp: toLocalPart(u.whatsapp ?? ""),
         });
         setAvatar(u.avatar ?? "");
+        setBanner(u.banner ?? "");
         setIsActive(u.isActive);
         setIsVerified(u.isVerified);
+        setIsVip(u.isVip ?? false);
         setIsAdmin(u.isAdmin);
+        setPlans(planList);
+        // The Standard / Premium switches are the canonical plan, so the Plan
+        // dropdown follows them rather than a stale subscription record.
+        setSelectedPlanId(planIdFor(u, planList));
+        if (s?.expiresAt) setExpiresAt(s.expiresAt.slice(0, 10));
         setLoading(false);
       })
       .catch(() => router.push("/admin/users"));
 
-    fetchAllSubscriptionPlansAction()
-      .then((data) => setPlans((data as { id: string; name: string }[]) ?? []))
-      .catch(() => {});
-
-    fetchUserSubscriptionAction(id as string)
-      .then((s) => {
-        if (s) {
-          setSelectedPlanId(s.planId);
-          setExpiresAt(s.expiresAt ? s.expiresAt.slice(0, 10) : "");
-        }
-      })
-      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, [id, router]);
 
   async function handleAvatarUpload(file: File | null) {
@@ -109,6 +132,17 @@ export default function EditUserPage() {
     try {
       const dataUrl = await compressImage(file, 400, 0.7);
       setAvatar(dataUrl);
+      setError("");
+    } catch {
+      setError("Could not read that image. Please try a different file.");
+    }
+  }
+
+  async function handleBannerUpload(file: File | null) {
+    if (!file) return;
+    try {
+      const dataUrl = await compressImage(file, 1200, 0.75);
+      setBanner(dataUrl);
       setError("");
     } catch {
       setError("Could not read that image. Please try a different file.");
@@ -127,14 +161,27 @@ export default function EditUserPage() {
         phone: toFullNumber(form.phone),
         whatsapp: form.whatsapp ? toFullNumber(form.whatsapp) : undefined,
         avatar: avatar || null,
+        banner: banner || null,
       });
 
       if (isActive !== user?.isActive) {
         await setUserActiveAction(id as string, isActive);
       }
-      if (isVerified !== user?.isVerified) {
-        await setUserVerifiedAction(id as string, isVerified);
+
+      const initialPlan = user?.isVip
+        ? "Premium"
+        : user?.isVerified
+          ? "Standard"
+          : "Free";
+      const nextPlan = isVip
+        ? "Premium"
+        : isVerified
+          ? "Standard"
+          : "Free";
+      if (nextPlan !== initialPlan) {
+        await setUserPlanAction(id as string, nextPlan);
       }
+
       if (isAdmin !== user?.isAdmin) {
         await setUserAdminAction(id as string, isAdmin);
       }
@@ -145,7 +192,12 @@ export default function EditUserPage() {
       setNewPassword("");
       setSaved(true);
       await fetchUserByIdAction(id as string).then((u) => {
-        if (u) setUser(u);
+        if (u) {
+          setUser(u);
+          setIsVerified(u.isVerified);
+          setIsVip(u.isVip ?? false);
+          setSelectedPlanId(planIdFor(u, plans));
+        }
       });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save changes");
@@ -194,7 +246,7 @@ export default function EditUserPage() {
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <label className="cursor-pointer rounded-xl border border-border px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
+              <label className="cursor-pointer rounded-xl border border-border/70 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
                 {avatar ? "Change photo" : "Upload photo"}
                 <input
                   type="file"
@@ -213,6 +265,49 @@ export default function EditUserPage() {
                 </button>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Banner */}
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-muted-foreground">
+            Seller Page Banner
+          </label>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Displayed at the top of this seller&apos;s public profile. Wide
+            images work best.
+          </p>
+          {banner && (
+            <div className="mb-3 overflow-hidden rounded-2xl border border-border/70">
+              <img
+                src={banner}
+                alt="Seller page banner"
+                className="h-28 w-full object-cover"
+              />
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-border/70 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
+              <ImagePlus className="h-4 w-4" />
+              {banner ? "Change banner" : "Upload banner"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) =>
+                  handleBannerUpload(e.target.files?.[0] ?? null)
+                }
+              />
+            </label>
+            {banner && (
+              <button
+                type="button"
+                onClick={() => setBanner("")}
+                className="text-sm font-semibold text-destructive hover:underline"
+              >
+                Remove banner
+              </button>
+            )}
           </div>
         </div>
 
@@ -266,87 +361,34 @@ export default function EditUserPage() {
               offLabel="○ Disabled"
             />
             <Toggle
-              checked={isVerified}
-              onChange={setIsVerified}
-              onLabel="✓ Verified Seller"
-              offLabel="○ Not Verified"
+              checked={isVerified && !isVip}
+              onChange={(on) => {
+                setIsVerified(on);
+                if (on) setIsVip(false);
+              }}
+              onLabel="✦ Standard Plan"
+              offLabel="○ Standard off"
             />
             <Toggle
-              checked={isAdmin}
-              onChange={setIsAdmin}
-              onLabel="★ Admin"
-              offLabel="○ Regular User"
+              checked={isVip}
+              onChange={(on) => {
+                setIsVip(on);
+                if (on) setIsVerified(true);
+              }}
+              onLabel="★ Premium Plan"
+              offLabel="○ Premium off"
             />
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Current plan:{" "}
+            <span className="font-semibold text-foreground">{currentPlan}</span>
+            {" · "}Standard adds verified status, Premium adds VIP perks.
+          </p>
           {isAdmin && (
             <p className="mt-3 text-xs text-muted-foreground">
               Making this user an admin grants them access to the admin panel.
             </p>
           )}
-        </div>
-
-        {/* Subscription */}
-        <div>
-          <h2 className="mb-3 font-heading text-lg font-bold text-foreground">
-            Subscription
-          </h2>
-          <div className="max-w-md space-y-3">
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold text-muted-foreground">
-                Plan
-              </label>
-              <select
-                value={selectedPlanId}
-                onChange={(e) => setSelectedPlanId(e.target.value)}
-                className="neu-inset w-full px-4 py-2.5 text-sm text-foreground focus:outline-none"
-              >
-                <option value="">— None —</option>
-                {plans.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold text-muted-foreground">
-                Expires (optional)
-              </label>
-              <input
-                type="date"
-                value={expiresAt}
-                onChange={(e) => setExpiresAt(e.target.value)}
-                className="neu-inset w-full px-4 py-2.5 text-sm text-foreground focus:outline-none"
-              />
-            </div>
-            <button
-              type="button"
-              disabled={saving || !selectedPlanId}
-              onClick={async () => {
-                if (!selectedPlanId) return;
-                setSaving(true);
-                setError("");
-                try {
-                  await assignSubscriptionAction(
-                    id as string,
-                    selectedPlanId,
-                    expiresAt ? new Date(expiresAt).toISOString() : null,
-                  );
-                  const s2 = await fetchUserSubscriptionAction(id as string);
-                  if (s2?.expiresAt) setExpiresAt(s2.expiresAt.slice(0, 10));
-                  setSaved(true);
-                  setTimeout(() => setSaved(false), 2000);
-                } catch (e) {
-                  setError(e instanceof Error ? e.message : "Failed to assign plan");
-                } finally {
-                  setSaving(false);
-                }
-              }}
-              className="neu-pill bg-primary text-primary-foreground font-bold px-4 py-2 text-sm transition-all disabled:opacity-60"
-            >
-              Assign Plan
-            </button>
-          </div>
         </div>
 
         {/* Security */}

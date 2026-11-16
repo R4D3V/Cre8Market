@@ -61,6 +61,15 @@ export const PLAN_SLOGAN = "CRE8 MARKET – Your Marketplace, Your Business, You
 
 export type PlanName = "Free" | "Standard" | "Premium";
 
+export function planTierFromName(name?: string | null): PlanName | null {
+  if (!name) return null;
+  const lower = name.toLowerCase();
+  if (lower.includes("premium") || lower.includes("vip")) return "Premium";
+  if (lower.includes("standard") || lower.includes("verified")) return "Standard";
+  if (lower.includes("free")) return "Free";
+  return null;
+}
+
 export function getCurrentPlanName(user: {
   isVerified?: boolean | null;
   isVip?: boolean | null;

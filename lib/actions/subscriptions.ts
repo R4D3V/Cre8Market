@@ -8,7 +8,13 @@ import {
   deleteSubscriptionPlan,
   getUserSubscription,
   setUserSubscription,
+  cancelUserSubscriptions,
+  updateUserPlanFlags,
+  logAudit,
 } from "@/lib/db/queries";
+import { planTierFromName } from "@/lib/plans";
+import { sellerPath } from "@/lib/seller-handle";
+import type { UserSubscription } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 
 async function requireAdmin() {
@@ -78,9 +84,37 @@ export async function fetchUserSubscriptionAction(userId: string) {
 }
 
 export async function assignSubscriptionAction(userId: string, planId: string, expiresAt: string | null) {
-  await requireAdmin();
-  const sub = await setUserSubscription(userId, planId, expiresAt, "active");
+  const adminId = await requireAdmin();
+  const plan = await getSubscriptionPlanById(planId);
+  if (!plan) throw new Error("Subscription plan not found");
+
+  const tier = planTierFromName(plan.name);
+
+  let sub: UserSubscription | null = null;
+  if (tier === "Free") {
+    await cancelUserSubscriptions(userId);
+  } else {
+    sub = await setUserSubscription(userId, planId, expiresAt, "active");
+  }
+
+  // Keep the admin's Standard/Premium switches in sync with the assigned plan.
+  const updatedUser = tier ? await updateUserPlanFlags(userId, tier) : null;
+
+  await logAudit({
+    actorId: adminId,
+    actorRole: "admin",
+    action: "user.subscription_assign",
+    targetType: "user",
+    targetId: userId,
+    metadata: { plan: plan.name, expiresAt },
+  });
+
   revalidatePath("/admin/users");
+  revalidatePath(`/admin/users/${userId}/edit`);
+  revalidatePath("/admin");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/profile");
+  revalidatePath("/sellers");
+  if (updatedUser) revalidatePath(sellerPath(updatedUser));
   return sub;
 }

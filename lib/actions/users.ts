@@ -6,6 +6,8 @@ import {
   getUsers,
   getPublicUsers,
   getUserById,
+  getUserByHandleOrId,
+  getStoreAdminProfile,
   createUser,
   updateUserStatus,
   updateUserProfile,
@@ -13,6 +15,10 @@ import {
   updateUserAdminStatus,
   updateUserVerifiedStatus,
   updateUserVipStatus,
+  updateUserPlanFlags,
+  getSubscriptionPlanByName,
+  setUserSubscription,
+  cancelUserSubscriptions,
   getUserPasswordHash,
   updateUserPassword,
   deleteUser,
@@ -20,6 +26,8 @@ import {
   checkPhoneExistsExcluding,
   logAudit,
 } from "@/lib/db/queries";
+import type { AppUser } from "@/lib/types";
+import { sellerPath } from "@/lib/seller-handle";
 import { revalidatePath } from "next/cache";
 
 async function requireAdmin() {
@@ -49,21 +57,22 @@ export async function fetchPublicUsersAction() {
 
 export async function fetchPublicUserAction(id: string) {
   if (id === "store") {
+    const storeProfile = await getStoreAdminProfile();
     return {
       id: "store",
       name: "CRE8MARKET",
       phone: "",
       whatsapp: null,
-      avatar: null,
-      banner: null,
+      avatar: storeProfile.avatar,
+      banner: storeProfile.banner,
       isActive: true,
       isAdmin: true,
       isVerified: true,
       isVip: true,
       createdAt: new Date().toISOString(),
-    } as any;
+    } satisfies AppUser;
   }
-  return getUserById(id);
+  return getUserByHandleOrId(id);
 }
 
 export async function fetchUserByIdAction(id: string) {
@@ -78,6 +87,8 @@ export async function createUserByAdminAction(data: {
   whatsapp?: string;
   password: string;
   pin?: string;
+  avatar?: string | null;
+  banner?: string | null;
 }) {
   await requireAdmin();
 
@@ -102,6 +113,8 @@ export async function createUserByAdminAction(data: {
     whatsapp: data.whatsapp || data.phone,
     password_hash,
     pin_hash,
+    avatar: data.avatar,
+    banner: data.banner,
   });
 
   const session = await auth();
@@ -115,6 +128,8 @@ export async function createUserByAdminAction(data: {
   });
 
   revalidatePath("/admin/users");
+  revalidatePath("/sellers");
+  revalidatePath(sellerPath(user));
   return user;
 }
 
@@ -138,7 +153,13 @@ export async function setUserActiveAction(id: string, isActive: boolean) {
 // Admin edits any user's name/phone/whatsapp.
 export async function updateUserByAdminAction(
   id: string,
-  data: { name: string; phone: string; whatsapp?: string; avatar?: string | null },
+  data: {
+    name: string;
+    phone: string;
+    whatsapp?: string;
+    avatar?: string | null;
+    banner?: string | null;
+  },
 ) {
   await requireAdmin();
 
@@ -155,6 +176,7 @@ export async function updateUserByAdminAction(
     phone,
     whatsapp: data.whatsapp?.trim() || phone,
     avatar: data.avatar,
+    banner: data.banner,
   });
   const session = await auth();
   await logAudit({
@@ -167,6 +189,8 @@ export async function updateUserByAdminAction(
   });
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${id}/edit`);
+  revalidatePath(sellerPath(user));
+  revalidatePath("/sellers");
   revalidatePath("/admin");
   return user;
 }
@@ -205,6 +229,49 @@ export async function setUserVipAction(id: string, isVip: boolean) {
   });
   revalidatePath("/admin/users");
   revalidatePath("/admin");
+  revalidatePath("/products");
+  return user;
+}
+
+// Admin selects Free / Standard / Premium for a seller. This keeps the user's
+// plan flags and their subscription record in sync, so the dashboard shows the
+// same plan the admin picked.
+export async function setUserPlanAction(
+  id: string,
+  plan: "Free" | "Standard" | "Premium",
+) {
+  await requireAdmin();
+  const session = await auth();
+
+  if (plan === "Free") {
+    await cancelUserSubscriptions(id);
+  } else {
+    const dbPlan = await getSubscriptionPlanByName(plan);
+    if (!dbPlan) {
+      throw new Error(
+        `The ${plan} subscription plan is missing. Create it under Admin → Subscriptions first.`,
+      );
+    }
+    await setUserSubscription(id, dbPlan.id, null, "active");
+  }
+
+  const user = await updateUserPlanFlags(id, plan);
+  await logAudit({
+    actorId: session?.user?.id ?? null,
+    actorRole: "admin",
+    action: "user.plan_change",
+    targetType: "user",
+    targetId: id,
+    metadata: { plan },
+  });
+
+  revalidatePath("/admin/users");
+  revalidatePath(`/admin/users/${id}/edit`);
+  revalidatePath("/admin");
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/profile");
+  revalidatePath("/sellers");
+  revalidatePath(sellerPath(user));
   revalidatePath("/products");
   return user;
 }
@@ -302,6 +369,8 @@ export async function updateMyProfileAction(data: {
   });
   revalidatePath("/dashboard/profile");
   revalidatePath("/dashboard");
+  revalidatePath("/sellers");
+  revalidatePath(sellerPath(user));
   return user;
 }
 

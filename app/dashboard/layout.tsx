@@ -35,9 +35,11 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-dvh bg-background text-foreground">
+    <div className="page-ambient min-h-dvh bg-background text-foreground">
       <Navbar />
-      <main className="mx-auto w-full max-w-7xl p-4 sm:p-6">{children}</main>
+      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+        {children}
+      </main>
     </div>
   );
 }

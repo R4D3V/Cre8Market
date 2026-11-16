@@ -4,9 +4,10 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageHero from "@/components/PageHero";
 import ProductCard from "@/components/ProductCard";
 import ScrollReveal from "@/components/ScrollReveal";
-import { SlidersHorizontal, WifiOff } from "lucide-react";
+import { Clock, Search, SlidersHorizontal, Star, WifiOff } from "lucide-react";
 import BottomSheet from "@/components/BottomSheet";
 import {
   fetchProductsPageAction,
@@ -15,12 +16,13 @@ import {
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import type { Product } from "@/lib/types";
 import type { CategoryDB } from "@/lib/types";
+import { sellerHandle } from "@/lib/seller-handle";
 
 const ITEMS_PER_PAGE = 16;
 
 function ProductCardSkeleton() {
   return (
-    <div className="neu-card overflow-hidden flex flex-col">
+    <div className="rounded-2xl border border-border/70 bg-card/80 overflow-hidden flex flex-col">
       <div className="relative aspect-[4/3] rounded-t-3xl bg-muted animate-pulse" />
       <div className="p-3.5 flex flex-col gap-2 flex-1">
         <div className="h-2.5 w-16 rounded-full bg-muted animate-pulse" />
@@ -42,7 +44,12 @@ export default function ProductsPageClient(props: {
   initialProducts?: Product[];
   initialTotal?: number;
   initialCategories?: CategoryDB[];
-  initialSellers?: { id: string; name: string; productCount: number }[];
+  initialSellers?: {
+    id: string;
+    name: string;
+    handle?: string | null;
+    productCount: number;
+  }[];
 } = {}) {
   return (
     <Suspense fallback={null}>
@@ -60,7 +67,12 @@ function ProductsPageContent({
   initialProducts?: Product[];
   initialTotal?: number;
   initialCategories?: CategoryDB[];
-  initialSellers?: { id: string; name: string; productCount: number }[];
+  initialSellers?: {
+    id: string;
+    name: string;
+    handle?: string | null;
+    productCount: number;
+  }[];
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -79,7 +91,12 @@ function ProductsPageContent({
     initialCategories ?? [],
   );
   const [sellers, setSellers] = useState<
-    { id: string; name: string; productCount: number }[]
+    {
+      id: string;
+      name: string;
+      handle?: string | null;
+      productCount: number;
+    }[]
   >(initialSellers ?? []);
   const [loading, setLoading] = useState(initialProducts ? false : true);
   const [loadError, setLoadError] = useState(false);
@@ -207,7 +224,7 @@ function ProductsPageContent({
           setPage(1);
         }}
         placeholder="Search listings…"
-        className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+        className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
       />
     </div>
 
@@ -221,7 +238,7 @@ function ProductsPageContent({
           setSelectedCategory(e.target.value);
           setPage(1);
         }}
-        className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+        className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
       >
         <option value="">All Categories</option>
         {categories.map((c) => (
@@ -242,11 +259,14 @@ function ProductsPageContent({
           setSelectedSeller(e.target.value);
           setPage(1);
         }}
-        className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+        className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
       >
         <option value="">All Sellers</option>
         {sellers.map((s) => (
-          <option key={s.id} value={s.id}>
+          <option
+            key={s.id}
+            value={s.id === "store" ? "store" : s.handle ?? sellerHandle(s.name)}
+          >
             {s.name} ({s.productCount})
           </option>
         ))}
@@ -266,7 +286,7 @@ function ProductsPageContent({
             setPage(1);
           }}
           placeholder="Min"
-          className="neu-inset w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+          className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
         <input
           type="number"
@@ -276,7 +296,7 @@ function ProductsPageContent({
             setPage(1);
           }}
           placeholder="Max"
-          className="neu-inset w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+          className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
       </div>
     </div>
@@ -286,11 +306,34 @@ function ProductsPageContent({
   return (
     <>
       <Navbar />
-      <main className="container py-6 pb-24 sm:pb-8 overflow-x-hidden max-w-full">
+      <PageHero
+        eyebrow="Browse the market"
+        title={
+          featuredParam === "1" ? (
+            <span className="inline-flex items-center gap-3">
+              <Star className="h-7 w-7 fill-featured text-featured" />
+              Featured Listings
+            </span>
+          ) : sortParam === "latest" ? (
+            <span className="inline-flex items-center gap-3">
+              <Clock className="h-7 w-7 text-primary" />
+              Latest Listings
+            </span>
+          ) : (
+            "All Listings"
+          )
+        }
+        description={`${total} ${total === 1 ? "result" : "results"}${
+          selectedCategory
+            ? ` in ${categories.find((c) => c.slug === selectedCategory)?.name ?? selectedCategory}`
+            : ""
+        }`}
+      />
+      <main className="page-ambient container py-6 pb-24 sm:pb-8 overflow-x-hidden max-w-full">
         <ScrollReveal className="flex flex-col lg:flex-row gap-6">
           {/* Desktop: persistent sidebar. Mobile uses the bottom sheet below. */}
           <aside className="hidden shrink-0 lg:block lg:w-56">
-            <div className="neu-card p-4 lg:sticky lg:top-24">
+            <div className="rounded-2xl border border-border/70 bg-card/80 p-4 lg:sticky lg:top-24">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="font-heading font-bold text-foreground">Filters</h2>
                 <button
@@ -305,27 +348,12 @@ function ProductsPageContent({
           </aside>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="font-heading text-xl font-extrabold text-foreground">
-                  {featuredParam === "1"
-                    ? "⭐ Featured Listings"
-                    : sortParam === "latest"
-                      ? "🕐 Latest Listings"
-                      : "All Listings"}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {total} {total === 1 ? "result" : "results"}
-                  {selectedCategory &&
-                    ` in ${categories.find((c) => c.slug === selectedCategory)?.name}`}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
+            <div className="mb-4 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setFiltersOpen(true)}
                 aria-haspopup="dialog"
-                className="neu-inset press relative flex min-h-11 items-center gap-1.5 px-3 text-sm font-semibold text-foreground lg:hidden"
+                className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 press relative flex min-h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-foreground lg:hidden"
               >
                 <SlidersHorizontal className="size-4" aria-hidden="true" />
                 Filters
@@ -343,14 +371,13 @@ function ProductsPageContent({
                   setPage(1);
                   router.replace(`/products?${params.toString()}`);
                 }}
-                className="neu-inset px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               >
                 <option value="latest">Latest first</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
                 <option value="featured">Featured first</option>
               </select>
-              </div>
             </div>
 
             {loading ? (
@@ -360,7 +387,7 @@ function ProductsPageContent({
                 ))}
               </div>
             ) : loadError ? (
-              <div className="neu-card text-center py-16 px-4" role="alert">
+              <div className="rounded-2xl border border-border/70 bg-card/80 text-center py-16 px-4" role="alert">
                 <WifiOff className="mx-auto mb-4 size-10 text-muted-foreground" aria-hidden="true" />
                 <h3 className="font-heading text-lg font-bold text-foreground mb-2">
                   Couldn&apos;t load listings
@@ -370,7 +397,7 @@ function ProductsPageContent({
                 </p>
                 <button
                   onClick={() => setReloadKey((k) => k + 1)}
-                  className="neu-pill press bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm hover:bg-primary/90 transition-all"
+                  className="rounded-full border border-border/70 press bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm hover:bg-primary/90 transition-all"
                 >
                   Try again
                 </button>
@@ -382,8 +409,10 @@ function ProductsPageContent({
                 ))}
               </div>
             ) : (
-              <div className="neu-card text-center py-20">
-                <span className="text-5xl mb-4 block">🔍</span>
+              <div className="rounded-2xl border border-border/70 bg-card/80 text-center py-20">
+                <span className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+                  <Search className="h-6 w-6" />
+                </span>
                 <h3 className="font-heading text-lg font-bold text-foreground mb-2">
                   No listings found
                 </h3>
@@ -392,7 +421,7 @@ function ProductsPageContent({
                 </p>
                 <button
                   onClick={resetFilters}
-                  className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2 text-sm hover:bg-primary/90 transition-all"
+                  className="rounded-full border border-border/70 bg-primary text-primary-foreground font-bold px-5 py-2 text-sm hover:bg-primary/90 transition-all"
                 >
                   Clear Filters
                 </button>

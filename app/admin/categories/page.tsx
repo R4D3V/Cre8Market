@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import {
   fetchCategoriesAction,
   createCategoryAction,
@@ -110,10 +109,18 @@ export default function AdminCategoriesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-extrabold font-heading text-foreground">
-          Categories
-        </h1>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
+            Admin · Taxonomy
+          </p>
+          <h1 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            Categories
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Organize how listings are grouped across the marketplace.
+          </p>
+        </div>
       </div>
 
       {/* Form */}
@@ -240,7 +247,7 @@ export default function AdminCategoriesPage() {
           No categories yet.
         </p>
       ) : (
-        <div className="bg-card border border-border rounded-xl overflow-x-auto">
+        <div className="border border-border/70 bg-card/80 rounded-xl overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-muted-foreground text-xs uppercase tracking-wide">

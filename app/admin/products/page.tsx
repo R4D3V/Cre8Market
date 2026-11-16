@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
+import { Package, Star } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { formatPrice } from "@/lib/data";
 import { fetchProductsWithOwnersAction, deleteProductsAction, setProductsFeaturedAction, duplicateProductsAction } from "@/lib/actions/products";
@@ -20,13 +21,20 @@ export default function AdminProductsPage() {
 function AdminProductsPageInner() {
   const searchParams = useSearchParams();
   const categoryFromUrl = searchParams.get("category") ?? "";
+  const ownerFromUrl = searchParams.get("owner");
+  const missingImagesFromUrl = searchParams.get("missingImages") === "1";
 
   const [products, setProducts] = useState<ProductWithOwner[]>([]);
   const [categories, setCategories] = useState<CategoryDB[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState(categoryFromUrl);
-  const [ownerFilter, setOwnerFilter] = useState("all");
+  const [ownerFilter, setOwnerFilter] = useState(
+    ownerFromUrl === "admin" || ownerFromUrl === "user" ? ownerFromUrl : "all",
+  );
+  const [missingImagesOnly, setMissingImagesOnly] = useState(
+    missingImagesFromUrl,
+  );
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
@@ -61,6 +69,9 @@ function AdminProductsPageInner() {
     } else if (ownerFilter === "admin") {
       list = list.filter((p) => p.ownerType === "admin");
     }
+    if (missingImagesOnly) {
+      list = list.filter((p) => !p.images || p.images.length === 0);
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -71,7 +82,14 @@ function AdminProductsPageInner() {
       );
     }
     return list;
-  }, [products, categoryFilter, ownerFilter, selectedUserId, search]);
+  }, [
+    products,
+    categoryFilter,
+    ownerFilter,
+    selectedUserId,
+    missingImagesOnly,
+    search,
+  ]);
 
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this product?")) return;
@@ -149,17 +167,22 @@ function AdminProductsPageInner() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold font-heading text-foreground">All Products</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
+            Admin · Inventory
+          </p>
+          <h1 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            All Products
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
             {filteredProducts.length} product{filteredProducts.length !== 1 && "s"}
             {filteredProducts.length !== products.length && ` of ${products.length} total`}
           </p>
         </div>
         <Link
           href="/admin/products/new"
-          className="neu-pill bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-5 py-2.5 text-sm transition-all"
+          className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90"
         >
           + Add Product
         </Link>
@@ -197,6 +220,18 @@ function AdminProductsPageInner() {
           <option value="admin">Added by Store (Admin)</option>
           <option value="user">Added by a User…</option>
         </select>
+        <button
+          type="button"
+          onClick={() => setMissingImagesOnly((value) => !value)}
+          aria-pressed={missingImagesOnly}
+          className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
+            missingImagesOnly
+              ? "border-amber-500/40 bg-amber-500/10 text-amber-700"
+              : "border-border/70 bg-card text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          No images only
+        </button>
         {ownerFilter === "user" && (
           <select
             value={selectedUserId}
@@ -224,7 +259,10 @@ function AdminProductsPageInner() {
             disabled={busy}
             className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
           >
-            ★ Mark Featured
+            <span className="inline-flex items-center gap-1.5">
+              <Star className="h-3.5 w-3.5 fill-current" />
+              Mark Featured
+            </span>
           </button>
           <button
             onClick={() => handleBulkFeatured(false)}
@@ -261,7 +299,9 @@ function AdminProductsPageInner() {
         <div className="text-center py-12 text-muted-foreground text-sm">Loading…</div>
       ) : filteredProducts.length === 0 ? (
         <div className="neu-card text-center py-12">
-          <p className="text-4xl mb-3">📦</p>
+          <span className="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+            <Package className="h-6 w-6" />
+          </span>
           <h3 className="font-bold text-foreground mb-1">No products found</h3>
           <p className="text-muted-foreground text-sm mb-4">
             {products.length === 0
@@ -295,7 +335,7 @@ function AdminProductsPageInner() {
             {filteredProducts.map((p) => (
               <div
                 key={`${p.id}-${p.slug}`}
-                className={`rounded-xl border border-border bg-card p-4 ${
+                className={`rounded-xl border border-border/70 bg-card/80 p-4 ${
                   selected.has(p.id) ? "border-primary/40 bg-primary/5" : ""
                 }`}
               >
@@ -311,8 +351,9 @@ function AdminProductsPageInner() {
                     <div className="flex items-start justify-between gap-2">
                       <p className="font-semibold text-foreground">{p.title}</p>
                       {p.featured && (
-                        <span className="shrink-0 text-xs font-bold text-featured">
-                          ★ Featured
+                        <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-featured">
+                          <Star className="h-3 w-3 fill-current" />
+                          Featured
                         </span>
                       )}
                     </div>
@@ -357,7 +398,7 @@ function AdminProductsPageInner() {
             ))}
           </div>
 
-          <div className="hidden overflow-x-auto rounded-xl border border-border bg-card lg:block">
+          <div className="hidden overflow-x-auto rounded-xl border border-border/70 bg-card/80 lg:block">
             <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-muted-foreground text-xs uppercase tracking-wide">
@@ -410,7 +451,10 @@ function AdminProductsPageInner() {
                   </td>
                   <td className="py-3 pr-4">
                     {p.featured ? (
-                      <span className="text-featured text-xs font-bold">★ Featured</span>
+                      <span className="inline-flex items-center gap-1 text-featured text-xs font-bold">
+                        <Star className="h-3 w-3 fill-current" />
+                        Featured
+                      </span>
                     ) : (
                       <span className="text-muted-foreground text-xs">—</span>
                     )}

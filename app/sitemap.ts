@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getProducts, getSellers } from "@/lib/db/queries";
+import { sellerPath } from "@/lib/seller-handle";
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL || "https://www.cre8-market.com";
 
@@ -31,12 +32,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
     const sellers = await getSellers();
-    sellerRoutes = sellers.map((s: { id: string }) => ({
-      url: `${BASE}/sellers/${s.id}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.5,
-    }));
+    sellerRoutes = sellers.map(
+      (s: { id: string; name: string; handle: string | null }) => ({
+        url: `${BASE}${sellerPath(s)}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.5,
+      }),
+    );
   } catch {
     // DB unavailable at build time; sitemap still lists static routes.
   }

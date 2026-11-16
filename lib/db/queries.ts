@@ -1,4 +1,5 @@
 import { pool } from "./pool";
+import { sellerHandle } from "../seller-handle";
 import type { Product, CategoryDB, ProductWithOwner, AppUser, SubscriptionPlan, UserSubscription } from "../types";
 
 export interface PushSubscriptionRow {
@@ -16,6 +17,7 @@ export interface AdminUserRow {
   phone: string | null;
   whatsapp: string | null;
   avatar: string | null;
+  banner: string | null;
   created_at: string;
 }
 
@@ -84,7 +86,13 @@ export async function getProductsPage(
     conditions.push("p.user_id IS NULL");
   } else if (sellerId) {
     values.push(sellerId);
-    conditions.push(`p.user_id = $${values.length}`);
+    const idx = values.length;
+    // Accept both the stored name handle and older UUID links.
+    conditions.push(
+      `(p.user_id::text = $${idx} OR p.user_id IN (
+        SELECT su.id FROM users su WHERE su.handle = lower($${idx})
+      ))`,
+    );
   }
 
   if (search && search.trim()) {
@@ -147,6 +155,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
 }
 
 export async function getDeals(): Promise<Product[]> {
+  if (!(await isFeatureEnabled("deals"))) return [];
   const { rows } = await pool.query(
     `${PRODUCT_SELECT} WHERE p.is_deal = true ORDER BY p.created_at DESC`,
   );
@@ -156,7 +165,7 @@ export async function getDeals(): Promise<Product[]> {
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const { rows } = await pool.query(
     `SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
-            u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified,
+            u.name AS owner_name, u.handle AS owner_handle, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified,
             u.is_vip AS owner_vip,
             a.avatar AS admin_avatar
      FROM products p
@@ -307,7 +316,7 @@ export async function getUserProductsWithOwner(
 ): Promise<Product[]> {
   const { rows } = await pool.query(
     `SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
-            u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified,
+            u.name AS owner_name, u.handle AS owner_handle, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified,
             u.is_vip AS owner_vip
      FROM products p
      LEFT JOIN categories c ON c.slug = p.category_slug
@@ -337,7 +346,7 @@ export async function getStoreProducts(): Promise<Product[]> {
 export async function getProductsWithOwners(): Promise<ProductWithOwner[]> {
   const { rows } = await pool.query(`
     SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
-           u.name AS owner_name, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified,
+           u.name AS owner_name, u.handle AS owner_handle, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified,
             u.is_vip AS owner_vip
     FROM products p
     LEFT JOIN categories c ON c.slug = p.category_slug
@@ -347,6 +356,36 @@ export async function getProductsWithOwners(): Promise<ProductWithOwner[]> {
   return rows.map((row) => ({
     ...mapProduct(row),
     ownerName: (row.owner_name as string) ?? null,
+    ownerHandle: (row.owner_handle as string) ?? null,
+    ownerPhone: (row.owner_phone as string) ?? null,
+    ownerWhatsapp: (row.owner_whatsapp as string) ?? null,
+    ownerAvatar: (row.owner_avatar as string) ?? null,
+    ownerVerified: (row.owner_verified as boolean) ?? null,
+    ownerType: row.user_id ? "user" : "admin",
+  }));
+}
+
+// Admin dashboard: the most recent listings with their owner, without loading
+// the whole catalogue into memory.
+export async function getRecentProductsWithOwners(
+  limit = 5,
+): Promise<ProductWithOwner[]> {
+  const capped = Math.min(Math.max(limit, 1), 20);
+  const { rows } = await pool.query(
+    `SELECT p.*, c.icon AS category_icon, c.color AS category_color, c.bg_color AS category_bg,
+            u.name AS owner_name, u.handle AS owner_handle, u.phone AS owner_phone, u.whatsapp AS owner_whatsapp, u.avatar AS owner_avatar, u.is_verified AS owner_verified,
+            u.is_vip AS owner_vip
+     FROM products p
+     LEFT JOIN categories c ON c.slug = p.category_slug
+     LEFT JOIN users u ON u.id = p.user_id
+     ORDER BY p.created_at DESC
+     LIMIT $1`,
+    [capped],
+  );
+  return rows.map((row) => ({
+    ...mapProduct(row),
+    ownerName: (row.owner_name as string) ?? null,
+    ownerHandle: (row.owner_handle as string) ?? null,
     ownerPhone: (row.owner_phone as string) ?? null,
     ownerWhatsapp: (row.owner_whatsapp as string) ?? null,
     ownerAvatar: (row.owner_avatar as string) ?? null,
@@ -476,6 +515,7 @@ export async function updateAdminProfile(
     phone?: string;
     whatsapp?: string;
     avatar?: string | null;
+    banner?: string | null;
   },
 ): Promise<AdminUserRow | null> {
   const { rows } = await pool.query(
@@ -483,17 +523,34 @@ export async function updateAdminProfile(
        name = COALESCE($1, name),
        phone = COALESCE($2, phone),
        whatsapp = COALESCE($3, whatsapp),
-       avatar = $4
-     WHERE id = $5 RETURNING *`,
+       avatar = $4,
+       banner = $5
+     WHERE id = $6 RETURNING *`,
     [
       data.name ?? null,
       data.phone ?? null,
       data.whatsapp ?? null,
       data.avatar ?? null,
+      data.banner ?? null,
       id,
     ],
   );
   return rows[0] ?? null;
+}
+
+// Banner and avatar shown on the public store seller page (/sellers/store).
+// The store is represented by the earliest-created admin account.
+export async function getStoreAdminProfile(): Promise<{
+  avatar: string | null;
+  banner: string | null;
+}> {
+  const { rows } = await pool.query(
+    "SELECT avatar, banner FROM admin_users ORDER BY created_at ASC LIMIT 1",
+  );
+  return {
+    avatar: (rows[0]?.avatar as string) ?? null,
+    banner: (rows[0]?.banner as string) ?? null,
+  };
 }
 
 export async function getAdminUserPasswordHash(
@@ -568,7 +625,7 @@ export interface UserRow {
 
 export async function getUsers(): Promise<AppUser[]> {
   const { rows } = await pool.query(`
-    SELECT u.id, u.name, u.phone, u.whatsapp, u.avatar, u.banner, u.is_active, u.is_admin, u.is_verified, u.is_vip, u.created_at,
+    SELECT u.id, u.name, u.handle, u.phone, u.whatsapp, u.avatar, u.banner, u.is_active, u.is_admin, u.is_verified, u.is_vip, u.created_at,
            COUNT(p.id)::int AS product_count
     FROM users u
     LEFT JOIN products p ON p.user_id = u.id
@@ -581,7 +638,7 @@ export async function getUsers(): Promise<AppUser[]> {
 // Public sellers directory: active registered users who currently have listings.
 export async function getPublicUsers(): Promise<AppUser[]> {
   const { rows } = await pool.query(`
-    SELECT u.id, u.name, u.phone, u.whatsapp, u.avatar, u.banner, u.is_active, u.is_admin, u.is_verified, u.is_vip, u.created_at,
+    SELECT u.id, u.name, u.handle, u.phone, u.whatsapp, u.avatar, u.banner, u.is_active, u.is_admin, u.is_verified, u.is_vip, u.created_at,
            COUNT(p.id)::int AS product_count
     FROM users u
     LEFT JOIN products p ON p.user_id = u.id
@@ -595,13 +652,14 @@ export async function getPublicUsers(): Promise<AppUser[]> {
   );
   const storeProducts = Number(storeCount.rows[0]?.count ?? 0);
   if (storeProducts > 0) {
+    const storeProfile = await getStoreAdminProfile();
     users.push({
       id: "store",
       name: "CRE8MARKET",
       phone: "",
       whatsapp: null,
-      avatar: null,
-      banner: null,
+      avatar: storeProfile.avatar,
+      banner: storeProfile.banner,
       isActive: true,
       isAdmin: true,
       isVerified: true,
@@ -616,10 +674,10 @@ export async function getPublicUsers(): Promise<AppUser[]> {
 // Public: sellers for the /products filter — registered users with listings,
 // plus the store (admin-added products, which have no user_id).
 export async function getSellers(): Promise<
-  { id: string; name: string; productCount: number }[]
+  { id: string; name: string; handle: string | null; productCount: number }[]
 > {
   const { rows } = await pool.query(`
-    SELECT u.id, u.name, COUNT(p.id)::int AS product_count
+    SELECT u.id, u.name, u.handle, COUNT(p.id)::int AS product_count
     FROM users u
     INNER JOIN products p ON p.user_id = u.id
     GROUP BY u.id
@@ -628,6 +686,7 @@ export async function getSellers(): Promise<
   const sellers = rows.map((r) => ({
     id: r.id as string,
     name: r.name as string,
+    handle: (r.handle as string) ?? null,
     productCount: Number(r.product_count),
   }));
 
@@ -639,6 +698,7 @@ export async function getSellers(): Promise<
     sellers.push({
       id: "store",
       name: "CRE8MARKET Store",
+      handle: "store",
       productCount: storeProducts,
     });
   }
@@ -646,10 +706,170 @@ export async function getSellers(): Promise<
   return sellers;
 }
 
+// ── Admin overview ───────────────────────────────────────────────────────────
+
+export interface AdminRenewal {
+  id: string;
+  name: string;
+  planName: string;
+  expiresAt: string | null;
+  status: "expiring" | "expired";
+}
+
+export interface AdminOverview {
+  totalListings: number;
+  activeDeals: number;
+  featuredListings: number;
+  totalUsers: number;
+  totalAdmins: number;
+  subscriptions: {
+    active: number;
+    expiringSoon: number;
+    expired: number;
+    free: number;
+  };
+  needsAttention: {
+    unverifiedSellers: number;
+    inactiveUsers: number;
+    missingImages: number;
+    storeListings: number;
+  };
+  renewals: AdminRenewal[];
+}
+
+// Aggregated counters for /admin. Replaces loading every product and user just
+// to call .length on them.
+export async function getAdminOverview(): Promise<AdminOverview> {
+  const [counts, subscriptionRows] = await Promise.all([
+    pool.query(`
+      SELECT
+        (SELECT COUNT(*)::int FROM products) AS total_listings,
+        (SELECT COUNT(*)::int FROM products WHERE is_deal = true) AS active_deals,
+        (SELECT COUNT(*)::int FROM products WHERE featured = true) AS featured_listings,
+        (SELECT COUNT(*)::int FROM products WHERE user_id IS NULL) AS store_listings,
+        (SELECT COUNT(*)::int FROM products
+          WHERE COALESCE(jsonb_array_length(CASE WHEN jsonb_typeof(images) = 'array' THEN images END), 0) = 0
+        ) AS missing_images,
+        (SELECT COUNT(*)::int FROM users) AS total_users,
+        (SELECT COUNT(*)::int FROM users WHERE is_active = false) AS inactive_users,
+        (SELECT COUNT(*)::int FROM admin_users) AS total_admins,
+        (SELECT COUNT(*)::int FROM users u
+          WHERE u.is_verified = false
+            AND EXISTS (SELECT 1 FROM products p WHERE p.user_id = u.id)
+            AND NOT EXISTS (
+              SELECT 1 FROM user_subscriptions us
+              JOIN subscription_plans sp ON sp.id = us.plan_id
+              WHERE us.user_id = u.id
+                AND us.status = 'active'
+                AND (us.expires_at IS NULL OR us.expires_at > now())
+                AND (lower(sp.name) LIKE '%standard%' OR lower(sp.name) LIKE '%premium%')
+            )
+        ) AS unverified_sellers
+    `),
+    pool.query(`
+      SELECT DISTINCT ON (us.user_id)
+        us.user_id AS id,
+        u.name,
+        us.status,
+        us.expires_at,
+        sp.name AS plan_name
+      FROM user_subscriptions us
+      JOIN subscription_plans sp ON sp.id = us.plan_id
+      JOIN users u ON u.id = us.user_id
+      ORDER BY us.user_id, us.started_at DESC
+    `),
+  ]);
+
+  const row = (counts.rows[0] ?? {}) as Record<string, unknown>;
+  const totalUsers = Number(row.total_users ?? 0);
+
+  const now = Date.now();
+  const soon = now + 7 * 24 * 60 * 60 * 1000;
+
+  let active = 0;
+  let expiringSoon = 0;
+  let expired = 0;
+  const renewals: AdminRenewal[] = [];
+
+  for (const sub of subscriptionRows.rows as Record<string, unknown>[]) {
+    const expiresAt = (sub.expires_at as string) ?? null;
+    const expiresMs = expiresAt ? new Date(expiresAt).getTime() : null;
+    const isActive =
+      sub.status === "active" && (expiresMs === null || expiresMs > now);
+
+    if (!isActive) {
+      expired++;
+      renewals.push({
+        id: sub.id as string,
+        name: sub.name as string,
+        planName: sub.plan_name as string,
+        expiresAt,
+        status: "expired",
+      });
+      continue;
+    }
+
+    active++;
+    if (expiresMs !== null && expiresMs <= soon) {
+      expiringSoon++;
+      renewals.push({
+        id: sub.id as string,
+        name: sub.name as string,
+        planName: sub.plan_name as string,
+        expiresAt,
+        status: "expiring",
+      });
+    }
+  }
+
+  renewals.sort((a, b) => {
+    if (!a.expiresAt) return 1;
+    if (!b.expiresAt) return -1;
+    return new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime();
+  });
+
+  return {
+    totalListings: Number(row.total_listings ?? 0),
+    activeDeals: Number(row.active_deals ?? 0),
+    featuredListings: Number(row.featured_listings ?? 0),
+    totalUsers,
+    totalAdmins: Number(row.total_admins ?? 0),
+    subscriptions: {
+      active,
+      expiringSoon,
+      expired,
+      free: Math.max(totalUsers - subscriptionRows.rows.length, 0),
+    },
+    needsAttention: {
+      unverifiedSellers: Number(row.unverified_sellers ?? 0),
+      inactiveUsers: Number(row.inactive_users ?? 0),
+      missingImages: Number(row.missing_images ?? 0),
+      storeListings: Number(row.store_listings ?? 0),
+    },
+    renewals: renewals.slice(0, 8),
+  };
+}
+
 export async function getUserById(id: string): Promise<AppUser | null> {
   const { rows } = await pool.query(
-    "SELECT id, name, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, is_vip, created_at FROM users WHERE id = $1",
+    "SELECT id, name, handle, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, is_vip, (pin_hash IS NOT NULL) AS has_pin, created_at FROM users WHERE id = $1",
     [id],
+  );
+  return rows[0] ? mapUser(rows[0]) : null;
+}
+
+// Storefront URLs use a name-based handle, but old links (and internal calls)
+// still use the UUID. Accept both, preferring an exact id match.
+export async function getUserByHandleOrId(
+  value: string,
+): Promise<AppUser | null> {
+  const { rows } = await pool.query(
+    `SELECT id, name, handle, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, is_vip, (pin_hash IS NOT NULL) AS has_pin, created_at
+     FROM users
+     WHERE id::text = $1 OR lower(handle) = lower($1)
+     ORDER BY (id::text = $1) DESC, created_at ASC
+     LIMIT 1`,
+    [value],
   );
   return rows[0] ? mapUser(rows[0]) : null;
 }
@@ -679,6 +899,37 @@ export async function checkPhoneExistsExcluding(
   return rows.length > 0;
 }
 
+async function sellerHandleTaken(
+  handle: string,
+  excludeId?: string,
+): Promise<boolean> {
+  const { rows } = await pool.query(
+    excludeId
+      ? "SELECT 1 FROM users WHERE handle = $1 AND id <> $2 LIMIT 1"
+      : "SELECT 1 FROM users WHERE handle = $1 LIMIT 1",
+    excludeId ? [handle, excludeId] : [handle],
+  );
+  return rows.length > 0;
+}
+
+// Build a unique, name-based handle for the public storefront URL. Duplicate
+// names get a numeric suffix: mary-jane, mary-jane-2, mary-jane-3, …
+export async function generateUniqueSellerHandle(
+  name: string,
+  excludeId?: string,
+): Promise<string> {
+  const base = sellerHandle(name);
+  let candidate = base;
+  let suffix = 1;
+
+  while (await sellerHandleTaken(candidate, excludeId)) {
+    suffix += 1;
+    candidate = `${base}-${suffix}`;
+  }
+
+  return candidate;
+}
+
 export async function createUser(data: {
   name: string;
   phone: string;
@@ -686,20 +937,39 @@ export async function createUser(data: {
   password_hash: string;
   pin_hash?: string | null;
   is_active?: boolean;
+  avatar?: string | null;
+  banner?: string | null;
 }): Promise<AppUser> {
-  const { rows } = await pool.query(
-    `INSERT INTO users (name, phone, whatsapp, password_hash, pin_hash, is_active)
-     VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
-    [
-      data.name,
-      data.phone,
-      data.whatsapp ?? null,
-      data.password_hash,
-      data.pin_hash ?? null,
-      data.is_active ?? true,
-    ],
-  );
-  return mapUser(rows[0]);
+  // Retry once if two registrations race for the same handle; the unique index
+  // catches the loser and the next attempt picks the following suffix.
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const handle = await generateUniqueSellerHandle(data.name);
+    try {
+      const { rows } = await pool.query(
+        `INSERT INTO users (name, phone, whatsapp, password_hash, pin_hash, is_active, avatar, banner, handle)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id, name, handle, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, created_at`,
+        [
+          data.name,
+          data.phone,
+          data.whatsapp ?? null,
+          data.password_hash,
+          data.pin_hash ?? null,
+          data.is_active ?? true,
+          data.avatar ?? null,
+          data.banner ?? null,
+          handle,
+        ],
+      );
+      return mapUser(rows[0]);
+    } catch (err) {
+      const conflict = err as { code?: string; constraint?: string };
+      const handleRace =
+        conflict.code === "23505" && conflict.constraint === "idx_users_handle";
+      if (!handleRace || attempt === 4) throw err;
+    }
+  }
+
+  throw new Error("Could not create user");
 }
 
 export async function updateUserStatus(
@@ -707,7 +977,7 @@ export async function updateUserStatus(
   is_active: boolean,
 ): Promise<AppUser> {
   const { rows } = await pool.query(
-    `UPDATE users SET is_active = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
+    `UPDATE users SET is_active = $1 WHERE id = $2 RETURNING id, name, handle, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
     [is_active, id],
   );
   return mapUser(rows[0]);
@@ -717,9 +987,17 @@ export async function updateUserProfile(
   id: string,
   data: { name: string; whatsapp?: string; avatar?: string | null; banner?: string | null },
 ): Promise<AppUser> {
+  const handle = await generateUniqueSellerHandle(data.name, id);
   const { rows } = await pool.query(
-    `UPDATE users SET name = $1, whatsapp = $2, avatar = $3, banner = $4 WHERE id = $5 RETURNING id, name, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, is_vip, created_at`,
-    [data.name, data.whatsapp ?? null, data.avatar ?? null, data.banner ?? null, id],
+    `UPDATE users SET name = $1, whatsapp = $2, avatar = $3, banner = $4, handle = $5 WHERE id = $6 RETURNING id, name, handle, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, is_vip, created_at`,
+    [
+      data.name,
+      data.whatsapp ?? null,
+      data.avatar ?? null,
+      data.banner ?? null,
+      handle,
+      id,
+    ],
   );
   return mapUser(rows[0]);
 }
@@ -731,11 +1009,21 @@ export async function updateUserContact(
     phone: string;
     whatsapp?: string;
     avatar?: string | null;
+    banner?: string | null;
   },
 ): Promise<AppUser> {
+  const handle = await generateUniqueSellerHandle(data.name, id);
   const { rows } = await pool.query(
-    `UPDATE users SET name = $1, phone = $2, whatsapp = $3, avatar = $4 WHERE id = $5 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
-    [data.name, data.phone, data.whatsapp ?? null, data.avatar ?? null, id],
+    `UPDATE users SET name = $1, phone = $2, whatsapp = $3, avatar = $4, banner = $5, handle = $6 WHERE id = $7 RETURNING id, name, handle, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, created_at`,
+    [
+      data.name,
+      data.phone,
+      data.whatsapp ?? null,
+      data.avatar ?? null,
+      data.banner ?? null,
+      handle,
+      id,
+    ],
   );
   return mapUser(rows[0]);
 }
@@ -745,7 +1033,7 @@ export async function updateUserAdminStatus(
   is_admin: boolean,
 ): Promise<AppUser> {
   const { rows } = await pool.query(
-    `UPDATE users SET is_admin = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
+    `UPDATE users SET is_admin = $1 WHERE id = $2 RETURNING id, name, handle, phone, whatsapp, avatar, is_active, is_admin, is_verified, created_at`,
     [is_admin, id],
   );
   return mapUser(rows[0]);
@@ -756,7 +1044,7 @@ export async function updateUserVerifiedStatus(
   is_verified: boolean,
 ): Promise<AppUser> {
   const { rows } = await pool.query(
-    `UPDATE users SET is_verified = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, is_vip, created_at`,
+    `UPDATE users SET is_verified = $1 WHERE id = $2 RETURNING id, name, handle, phone, whatsapp, avatar, is_active, is_admin, is_verified, is_vip, created_at`,
     [is_verified, id],
   );
   return mapUser(rows[0]);
@@ -767,8 +1055,25 @@ export async function updateUserVipStatus(
   is_vip: boolean,
 ): Promise<AppUser> {
   const { rows } = await pool.query(
-    `UPDATE users SET is_vip = $1 WHERE id = $2 RETURNING id, name, phone, whatsapp, avatar, is_active, is_admin, is_verified, is_vip, created_at`,
+    `UPDATE users SET is_vip = $1 WHERE id = $2 RETURNING id, name, handle, phone, whatsapp, avatar, is_active, is_admin, is_verified, is_vip, created_at`,
     [is_vip, id],
+  );
+  return mapUser(rows[0]);
+}
+
+// Plan switches (Standard / Premium / Free) are the admin-facing control for
+// seller subscriptions. Standard grants the verified badge, Premium grants VIP
+// perks plus the badge, Free removes both.
+export async function updateUserPlanFlags(
+  id: string,
+  plan: "Free" | "Standard" | "Premium",
+): Promise<AppUser> {
+  const isVerified = plan !== "Free";
+  const isVip = plan === "Premium";
+  const { rows } = await pool.query(
+    `UPDATE users SET is_verified = $1, is_vip = $2 WHERE id = $3
+     RETURNING id, name, handle, phone, whatsapp, avatar, is_active, is_admin, is_verified, is_vip, created_at`,
+    [isVerified, isVip, id],
   );
   return mapUser(rows[0]);
 }
@@ -800,6 +1105,7 @@ function mapUser(row: Record<string, unknown>): AppUser {
   return {
     id: row.id as string,
     name: row.name as string,
+    handle: (row.handle as string) ?? null,
     phone: row.phone as string,
     whatsapp: (row.whatsapp as string) ?? null,
     avatar: (row.avatar as string) ?? null,
@@ -808,6 +1114,7 @@ function mapUser(row: Record<string, unknown>): AppUser {
     isAdmin: (row.is_admin as boolean) ?? false,
     isVerified: (row.is_verified as boolean) ?? false,
     isVip: (row.is_vip as boolean) ?? false,
+    hasPin: (row.has_pin as boolean) ?? undefined,
     createdAt: row.created_at as string,
     productCount:
       row.product_count !== undefined ? Number(row.product_count) : undefined,
@@ -875,6 +1182,7 @@ function mapProductWithOwner(row: Record<string, unknown>): Product {
   return {
     ...mapProduct(row),
     ownerName: (row.owner_name as string) ?? null,
+    ownerHandle: (row.owner_handle as string) ?? null,
     ownerPhone: (row.owner_phone as string) ?? null,
     ownerWhatsapp: (row.owner_whatsapp as string) ?? null,
     ownerAvatar:
@@ -1092,20 +1400,96 @@ export async function getAuditFacets(): Promise<AuditFacets> {
 }
 
 // ── Feature flags ────────────────────────────────────────────────────────────
+
+export interface FeatureFlag {
+  key: string;
+  label: string;
+  description: string;
+  enabled: boolean;
+  updatedAt: string | null;
+  custom?: boolean;
+}
+
+// Flags the app actually reads. Values here are the fallback used before a
+// row exists in feature_flags, so existing features stay on after deploy.
+export const FEATURE_FLAG_CATALOG = [
+  {
+    key: "deals",
+    label: "Deals",
+    description:
+      "Show the Deals page and deal promotions across the marketplace.",
+    defaultEnabled: true,
+  },
+  {
+    key: "push-notifications",
+    label: "Push notifications",
+    description:
+      "Let visitors enable web push notifications from the install page.",
+    defaultEnabled: true,
+  },
+] as const;
+
+export async function getFeatureFlags(): Promise<FeatureFlag[]> {
+  let rows: Record<string, unknown>[] = [];
+  try {
+    const result = await pool.query(
+      "SELECT key, enabled, description, updated_at FROM feature_flags ORDER BY key",
+    );
+    rows = result.rows as Record<string, unknown>[];
+  } catch {
+    rows = [];
+  }
+
+  const byKey = new Map(rows.map((row) => [row.key as string, row]));
+
+  const catalog: FeatureFlag[] = FEATURE_FLAG_CATALOG.map((flag) => {
+    const row = byKey.get(flag.key);
+    return {
+      key: flag.key,
+      label: flag.label,
+      description: flag.description,
+      enabled: row ? row.enabled === true : flag.defaultEnabled,
+      updatedAt: (row?.updated_at as string) ?? null,
+    };
+  });
+
+  const known = new Set<string>(
+    FEATURE_FLAG_CATALOG.map((flag) => flag.key),
+  );
+  const custom: FeatureFlag[] = rows
+    .filter((row) => !known.has(row.key as string))
+    .map((row) => ({
+      key: row.key as string,
+      label: row.key as string,
+      description:
+        (row.description as string) || "Custom feature flag.",
+      enabled: row.enabled === true,
+      updatedAt: (row.updated_at as string) ?? null,
+      custom: true,
+    }));
+
+  return [...catalog, ...custom];
+}
+
 export async function isFeatureEnabled(key: string): Promise<boolean> {
   // Env override takes precedence: FEATURE_<KEY>=true/false
   const envKey = `FEATURE_${key.toUpperCase().replace(/-/g, "_")}`;
   const envVal = process.env[envKey];
   if (envVal === "true") return true;
   if (envVal === "false") return false;
+
+  const fallback =
+    FEATURE_FLAG_CATALOG.find((flag) => flag.key === key)?.defaultEnabled ??
+    false;
+
   try {
     const { rows } = await pool.query(
       `SELECT enabled FROM feature_flags WHERE key = $1`,
       [key],
     );
-    return rows[0]?.enabled === true;
+    return rows[0] ? rows[0].enabled === true : fallback;
   } catch {
-    return false;
+    return fallback;
   }
 }
 
@@ -1128,6 +1512,16 @@ export async function getSubscriptionPlans(activeOnly = false): Promise<Subscrip
 
 export async function getSubscriptionPlanById(id: string): Promise<SubscriptionPlan | null> {
   const { rows } = await pool.query("SELECT * FROM subscription_plans WHERE id = $1", [id]);
+  return rows[0] ? mapSubscriptionPlan(rows[0]) : null;
+}
+
+export async function getSubscriptionPlanByName(
+  name: string,
+): Promise<SubscriptionPlan | null> {
+  const { rows } = await pool.query(
+    "SELECT * FROM subscription_plans WHERE lower(name) = lower($1) ORDER BY active DESC, sort_order ASC LIMIT 1",
+    [name],
+  );
   return rows[0] ? mapSubscriptionPlan(rows[0]) : null;
 }
 
@@ -1209,6 +1603,14 @@ export async function getUserSubscription(userId: string): Promise<UserSubscript
   return mapUserSubscription(rows[0]);
 }
 
+export async function cancelUserSubscriptions(userId: string): Promise<void> {
+  await pool.query(
+    `UPDATE user_subscriptions SET status='cancelled', updated_at=now()
+     WHERE user_id = $1 AND status = 'active'`,
+    [userId],
+  );
+}
+
 export async function setUserSubscription(
   userId: string,
   planId: string,
@@ -1218,7 +1620,7 @@ export async function setUserSubscription(
   if (!expiresAt && status === "active") {
     const plan = await getSubscriptionPlanById(planId);
     if (plan && plan.period) {
-      const m = plan.period.match(/(d+)s*(month|months|year|years|day|days|week|weeks)/i);
+      const m = plan.period.match(/(\d+)\s*(month|months|year|years|day|days|week|weeks)/i);
       if (m) {
         const n = parseInt(m[1], 10);
         const unit = m[2].toLowerCase();

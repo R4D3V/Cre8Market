@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Camera, ImagePlus } from "lucide-react";
 import {
   fetchMyAdminProfileAction,
   updateMyAdminProfileAction,
@@ -20,6 +21,7 @@ export default function AdminProfilePage() {
   const [phone, setPhone] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [avatar, setAvatar] = useState("");
+  const [banner, setBanner] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
@@ -35,6 +37,7 @@ export default function AdminProfilePage() {
       setPhone(data.phone ?? "");
       setWhatsapp(data.whatsapp ?? "");
       setAvatar(data.avatar ?? "");
+      setBanner(data.banner ?? "");
       setLoading(false);
     });
   }, []);
@@ -44,6 +47,16 @@ export default function AdminProfilePage() {
     try {
       const dataUrl = await compressImage(file, 400, 0.7);
       setAvatar(dataUrl);
+    } catch {
+      setInfoError("Could not read that image. Please try a different file.");
+    }
+  }
+
+  async function handleBannerUpload(file: File | null) {
+    if (!file) return;
+    try {
+      const dataUrl = await compressImage(file, 1200, 0.75);
+      setBanner(dataUrl);
     } catch {
       setInfoError("Could not read that image. Please try a different file.");
     }
@@ -59,6 +72,7 @@ export default function AdminProfilePage() {
         phone,
         whatsapp,
         avatar: avatar || null,
+        banner: banner || null,
       });
       if (updated) setProfile(updated);
       setInfoMsg("Profile updated successfully!");
@@ -111,8 +125,9 @@ export default function AdminProfilePage() {
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <label className="neu-pill bg-card text-primary text-xs font-semibold px-3 py-1.5 cursor-pointer text-center">
-                📷 Upload Photo
+              <label className="neu-pill bg-card text-primary text-xs font-semibold px-3 py-1.5 cursor-pointer text-center inline-flex items-center justify-center gap-1.5">
+                <Camera className="h-3.5 w-3.5" />
+                Upload Photo
                 <input
                   type="file"
                   accept="image/*"
@@ -130,6 +145,48 @@ export default function AdminProfilePage() {
                 </button>
               )}
             </div>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
+              Banner Image (shown on your public store page)
+            </label>
+            {banner && (
+              <div className="mb-2 overflow-hidden rounded-xl border border-border">
+                <img
+                  src={banner}
+                  alt="Profile banner"
+                  className="w-full h-32 object-cover"
+                />
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="neu-pill bg-card text-primary text-xs font-semibold px-3 py-1.5 cursor-pointer text-center inline-flex items-center justify-center gap-1.5">
+                <ImagePlus className="h-3.5 w-3.5" />
+                Upload Banner
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleBannerUpload(e.target.files?.[0] ?? null)}
+                />
+              </label>
+              {banner && (
+                <button
+                  type="button"
+                  onClick={() => setBanner("")}
+                  className="text-xs text-destructive font-semibold"
+                >
+                  Remove Banner
+                </button>
+              )}
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Wide images look best. This appears at the top of{" "}
+              <Link href="/sellers/store" className="text-primary hover:underline">
+                your public store page
+              </Link>
+              .
+            </p>
           </div>
           <div>
             <label className="block text-sm font-semibold text-muted-foreground mb-1.5">

@@ -2,9 +2,47 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  Mail,
+  MapPin,
+  MessageCircle,
+  MessageSquare,
+  Send,
+  Sparkles,
+  Tag,
+  User,
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
+
+const FIELD_CLASS =
+  "w-full rounded-xl border border-border/70 bg-muted/30 py-3 pl-10 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-muted/50";
+
+const CONTACT_METHODS = [
+  {
+    icon: MapPin,
+    label: "Visit us",
+    value: "Kitoro, Entebbe, Uganda",
+    href: undefined,
+  },
+  {
+    icon: Mail,
+    label: "Email us",
+    value: "raymonjohns@gmail.com",
+    href: "mailto:raymonjohns@gmail.com",
+  },
+  {
+    icon: MessageCircle,
+    label: "WhatsApp",
+    value: "+256 767 155 113",
+    href: "https://wa.me/256767155113",
+  },
+];
 
 export default function ContactPage() {
   const [name, setName] = useState("");
@@ -26,193 +64,344 @@ export default function ContactPage() {
     setSubmitted(true);
   }
 
+  function resetForm() {
+    setSubmitted(false);
+    setName("");
+    setEmail("");
+    setSubject("");
+    setMessage("");
+  }
+
   return (
-    <>
+    <div className="min-h-dvh bg-background text-foreground">
       <Navbar />
-      <main className="container py-10 pb-28 sm:pb-10">
-        <Link
-          href="/"
-          className="text-sm text-primary font-semibold hover:underline mb-6 inline-block"
-        >
-          ← Home
-        </Link>
 
-        {/* Hero */}
-        <ScrollReveal>
-          <div className="neu-dark-card text-foreground text-center py-12 px-6 mb-8">
-            <h1 className="text-3xl font-extrabold font-heading mb-3">
-              Contact Us
-            </h1>
-            <p className="text-muted-foreground text-base max-w-lg mx-auto">
-              Have a question, feedback, or need help? We&apos;re here for you.
-            </p>
-          </div>
-        </ScrollReveal>
+      <PageHero
+        backHref="/"
+        backLabel="Back to home"
+        eyebrow="Get in touch"
+        eyebrowIcon={Sparkles}
+        align="center"
+        size="large"
+        title={
+          <>
+            Let&apos;s talk about{" "}
+            <span className="mt-1 block bg-gradient-to-r from-primary via-emerald-300 to-teal-200 bg-clip-text text-transparent">
+              your next deal.
+            </span>
+          </>
+        }
+        description="Have a question, feedback, or need a hand? Send us a message and our Entebbe team will get back to you on WhatsApp."
+      >
+        <div className="mx-auto grid max-w-2xl grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/50 sm:grid-cols-3">
+          {CONTACT_METHODS.map(({ icon: Icon, label, value, href }) => {
+            const content = (
+              <>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="min-w-0 text-left">
+                  <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                    {label}
+                  </span>
+                  <span className="mt-0.5 block text-[13px] font-semibold leading-snug text-foreground sm:text-sm">
+                    {value}
+                  </span>
+                </span>
+              </>
+            );
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Sidebar info */}
-          <ScrollReveal className="lg:col-span-1 space-y-4">
-            <div className="neu-card p-5">
-              <h2 className="font-extrabold text-foreground text-sm mb-3">
-                Get in Touch
+            return href ? (
+              <a
+                key={label}
+                href={href}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel={href.startsWith("http") ? "noreferrer" : undefined}
+                className="flex items-center gap-3 bg-card/70 p-4 backdrop-blur-sm transition hover:bg-card sm:p-5"
+              >
+                {content}
+              </a>
+            ) : (
+              <div
+                key={label}
+                className="flex items-center gap-3 bg-card/70 p-4 backdrop-blur-sm transition hover:bg-card sm:p-5"
+              >
+                {content}
+              </div>
+            );
+          })}
+        </div>
+      </PageHero>
+
+      <main className="page-ambient container py-10 pb-28 sm:py-14 sm:pb-14">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-5">
+          {/* Sidebar */}
+          <ScrollReveal className="space-y-5 lg:col-span-2">
+            <div className="rounded-3xl border border-border/70 bg-card/80 p-6 backdrop-blur-sm">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
+                Contact details
+              </p>
+              <h2 className="mt-2 font-heading text-xl font-extrabold tracking-tight text-foreground">
+                Reach us directly
               </h2>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2.5">
-                  <span className="text-lg shrink-0">📍</span>
-                  <span>Kitoro Entebbe Uganda</span>
-                </li>
-                <li>
-                  <a
-                    href="mailto:raymonjohns@gmail.com"
-                    className="flex items-start gap-2.5 hover:text-primary transition-colors"
-                  >
-                    <span className="text-lg shrink-0">📧</span>
-                    <span>raymonjohns@gmail.com</span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://wa.me/256767155113"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-start gap-2.5 hover:text-wa transition-colors"
-                  >
-                    <span className="text-lg shrink-0">💬</span>
-                    <span>WhatsApp: +256 767 155 113</span>
-                  </a>
-                </li>
+
+              <ul className="mt-6 space-y-4">
+                {CONTACT_METHODS.map(({ icon: Icon, label, value, href }) => (
+                  <li key={label} className="flex items-start gap-3">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                        {label}
+                      </p>
+                      {href ? (
+                        <a
+                          href={href}
+                          target={href.startsWith("http") ? "_blank" : undefined}
+                          rel={href.startsWith("http") ? "noreferrer" : undefined}
+                          className="mt-0.5 block break-words text-sm font-semibold text-foreground transition hover:text-primary"
+                        >
+                          {value}
+                        </a>
+                      ) : (
+                        <p className="mt-0.5 text-sm font-semibold text-foreground">
+                          {value}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
               </ul>
             </div>
 
-            <div className="neu-card p-5">
-              <h2 className="font-extrabold text-foreground text-sm mb-3">
-                Hours
-              </h2>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex justify-between">
-                  <span>Mon – Fri</span>
-                  <span className="font-medium">8:00 AM – 6:00 PM</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Saturday</span>
-                  <span className="font-medium">9:00 AM – 4:00 PM</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Sunday</span>
-                  <span className="font-medium text-muted-foreground">
-                    Closed
-                  </span>
-                </li>
+            <div className="rounded-3xl border border-border/70 bg-card/80 p-6 backdrop-blur-sm">
+              <div className="flex items-center gap-3">
+                <span className="grid h-9 w-9 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                  <Clock className="h-4 w-4" />
+                </span>
+                <h2 className="font-heading text-base font-extrabold tracking-tight text-foreground">
+                  Opening hours
+                </h2>
+              </div>
+              <ul className="mt-4 divide-y divide-border/50 text-sm">
+                {[
+                  ["Mon – Fri", "8:00 AM – 6:00 PM"],
+                  ["Saturday", "9:00 AM – 4:00 PM"],
+                  ["Sunday", "Closed"],
+                ].map(([day, hours]) => (
+                  <li key={day} className="flex items-center justify-between py-2.5">
+                    <span className="text-muted-foreground">{day}</span>
+                    <span className="font-semibold text-foreground">{hours}</span>
+                  </li>
+                ))}
               </ul>
+            </div>
+
+            <div className="relative overflow-hidden rounded-3xl border border-wa/25 bg-wa/5 p-6">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-12 -top-14 h-36 w-36 rounded-full bg-wa/15 blur-[60px]"
+              />
+              <div className="relative">
+                <span className="grid h-10 w-10 place-items-center rounded-xl border border-wa/30 bg-wa/10 text-wa">
+                  <MessageCircle className="h-5 w-5" />
+                </span>
+                <h3 className="mt-4 font-heading text-lg font-extrabold tracking-tight text-foreground">
+                  Prefer to chat?
+                </h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  Skip the form and message our team directly on WhatsApp. We
+                  usually reply within a few hours.
+                </p>
+                <a
+                  href="https://wa.me/256767155113"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-wa px-4 py-2.5 text-sm font-bold text-white transition hover:bg-wa-dark"
+                >
+                  Chat on WhatsApp
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </div>
             </div>
           </ScrollReveal>
 
           {/* Form */}
-          <ScrollReveal delay={100} className="lg:col-span-2">
+          <ScrollReveal delay={100} className="lg:col-span-3">
             {submitted ? (
-              <div className="neu-card text-center py-12 px-6">
-                <div className="text-5xl mb-4">✅</div>
-                <h2 className="text-xl font-extrabold text-foreground mb-2">
-                  Message Sent!
-                </h2>
-                <p className="text-muted-foreground text-sm mb-6">
-                  We&apos;ll get back to you on WhatsApp shortly.
-                </p>
-                <button
-                  onClick={() => {
-                    setSubmitted(false);
-                    setName("");
-                    setEmail("");
-                    setSubject("");
-                    setMessage("");
-                  }}
-                  className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm hover:bg-primary/90 transition-all"
-                >
-                  Send Another Message
-                </button>
+              <div className="relative overflow-hidden rounded-3xl border border-primary/25 bg-card/80 p-8 text-center backdrop-blur-sm sm:p-12">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full bg-primary/15 blur-[90px]"
+                />
+                <div className="relative">
+                  <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-primary/30 bg-primary/15 text-primary">
+                    <CheckCircle2 className="h-8 w-8" />
+                  </span>
+                  <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
+                    Message sent
+                  </p>
+                  <h2 className="mt-2 font-heading text-3xl font-extrabold tracking-tight text-foreground">
+                    Thanks for reaching out!
+                  </h2>
+                  <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+                    We&apos;ll get back to you on WhatsApp shortly. For anything
+                    urgent, message us directly and we&apos;ll jump on it.
+                  </p>
+
+                  <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+                    <button
+                      onClick={resetForm}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90"
+                    >
+                      Send another message
+                    </button>
+                    <Link
+                      href="/products"
+                      className="inline-flex items-center justify-center gap-2 rounded-full border border-border/70 bg-card/60 px-5 py-3 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:text-primary"
+                    >
+                      Browse the market
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="neu-card p-6 space-y-4">
-                <h2 className="text-lg font-extrabold text-foreground">
-                  Send us a message
-                </h2>
+              <form
+                onSubmit={handleSubmit}
+                className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 backdrop-blur-sm sm:p-8"
+              >
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-primary/10 blur-[80px]"
+                />
 
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
-                      Your Name *
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Full name"
-                      className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
-                    />
+                <div className="relative">
+                  <div className="mb-6 flex items-center gap-3 border-b border-border/60 pb-5">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+                      <MessageSquare className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <h2 className="text-sm font-bold text-foreground">
+                        Send us a message
+                      </h2>
+                      <p className="text-xs text-muted-foreground">
+                        Fields marked * are required
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your@email.com"
-                      className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
-                    />
+
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div>
+                        <label
+                          htmlFor="contact-name"
+                          className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
+                        >
+                          Your name *
+                        </label>
+                        <div className="relative">
+                          <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <input
+                            id="contact-name"
+                            required
+                            type="text"
+                            autoComplete="name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Full name"
+                            className={FIELD_CLASS}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="contact-email"
+                          className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
+                        >
+                          Email
+                        </label>
+                        <div className="relative">
+                          <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <input
+                            id="contact-email"
+                            type="email"
+                            autoComplete="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="your@email.com"
+                            className={FIELD_CLASS}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="contact-subject"
+                        className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
+                      >
+                        Subject *
+                      </label>
+                      <div className="relative">
+                        <Tag className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                          id="contact-subject"
+                          required
+                          type="text"
+                          value={subject}
+                          onChange={(e) => setSubject(e.target.value)}
+                          placeholder="What is this about?"
+                          className={FIELD_CLASS}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="contact-message"
+                        className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
+                      >
+                        Message *
+                      </label>
+                      <div className="relative">
+                        <MessageSquare className="pointer-events-none absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
+                        <textarea
+                          id="contact-message"
+                          required
+                          rows={5}
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                          placeholder="Tell us more about your enquiry…"
+                          className={`${FIELD_CLASS} resize-none`}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="flex w-full items-center justify-center gap-2 rounded-full bg-wa py-3.5 text-sm font-bold text-white shadow-[0_18px_40px_-20px_rgba(37,211,102,0.9)] transition hover:bg-wa-dark disabled:opacity-60"
+                    >
+                      <Send className="h-4 w-4" />
+                      {loading ? "Sending…" : "Send via WhatsApp"}
+                    </button>
+
+                    <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+                      <MessageCircle className="h-3 w-3" />
+                      We usually reply within a few hours during opening times.
+                    </p>
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
-                    Subject *
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    placeholder="What is this about?"
-                    className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
-                    Message *
-                  </label>
-                  <textarea
-                    required
-                    rows={4}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Tell us more about your enquiry…"
-                    className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none resize-none transition-all"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="neu-pill w-full bg-wa hover:bg-wa-dark text-white font-bold py-3.5 text-sm transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                  </svg>
-                  {loading ? "Sending…" : "Send via WhatsApp"}
-                </button>
               </form>
             )}
           </ScrollReveal>
         </div>
       </main>
+
       <Footer />
-    </>
+    </div>
   );
 }

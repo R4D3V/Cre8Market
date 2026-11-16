@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
+import { Flame, Lock } from "lucide-react";
 import {
   createMyProductAction,
   checkSlugAction,
@@ -266,8 +267,10 @@ export default function NewMyProductPage() {
       }
     >
       {limit && limit.limit !== null && limit.productCount >= limit.limit ? (
-        <div className="bg-card border border-border rounded-xl p-8 text-center">
-          <p className="text-5xl mb-4">🔒</p>
+        <div className="border border-border/70 bg-card/80 rounded-xl p-8 text-center">
+          <span className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-featured/20 bg-featured/10 text-featured">
+            <Lock className="h-6 w-6" />
+          </span>
           <h2 className="font-heading text-xl font-bold text-foreground mb-2">
             Listing limit reached
           </h2>
@@ -548,8 +551,9 @@ export default function NewMyProductPage() {
               onChange={(e) => update("isDeal", e.target.checked)}
               className="w-4 h-4 rounded border-border bg-card text-primary focus:ring-primary"
             />
-            <span className="text-sm font-semibold text-muted-foreground">
-              🔥 Mark as a Deal (shows on the Deals page)
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+              <Flame className="h-4 w-4 text-featured" />
+              Mark as a Deal (shows on the Deals page)
             </span>
           </label>
 

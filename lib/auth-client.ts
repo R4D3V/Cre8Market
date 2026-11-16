@@ -12,6 +12,7 @@ type AppSessionUser = {
   id?: string;
   email?: string | null;
   name?: string | null;
+  image?: string | null;
   phone?: string | null;
   whatsapp?: string | null;
   role?: "admin" | "user";

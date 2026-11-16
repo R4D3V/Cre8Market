@@ -21,6 +21,7 @@ import {
   getProductOwnerIds,
   getSellers,
   getUserById,
+  getUserByHandleOrId,
   getStoreProducts,
   getUserSubscription,
   logAudit,
@@ -84,10 +85,14 @@ async function getEffectivePerks(userId: string): Promise<{ isVerified: boolean;
   if (hasSub && subExpired) {
     return { isVerified: false, isVip: false };
   }
-  return {
-    isVerified: (user?.isVerified ?? false) || subVerified,
-    isVip: (user?.isVip ?? false) || subVip,
-  };
+
+  // The admin's Standard / Premium switches are the canonical plan, so they win
+  // over whatever an older subscription record says. Fall back to the active
+  // subscription only when the admin has this user on the Free plan.
+  if (user?.isVip) return { isVerified: true, isVip: true };
+  if (user?.isVerified) return { isVerified: true, isVip: false };
+
+  return { isVerified: subVerified, isVip: subVip };
 }
 
 // Generate a slug that doesn't collide with an existing one (e.g. `x-copy-2`).
@@ -174,11 +179,14 @@ export async function fetchProductByIdAction(id: string) {
 }
 
 // Public: every listing added by a specific seller (their storefront page).
-export async function fetchPublicUserProductsAction(userId: string) {
-  if (userId === "store") {
+// The route may carry the seller's name handle or their legacy UUID.
+export async function fetchPublicUserProductsAction(userIdOrHandle: string) {
+  if (userIdOrHandle === "store") {
     return getStoreProducts();
   }
-  return getUserProductsWithOwner(userId);
+  const user = await getUserByHandleOrId(userIdOrHandle);
+  if (!user) return [];
+  return getUserProductsWithOwner(user.id);
 }
 
 // Admin dashboard: all products across the platform, with the user who added each one

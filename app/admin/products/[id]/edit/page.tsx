@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { Flame } from "lucide-react";
 import {
   fetchProductByIdAction,
   updateProductAction,
@@ -319,8 +320,9 @@ export default function EditProductPage() {
             onChange={(e) => update("isDeal", e.target.checked)}
             className="w-4 h-4 rounded border-border bg-card text-primary"
           />
-          <span className="text-sm font-semibold text-muted-foreground">
-            🔥 Mark as a Deal (shows on the Deals page)
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+            <Flame className="h-4 w-4 text-featured" />
+            Mark as a Deal (shows on the Deals page)
           </span>
         </label>
 
