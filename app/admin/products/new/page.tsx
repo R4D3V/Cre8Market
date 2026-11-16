@@ -7,7 +7,7 @@ import { Flame } from "lucide-react";
 import { createProductAction, checkSlugAction } from "@/lib/actions/products";
 import { fetchMyAdminProfileAction } from "@/lib/actions/admin";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
-import { uploadProductImage } from "@/lib/uploadImage";
+import { uploadProductImage, uploadProductVideo } from "@/lib/uploadImage";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import type { CategoryDB } from "@/lib/types";
 
@@ -28,6 +28,7 @@ export default function NewProductPage() {
     sellerWhatsapp: "",
   });
   const [images, setImages] = useState<string[]>(["", "", "", ""]);
+  const [video, setVideo] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
@@ -60,6 +61,20 @@ export default function NewProductPage() {
       });
     } catch {
       // Ignore; the slot stays empty on failure.
+    }
+  }
+
+  async function handleVideoUpload(file: File | null) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Video must be 5MB or smaller.");
+      return;
+    }
+    try {
+      const url = await uploadProductVideo(file);
+      setVideo(url);
+    } catch {
+      alert("Could not read that video. Please try a different file.");
     }
   }
 
@@ -218,6 +233,7 @@ export default function NewProductPage() {
           whatsapp: form.sellerWhatsapp || undefined,
         },
         images: imgs,
+        video: video || null,
         daysAgo: 0,
         timeAgo: "Just now",
       });
@@ -288,7 +304,7 @@ export default function NewProductPage() {
             {[0, 1, 2, 3].map((i) => (
               <label
                 key={i}
-                className="neu-inset aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors overflow-hidden"
+                className="neu-inset aspect-video flex flex-col items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors overflow-hidden"
               >
                 {images[i] ? (
                   <img
@@ -301,6 +317,9 @@ export default function NewProductPage() {
                     <span className="text-xl">📷</span>
                     <span className="text-[10px] font-semibold">
                       Image {i + 1}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground/80">
+                      Landscape
                     </span>
                   </div>
                 )}
@@ -316,6 +335,43 @@ export default function NewProductPage() {
             ))}
           </div>
         </div>
+        <div>
+          <label className="block text-sm font-semibold text-muted-foreground mb-2">
+            Product Video (up to 1, max 5MB)
+          </label>
+          <label className="neu-inset aspect-video flex flex-col items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors overflow-hidden">
+            {video ? (
+              <video
+                src={video}
+                controls
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                <span className="text-xl">🎬</span>
+                <span className="text-[10px] font-semibold">Add Video</span>
+              </div>
+            )}
+            <input
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={(e) =>
+                handleVideoUpload(e.target.files?.[0] ?? null)
+              }
+            />
+          </label>
+          {video && (
+            <button
+              type="button"
+              onClick={() => setVideo("")}
+              className="mt-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
+            >
+              Remove video
+            </button>
+          )}
+        </div>
+
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>

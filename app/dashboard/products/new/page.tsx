@@ -350,7 +350,7 @@ export default function NewMyProductPage() {
               {Array.from({ length: maxImages }).map((_, i) => (
                 <label
                   key={i}
-                  className="neu-inset aspect-square flex flex-col items-center justify-center cursor-pointer hover:bg-muted transition-colors overflow-hidden"
+                  className="neu-inset aspect-video flex flex-col items-center justify-center cursor-pointer hover:bg-muted transition-colors overflow-hidden"
                 >
                   {images[i] ? (
                     <img
@@ -363,6 +363,9 @@ export default function NewMyProductPage() {
                       <span className="text-xl">📷</span>
                       <span className="text-[10px] font-semibold">
                         Image {i + 1}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground/80">
+                        Landscape
                       </span>
                     </div>
                   )}
