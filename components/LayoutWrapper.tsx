@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import FloatingIcons from './FloatingIcons'
 import InstallPrompt from './pwa/InstallPrompt'
 import NotificationPrompt from './pwa/NotificationPrompt'
+import ResubscribeBanner from './pwa/ResubscribeBanner'
 import NetworkStatus from './pwa/NetworkStatus'
 import AppBadgeClearer from './pwa/AppBadgeClearer'
 import MobileBottomNav from './MobileBottomNav'
@@ -28,6 +29,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
       <AppBadgeClearer />
       <InstallPrompt />
       <NotificationPrompt />
+      <ResubscribeBanner />
       <InAppNotificationToast />
       <div id="main-content" className="relative z-10" tabIndex={-1}>
         {children}
