@@ -11,7 +11,8 @@ import {
   fetchMyListingLimitAction,
 } from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
-import { uploadProductImage, uploadProductVideo } from "@/lib/uploadImage";
+import { uploadProductImage } from "@/lib/uploadImage";
+import { PLAN_LIMITS } from "@/lib/plans";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { CategoryDB } from "@/lib/types";
 
@@ -28,8 +29,11 @@ export default function NewMyProductPage() {
     specs: [{ label: "", value: "" }],
     isDeal: false,
   });
-  const [images, setImages] = useState<string[]>(["", "", "", "", ""]);
-  const [video, setVideo] = useState<string>("");
+  // Render at most the highest tier's slots; the active plan decides how many
+  // are shown (see maxImages below).
+  const [images, setImages] = useState<string[]>(
+    Array.from({ length: PLAN_LIMITS.Premium.images }, () => ""),
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -39,12 +43,13 @@ export default function NewMyProductPage() {
     productCount: number;
     isVerified: boolean;
     isVip: boolean;
+    plan?: string;
     limit: number | null;
+    maxImages?: number;
   } | null>(null);
 
-  const isVip = limit?.isVip ?? false;
   const isVerified = limit?.isVerified ?? false;
-  const maxImages = isVip || isVerified ? 5 : 3;
+  const maxImages = limit?.maxImages ?? PLAN_LIMITS.Free.images;
 
   useEffect(() => {
     fetchCategoriesAction().then((data) => setCategories(data ?? []));
@@ -64,20 +69,6 @@ export default function NewMyProductPage() {
       });
     } catch {
       setError("Could not read that image. Please try a different file.");
-    }
-  }
-
-  async function handleVideoUpload(file: File | null) {
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Video must be 5MB or smaller.");
-      return;
-    }
-    try {
-      const url = await uploadProductVideo(file);
-      setVideo(url);
-    } catch {
-      setError("Could not read that video. Please try a different file.");
     }
   }
 
@@ -209,7 +200,7 @@ export default function NewMyProductPage() {
     const exists = await checkSlugAction(slug);
     if (exists) slug = `${slug}-${Date.now()}`;
 
-    const imgs = images.filter(Boolean);
+    const imgs = images.filter(Boolean).slice(0, maxImages);
 
     try {
       const product = await createMyProductAction({
@@ -237,7 +228,6 @@ export default function NewMyProductPage() {
           whatsapp: session?.user?.whatsapp ?? session?.user?.phone ?? "",
         },
         images: imgs,
-        video: video || null,
         daysAgo: 0,
         timeAgo: "Just now",
       });
@@ -299,17 +289,17 @@ export default function NewMyProductPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {limit && limit.limit !== null && (
             <div className="bg-primary/10 border border-primary/40 text-primary text-xs font-semibold rounded-xl px-4 py-3">
-              You can post up to {limit.limit} listings. You've used{" "}
-              {limit.productCount} of {limit.limit}.{" "}
+              You're on the {limit.plan} plan — {limit.productCount} of{" "}
+              {limit.limit} listings used, up to {maxImages} photos per listing.{" "}
               {limit.isVerified
-                ? "Become a VIP to post unlimited listings."
-                : "Get verified to post more."}
+                ? "Go Premium for unlimited listings and 7 photos."
+                : "Upgrade for more listings and photos."}
             </div>
           )}
           {limit && limit.isVip && (
             <div className="bg-primary/10 border border-primary/40 text-primary text-xs font-semibold rounded-xl px-4 py-3">
-              VIP sellers have unlimited listings. You've posted{" "}
-              {limit.productCount} so far.
+              Premium sellers have unlimited listings and up to {maxImages}{" "}
+              photos per listing. You've posted {limit.productCount} so far.
             </div>
           )}
           <div>
@@ -381,45 +371,6 @@ export default function NewMyProductPage() {
               ))}
             </div>
           </div>
-
-          {isVip && (
-            <div>
-              <label className="block text-sm font-semibold text-muted-foreground mb-2">
-                Product Video (up to 1, max 5MB)
-              </label>
-              <label className="neu-inset aspect-video flex flex-col items-center justify-center cursor-pointer hover:bg-muted transition-colors overflow-hidden">
-                {video ? (
-                  <video
-                    src={video}
-                    controls
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                    <span className="text-xl">🎬</span>
-                    <span className="text-[10px] font-semibold">Add Video</span>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="video/*"
-                  className="hidden"
-                  onChange={(e) =>
-                    handleVideoUpload(e.target.files?.[0] ?? null)
-                  }
-                />
-              </label>
-              {video && (
-                <button
-                  type="button"
-                  onClick={() => setVideo("")}
-                  className="mt-2 text-xs text-destructive font-semibold hover:underline"
-                >
-                  Remove video
-                </button>
-              )}
-            </div>
-          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>

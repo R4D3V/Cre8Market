@@ -37,6 +37,11 @@ import type { Product } from "@/lib/types";
 import type { ProductsPageParams } from "@/lib/db/queries";
 import type { AuditLogFilters } from "@/lib/db/queries";
 import { productInputSchema } from "@/lib/validation";
+import {
+  ADMIN_IMAGE_LIMIT,
+  limitsForPerks,
+  planForPerks,
+} from "@/lib/plans";
 
 async function requireAdmin() {
   const session = await auth();
@@ -53,10 +58,8 @@ async function requireUser() {
   return session.user.id;
 }
 
-// Unverified sellers can only post a limited number of listings. Once they're
-// verified by an admin, the limit is lifted.
-const MAX_FREE_PRODUCTS = 3;
-const MAX_VERIFIED_PRODUCTS = 20;
+// Listing/image limits live in lib/plans.ts so the new-listing forms and these
+// Server Actions enforce the same per-plan rules.
 
 // helper
 async function getEffectivePerks(userId: string): Promise<{ isVerified: boolean; isVip: boolean }> {
@@ -108,7 +111,11 @@ async function uniqueSlug(base: string): Promise<string> {
 
 // Build the insert payload for a duplicated product: same content, fresh slug,
 // not featured, not a deal, listed "Just now".
-function buildDuplicateData(source: Product, ownerUserId: string | null) {
+function buildDuplicateData(
+  source: Product,
+  ownerUserId: string | null,
+  maxImages: number,
+) {
   return {
     title: `${source.title} (Copy)`,
     slug: undefined as string | undefined,
@@ -122,7 +129,7 @@ function buildDuplicateData(source: Product, ownerUserId: string | null) {
     condition: source.condition,
     location: source.location,
     seller: source.seller ?? {},
-    images: source.images ?? [],
+    images: (source.images ?? []).slice(0, maxImages),
     daysAgo: 0,
     timeAgo: "Just now",
     user_id: ownerUserId,
@@ -131,18 +138,16 @@ function buildDuplicateData(source: Product, ownerUserId: string | null) {
 
 export async function fetchMyListingLimitAction() {
   const userId = await requireUser();
-  const { isVerified, isVip } = await getEffectivePerks(userId);
+  const perks = await getEffectivePerks(userId);
   const products = await getProductsByUserId(userId);
-  const limit = isVip
-    ? null
-    : isVerified
-      ? MAX_VERIFIED_PRODUCTS
-      : MAX_FREE_PRODUCTS;
+  const limits = limitsForPerks(perks);
   return {
     productCount: products.length,
-    isVerified,
-    isVip,
-    limit,
+    isVerified: perks.isVerified,
+    isVip: perks.isVip,
+    plan: planForPerks(perks),
+    limit: limits.listings,
+    maxImages: limits.images,
   };
 }
 
@@ -222,9 +227,18 @@ export async function createProductAction(data: Record<string, unknown>) {
     throw new Error(parsed.error.issues.map((i) => i.message).join("; "));
   }
   const input = parsed.data;
+  const images = input.images ?? [];
+  if (images.length > ADMIN_IMAGE_LIMIT) {
+    throw new Error(`A product can have at most ${ADMIN_IMAGE_LIMIT} images`);
+  }
   const exists = await checkSlugExists(input.slug);
   if (exists) throw new Error("Slug already exists");
-  const product = await createProduct(input as Record<string, unknown>);
+  // New listings are image-only — never persist a video from the create form.
+  const product = await createProduct({
+    ...input,
+    images,
+    video: null,
+  } as Record<string, unknown>);
   await logAudit({
     actorId: session?.user?.id ?? null,
     actorRole: "admin",
@@ -331,7 +345,7 @@ export async function duplicateProductsAction(ids: string[]) {
   for (const id of ids) {
     const source = await getProductById(id);
     if (!source) continue;
-    const data = buildDuplicateData(source, source.user_id ?? null);
+    const data = buildDuplicateData(source, source.user_id ?? null, ADMIN_IMAGE_LIMIT);
     data.slug = await uniqueSlug(source.slug);
     const product = await createProduct(data);
     created.push(product.id);
@@ -363,15 +377,14 @@ export async function fetchMyProductsAction() {
 export async function createMyProductAction(data: Record<string, unknown>) {
   const userId = await requireUser();
 
-  const { isVip, isVerified } = await getEffectivePerks(userId);
-  if (!isVip) {
-    const max = isVerified ? MAX_VERIFIED_PRODUCTS : MAX_FREE_PRODUCTS;
+  const perks = await getEffectivePerks(userId);
+  const limits = limitsForPerks(perks);
+  const plan = planForPerks(perks);
+  if (limits.listings !== null) {
     const existing = await getProductsByUserId(userId);
-    if (existing.length >= max) {
+    if (existing.length >= limits.listings) {
       throw new Error(
-        isVerified
-          ? `You've reached the limit of ${MAX_VERIFIED_PRODUCTS} listings as a verified seller. Upgrade your subscription to post more.`
-          : `You've reached the limit of ${MAX_FREE_PRODUCTS} listings as a free seller. Subscribe to a plan to post more listings.`,
+        `You've reached the limit of ${limits.listings} listings on the ${plan} plan. Upgrade your subscription to post more.`,
       );
     }
   }
@@ -381,9 +394,21 @@ export async function createMyProductAction(data: Record<string, unknown>) {
     throw new Error(parsed.error.issues.map((i) => i.message).join("; "));
   }
   const input = parsed.data;
+  const images = input.images ?? [];
+  if (images.length > limits.images) {
+    throw new Error(
+      `The ${plan} plan allows at most ${limits.images} photos per product`,
+    );
+  }
   const exists = await checkSlugExists(input.slug);
   if (exists) throw new Error("Slug already exists");
-  const product = await createProduct({ ...input, user_id: userId });
+  // New listings are image-only — never persist a video from the create form.
+  const product = await createProduct({
+    ...input,
+    images,
+    video: null,
+    user_id: userId,
+  } as Record<string, unknown>);
   await logAudit({
     actorId: userId,
     actorRole: "user",
@@ -491,13 +516,12 @@ export async function duplicateMyProductsAction(ids: string[]) {
     }
   }
 
-  const { isVip, isVerified } = await getEffectivePerks(userId);
-  if (!isVip) {
-    const max = isVerified ? MAX_VERIFIED_PRODUCTS : MAX_FREE_PRODUCTS;
+  const limits = limitsForPerks(await getEffectivePerks(userId));
+  if (limits.listings !== null) {
     const existing = await getProductsByUserId(userId);
-    if (existing.length + ids.length > max) {
+    if (existing.length + ids.length > limits.listings) {
       throw new Error(
-        `Duplicating ${ids.length} product${ids.length !== 1 ? "s" : ""} would put you past the ${max} listing limit. Subscribe to a plan to post more listings.`,
+        `Duplicating ${ids.length} product${ids.length !== 1 ? "s" : ""} would put you past the ${limits.listings} listing limit. Subscribe to a plan to post more listings.`,
       );
     }
   }
@@ -506,7 +530,7 @@ export async function duplicateMyProductsAction(ids: string[]) {
   for (const id of ids) {
     const source = await getProductById(id);
     if (!source) continue;
-    const data = buildDuplicateData(source, userId);
+    const data = buildDuplicateData(source, userId, limits.images);
     data.slug = await uniqueSlug(source.slug);
     const product = await createProduct(data);
     created.push(product.id);
