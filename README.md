@@ -31,8 +31,10 @@ pnpm dev
 Open [http://localhost:3000](http://localhost:3000).
 
 You need a Postgres database (a free **Neon** project works — the pool appends
-`sslmode=verify-full` automatically). Schema is in `lib/db/schema.sql`; apply it
-with your DB tool, then run `pnpm seed:deals` to populate the deals page.
+`sslmode=verify-full` automatically). Run `pnpm migrate` to apply the numbered
+migrations in `migrations/` (schema, feature flags and subscription plans), then
+`pnpm seed:deals` to populate the deals page. `lib/db/schema.sql` is the
+reference schema; the migrations are the source of truth for deployment.
 
 ## Environment Variables
 
@@ -54,7 +56,9 @@ See `.env.example` for the full annotated list. The essentials:
 | `pnpm start` | Start the production server |
 | `pnpm lint` | ESLint via Next.js |
 | `pnpm test` | Run Vitest unit tests |
+| `pnpm migrate` | Apply pending migrations (idempotent) |
 | `pnpm seed:deals` | Seed the `/deals` products (idempotent) |
+| `pnpm seed:plans` | Re-sync subscription plan rows from `scripts/seed-subscription-plans.mjs` |
 
 ## Routes
 

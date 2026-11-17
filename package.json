@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.sw.json",
     "analyze": "ANALYZE=true pnpm build",
     "migrate": "node --env-file=.env.local scripts/migrate.mjs",
-    "seed:deals": "node --env-file=.env.local scripts/seed-deals.mjs"
+    "seed:deals": "node --env-file=.env.local scripts/seed-deals.mjs",
+    "seed:plans": "node --env-file=.env.local scripts/seed-subscription-plans.mjs"
   },
   "dependencies": {
     "@sentry/nextjs": "^11.8.0",
