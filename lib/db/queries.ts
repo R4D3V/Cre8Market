@@ -371,6 +371,24 @@ export async function getRecentProductsWithOwners(limit = 5): Promise<ProductWit
   }));
 }
 
+// Lightweight feed for the "new product" in-app toast poller: only the fields
+// needed to render a toast, for rows created after a cursor timestamp.
+export async function getRecentProductEvents(
+  after: Date,
+  limit = 3,
+): Promise<Array<{ slug: string; title: string; price: string; createdAt: Date }>> {
+  const capped = Math.min(Math.max(limit, 1), 10);
+  const { rows } = await pool.query(
+    `SELECT slug, title, price, created_at AS "createdAt"
+     FROM products
+     WHERE created_at > $1
+     ORDER BY created_at ASC
+     LIMIT $2`,
+    [after.toISOString(), capped],
+  );
+  return rows as Array<{ slug: string; title: string; price: string; createdAt: Date }>;
+}
+
 export async function checkSlugExists(slug: string, excludeId?: string): Promise<boolean> {
   if (excludeId) {
     const { rows } = await pool.query(`SELECT 1 FROM products WHERE slug = $1 AND id != $2`, [
@@ -1553,3 +1571,4 @@ export function mapUserSubscription(row: Record<string, unknown>): UserSubscript
     createdAt: row.created_at ? new Date(row.created_at as string).toISOString() : undefined,
   };
 }
+

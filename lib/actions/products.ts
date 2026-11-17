@@ -238,15 +238,23 @@ export async function createProductAction(data: Record<string, unknown>) {
     targetId: product.id,
     metadata: { title: product.title, slug: product.slug },
   });
-  await sendPushNotification({
+  const notification = await sendPushNotification({
     title: "New Product Added!",
     body: `${product.title} — UGX ${Number(product.price).toLocaleString()}`,
     url: `/products/${product.slug}`,
-  }).catch((err) => console.error("Push notification failed:", err));
+  }).catch((err) => {
+    console.error("Push notification failed:", err);
+    return { sent: 0, total: 0 };
+  });
+  // Visible in the dev/production server log so an admin can confirm delivery
+  // even when the browser suppresses the system notification.
+  console.log(
+    `[createProductAction] push for ${product.slug}: ${notification.sent}/${notification.total} subscribers`,
+  );
   revalidatePath("/admin");
   revalidatePath("/products");
   revalidatePath("/deals");
-  return product;
+  return { product, notification };
 }
 
 export async function updateProductAction(id: string, data: Record<string, unknown>) {

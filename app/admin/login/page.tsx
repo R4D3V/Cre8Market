@@ -13,7 +13,6 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PasswordInput from "@/components/PasswordInput";
 import { signIn } from "@/lib/auth-client";
@@ -40,7 +39,6 @@ const HIGHLIGHTS = [
 ];
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -75,7 +73,13 @@ export default function AdminLoginPage() {
       return;
     }
 
-    router.push("/admin");
+    // Hard navigation on purpose. The login page renders <Footer />, whose
+    // /admin Link gets prefetched while logged out — the cached payload is the
+    // proxy's redirect back to this page. router.push("/admin") would replay
+    // that stale redirect, land here again without remounting, and leave the
+    // form stuck on "Signing in…". A full page load always carries the new
+    // session cookie.
+    window.location.replace("/admin");
   }
 
   return (

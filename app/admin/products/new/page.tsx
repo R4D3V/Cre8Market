@@ -35,6 +35,11 @@ export default function NewProductPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [categories, setCategories] = useState<CategoryDB[]>([]);
+  const [saved, setSaved] = useState<{
+    title: string;
+    sent: number;
+    total: number;
+  } | null>(null);
 
   useEffect(() => {
     fetchCategoriesAction().then((data) => setCategories(data ?? []));
@@ -192,7 +197,7 @@ export default function NewProductPage() {
     const imgs = images.filter(Boolean).slice(0, ADMIN_IMAGE_LIMIT);
 
     try {
-      await createProductAction({
+      const result = await createProductAction({
         slug,
         title: form.title,
         price: Number(form.price),
@@ -219,7 +224,12 @@ export default function NewProductPage() {
         timeAgo: "Just now",
       });
 
-      router.push("/admin");
+      setSaved({
+        title: result.product.title,
+        sent: result.notification.sent,
+        total: result.notification.total,
+      });
+      setTimeout(() => router.push("/admin"), 2500);
     } catch (err: unknown) {
       alert("Error saving: " + (err instanceof Error ? err.message : "Unknown error"));
       setSaving(false);
@@ -243,6 +253,16 @@ export default function NewProductPage() {
         </Link>
       }
     >
+      {saved && (
+        <div className="mb-4 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-primary">
+          <p className="font-bold">&quot;{saved.title}&quot; saved.</p>
+          <p className="mt-1">
+            Push notification delivered to {saved.sent} of {saved.total} subscribers.
+            {saved.sent === 0 && saved.total > 0 && " Check the server log for delivery errors."}
+          </p>
+          <p className="mt-1 text-xs">Redirecting to the dashboard…</p>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <div className="flex items-center justify-between gap-3 mb-1.5">

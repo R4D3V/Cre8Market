@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface Toast {
   id: number;
@@ -10,32 +10,105 @@ interface Toast {
   url: string;
 }
 
+interface NewProductEvent {
+  slug: string;
+  title: string;
+  price: string;
+  createdAt: string;
+}
+
+const CURSOR_KEY = "cre8:product-toast-cursor";
+const POLL_MS = 30_000;
+// Web push and the poller can both announce the same listing; remember toast
+// URLs briefly so the user never sees the same product twice.
+const DEDUPE_MS = 2 * 60_000;
+
 export default function InAppNotificationToast() {
   const router = useRouter();
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const recentUrls = useRef(new Map<string, number>());
+
+  const addToast = useCallback((toast: Omit<Toast, "id">) => {
+    const now = Date.now();
+    if ((recentUrls.current.get(toast.url) ?? 0) > now) return;
+    recentUrls.current.set(toast.url, now + DEDUPE_MS);
+    const id = now + Math.random();
+    setToasts((prev) => [...prev, { ...toast, id }]);
+    // Auto-dismiss after 6 seconds.
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 6000);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
     const handler = (event: MessageEvent) => {
       const data = event.data;
-      if (!data || data.type !== "push") return;
-      const toast: Toast = {
-        id: Date.now() + Math.random(),
+      if (data?.type !== "push") return;
+      addToast({
         title: data.title || "CRE8MARKET ENTEBBE",
         body: data.body || "",
         url: data.url || "/",
-      };
-      setToasts((prev) => [...prev, toast]);
-      // Auto-dismiss after 6 seconds.
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== toast.id));
-      }, 6000);
+      });
     };
 
     navigator.serviceWorker.addEventListener("message", handler);
     return () => navigator.serviceWorker.removeEventListener("message", handler);
-  }, []);
+  }, [addToast]);
+
+  // Poll for newly listed products so every open browser sees a toast even
+  // without web-push permission (and in dev, where the service worker is off).
+  useEffect(() => {
+    let cancelled = false;
+
+    async function poll() {
+      let cursor: string | null = null;
+      try {
+        cursor = window.localStorage.getItem(CURSOR_KEY);
+      } catch {
+        // Storage can be unavailable (private mode); fall back to session-only.
+      }
+      try {
+        const res = await fetch(
+          cursor ? `/api/new-products?after=${encodeURIComponent(cursor)}` : "/api/new-products",
+          { cache: "no-store" },
+        );
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as { products: NewProductEvent[]; cursor: string };
+        if (cancelled) return;
+        try {
+          window.localStorage.setItem(CURSOR_KEY, data.cursor);
+        } catch {
+          // Ignore persistence failures; toasts still work this session.
+        }
+        // First visit: only initialize the cursor, never toast history.
+        if (!cursor) return;
+        for (const p of data.products) {
+          addToast({
+            title: "New Product Added!",
+            body: `${p.title} — UGX ${Number(p.price).toLocaleString()}`,
+            url: `/products/${p.slug}`,
+          });
+        }
+      } catch {
+        // Offline or server hiccup — try again on the next tick.
+      }
+    }
+
+    function pollIfVisible() {
+      if (document.visibilityState === "visible") poll();
+    }
+
+    poll();
+    const interval = setInterval(pollIfVisible, POLL_MS);
+    document.addEventListener("visibilitychange", pollIfVisible);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", pollIfVisible);
+    };
+  }, [addToast]);
 
   function dismiss(id: number) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
