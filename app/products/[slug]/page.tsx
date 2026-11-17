@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import ProductDetailPageClient from "@/components/ProductDetailPageClient";
 import {
   fetchProductBySlugAction,
   fetchRelatedProductsAction,
 } from "@/lib/actions/products";
+import {
+  SITE_NAME,
+  SITE_URL,
+  buildBreadcrumbJsonLd,
+  buildProductDescription,
+  buildProductJsonLd,
+  buildProductTitle,
+  jsonLdString,
+} from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -21,38 +29,31 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${product.title} | ${product.category} for sale in Entebbe`;
-  const description =
-    product.description?.trim() ||
-    `View ${product.title} for sale in ${product.location ?? "Entebbe"} on CRE8MARKET.`;
+  const title = buildProductTitle(product);
+  const description = buildProductDescription(product);
+  const image = product.images?.[0];
 
   return {
-    title,
-    description: description.slice(0, 160),
+    title: { absolute: title },
+    description,
     alternates: {
       canonical: `/products/${product.slug}`,
     },
     openGraph: {
       title,
-      description: description.slice(0, 160),
-      url: `https://www.cre8-market.com/products/${product.slug}`,
+      description,
+      url: `${SITE_URL}/products/${product.slug}`,
+      siteName: SITE_NAME,
       type: "website",
-      images: product.images?.[0]
-        ? [
-            {
-              url: product.images[0],
-              width: 1200,
-              height: 630,
-              alt: product.title,
-            },
-          ]
+      images: image
+        ? [{ url: image, alt: product.title }]
         : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title,
-      description: description.slice(0, 160),
-      images: product.images?.[0] ? [product.images[0]] : undefined,
+      description,
+      images: image ? [image] : undefined,
     },
   };
 }
@@ -68,14 +69,45 @@ export default async function ProductDetailPage({
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const isFromDeals = resolvedSearchParams.from === "deals";
 
-  // Render the shell immediately; ProductDetailPageClient fetches the product
-  // (and related listings) on the client so the page shows a skeleton instead
-  // of blocking on the database round-trip.
+  // Fetch on the server so the product's title, price, description and
+  // images are in the HTML that search engines and WhatsApp/Facebook link
+  // previews read, and so buyers see the listing without a loading skeleton.
+  // If the lookup fails (for example a Neon cold-start timeout) we fall back
+  // to the client component's own fetch, which is how the page worked before.
+  let product: Awaited<ReturnType<typeof fetchProductBySlugAction>> = null;
+  let related: Awaited<ReturnType<typeof fetchRelatedProductsAction>> = [];
+  try {
+    product = await fetchProductBySlugAction(slug);
+    if (product) related = await fetchRelatedProductsAction(product);
+  } catch {
+    product = null;
+  }
+
   return (
-    <ProductDetailPageClient
-      slug={slug}
-      backHref={isFromDeals ? "/deals" : "/products"}
-      backLabel={isFromDeals ? "Back to Deals" : "Back to Listings"}
-    />
+    <>
+      {product && (
+        <>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: jsonLdString(buildProductJsonLd(product)),
+            }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: jsonLdString(buildBreadcrumbJsonLd(product)),
+            }}
+          />
+        </>
+      )}
+      <ProductDetailPageClient
+        initialProduct={product}
+        initialRelated={related}
+        slug={slug}
+        backHref={isFromDeals ? "/deals" : "/products"}
+        backLabel={isFromDeals ? "Back to Deals" : "Back to Listings"}
+      />
+    </>
   );
 }
