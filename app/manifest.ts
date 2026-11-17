@@ -27,7 +27,11 @@ export default function manifest(): MetadataRoute.Manifest {
     shortcuts: [
       { name: "Shop", url: "/products?source=shortcut", description: "Browse all listings" },
       { name: "Deals", url: "/deals?source=shortcut", description: "Today's best deals" },
-      { name: "Sell to Us", url: "/selltous?source=shortcut", description: "Get an instant cash offer" },
+      {
+        name: "Sell to Us",
+        url: "/selltous?source=shortcut",
+        description: "Get an instant cash offer",
+      },
     ],
   };
 }

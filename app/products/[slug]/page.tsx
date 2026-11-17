@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
 import ProductDetailPageClient from "@/components/ProductDetailPageClient";
+import { fetchProductBySlugAction, fetchRelatedProductsAction } from "@/lib/actions/products";
 import {
-  fetchProductBySlugAction,
-  fetchRelatedProductsAction,
-} from "@/lib/actions/products";
-import {
-  SITE_NAME,
-  SITE_URL,
   buildBreadcrumbJsonLd,
   buildProductDescription,
   buildProductJsonLd,
   buildProductTitle,
   jsonLdString,
+  SITE_NAME,
+  SITE_URL,
 } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -45,9 +42,7 @@ export async function generateMetadata({
       url: `${SITE_URL}/products/${product.slug}`,
       siteName: SITE_NAME,
       type: "website",
-      images: image
-        ? [{ url: image, alt: product.title }]
-        : undefined,
+      images: image ? [{ url: image, alt: product.title }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
@@ -89,12 +84,14 @@ export default async function ProductDetailPage({
         <>
           <script
             type="application/ld+json"
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD is generated locally
             dangerouslySetInnerHTML={{
               __html: jsonLdString(buildProductJsonLd(product)),
             }}
           />
           <script
             type="application/ld+json"
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD is generated locally
             dangerouslySetInnerHTML={{
               __html: jsonLdString(buildBreadcrumbJsonLd(product)),
             }}

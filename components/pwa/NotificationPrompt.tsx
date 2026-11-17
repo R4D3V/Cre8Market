@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { Bell, X } from "lucide-react";
-import { pushSupported, resyncPushSubscription, usePushSubscription } from "@/hooks/usePushSubscription";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import {
+  pushSupported,
+  resyncPushSubscription,
+  usePushSubscription,
+} from "@/hooks/usePushSubscription";
 import { haptic } from "@/lib/haptics";
 import { DAY_MS, isStandalone, readNumber, writeStorage } from "@/lib/pwa";
 
@@ -79,7 +83,9 @@ export default function NotificationPrompt() {
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-extrabold text-foreground">Never miss a deal</p>
-          <p className="text-xs text-muted-foreground">Get alerts for new deals and seller replies.</p>
+          <p className="text-xs text-muted-foreground">
+            Get alerts for new deals and seller replies.
+          </p>
         </div>
         <button
           type="button"

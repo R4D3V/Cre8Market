@@ -3,8 +3,7 @@ import LegalPage from "@/components/LegalPage";
 
 export const metadata: Metadata = {
   title: "Terms of Service | CRE8MARKET Entebbe",
-  description:
-    "The rules and agreements that apply when buying and selling on CRE8MARKET ENTEBBE.",
+  description: "The rules and agreements that apply when buying and selling on CRE8MARKET ENTEBBE.",
   alternates: {
     canonical: "/terms",
   },

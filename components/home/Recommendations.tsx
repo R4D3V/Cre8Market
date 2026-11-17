@@ -1,6 +1,6 @@
+import { ArrowUpRight, Flame, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Flame, Sparkles } from "lucide-react";
 import SectionHeading from "./SectionHeading";
 
 const cards = [
@@ -16,8 +16,7 @@ const cards = [
     alt: "Laptop glowing in a dark room",
     accent: "text-primary",
     badgeClass: "border-white/15 bg-white/10",
-    overlay:
-      "bg-gradient-to-t from-[#021321] via-[#021321]/55 to-[#021321]/10",
+    overlay: "bg-gradient-to-t from-[#021321] via-[#021321]/55 to-[#021321]/10",
   },
   {
     badge: "Limited time",
@@ -31,8 +30,7 @@ const cards = [
     alt: "Gaming controller on a yellow background",
     accent: "text-amber-100",
     badgeClass: "border-amber-200/40 bg-black/30",
-    overlay:
-      "bg-gradient-to-t from-[#140d02] via-[#1a1203]/75 to-[#3a2a02]/25",
+    overlay: "bg-gradient-to-t from-[#140d02] via-[#1a1203]/75 to-[#3a2a02]/25",
   },
 ];
 

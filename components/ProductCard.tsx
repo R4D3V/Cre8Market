@@ -1,6 +1,6 @@
+import { ArrowUpRight, Clock, Flame, Package, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Clock, Flame, Package, Sparkles } from "lucide-react";
 import type { Product } from "@/lib/types";
 
 function formatPrice(price: number) {
@@ -22,9 +22,7 @@ export default function ProductCard({
 }: Props) {
   const dark = variant === "dark";
   const productHref =
-    source === "deals"
-      ? `/products/${product.slug}?from=deals`
-      : `/products/${product.slug}`;
+    source === "deals" ? `/products/${product.slug}?from=deals` : `/products/${product.slug}`;
   const aspect = size === "small" ? "aspect-[4/3]" : "aspect-[4/5]";
 
   return (
@@ -32,9 +30,7 @@ export default function ProductCard({
       href={productHref}
       data-testid="product-card"
       className={`group relative flex flex-col overflow-hidden rounded-2xl border transition duration-300 hover:-translate-y-1.5 hover:border-primary/50 hover:shadow-[0_28px_60px_-30px_rgba(0,0,0,0.9)] ${
-        dark
-          ? "border-border/70 bg-card"
-          : "border-border/60 bg-card/80"
+        dark ? "border-border/70 bg-card" : "border-border/60 bg-card/80"
       }`}
     >
       {/* Image */}

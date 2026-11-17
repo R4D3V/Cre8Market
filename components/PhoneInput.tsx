@@ -19,19 +19,10 @@ type PhoneInputProps = Omit<
   outerClassName?: string;
 };
 
-export function PhoneInput({
-  value,
-  onChange,
-  outerClassName = "",
-  ...props
-}: PhoneInputProps) {
+export function PhoneInput({ value, onChange, outerClassName = "", ...props }: PhoneInputProps) {
   return (
-    <div
-      className={`neu-inset flex w-full items-center overflow-hidden ${outerClassName}`}
-    >
-      <span className="select-none pl-3 text-sm font-semibold text-muted-foreground">
-        +256
-      </span>
+    <div className={`neu-inset flex w-full items-center overflow-hidden ${outerClassName}`}>
+      <span className="select-none pl-3 text-sm font-semibold text-muted-foreground">+256</span>
       <input
         {...props}
         type="tel"

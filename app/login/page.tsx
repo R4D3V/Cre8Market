@@ -1,8 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   AlertCircle,
   ArrowLeft,
@@ -16,12 +13,15 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
-import { signIn, getSession } from "@/lib/auth-client";
-import Navbar from "@/components/Navbar";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Footer from "@/components/Footer";
-import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
+import Navbar from "@/components/Navbar";
 import PasswordInput from "@/components/PasswordInput";
+import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
 import ScrollReveal from "@/components/ScrollReveal";
+import { getSession, signIn } from "@/lib/auth-client";
 
 const FIELD_CLASS =
   "w-full rounded-xl border border-border/70 bg-muted/30 py-3 pl-10 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-muted/50";
@@ -63,9 +63,7 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      setError(
-        "Invalid phone number or password. Try registering a new account.",
-      );
+      setError("Invalid phone number or password. Try registering a new account.");
       setLoading(false);
       return;
     }
@@ -93,8 +91,7 @@ export default function LoginPage() {
               backgroundImage:
                 "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
               backgroundSize: "56px 56px",
-              maskImage:
-                "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
+              maskImage: "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
               WebkitMaskImage:
                 "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
             }}
@@ -138,8 +135,8 @@ export default function LoginPage() {
                     </span>
                   </h1>
                   <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-                    Pick up where you left off — manage your listings, reply to
-                    buyers, and discover fresh finds across Entebbe.
+                    Pick up where you left off — manage your listings, reply to buyers, and discover
+                    fresh finds across Entebbe.
                   </p>
 
                   <ul className="mt-7 space-y-3">
@@ -152,9 +149,7 @@ export default function LoginPage() {
                           <Icon className="h-4 w-4" />
                         </span>
                         <div>
-                          <p className="text-sm font-bold text-foreground">
-                            {title}
-                          </p>
+                          <p className="text-sm font-bold text-foreground">{title}</p>
                           <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                             {description}
                           </p>

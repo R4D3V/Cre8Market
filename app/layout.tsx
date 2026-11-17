@@ -72,17 +72,9 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${sora.variable}`}
-      data-scroll-behavior="smooth"
-    >
+    <html lang="en" className={`${sora.variable}`} data-scroll-behavior="smooth">
       <body className="min-h-dvh bg-background font-body antialiased">
         <Providers>
           <LayoutWrapper>{children}</LayoutWrapper>

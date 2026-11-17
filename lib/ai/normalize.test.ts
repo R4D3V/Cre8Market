@@ -2,67 +2,43 @@ import { describe, expect, it } from "vitest";
 import {
   normalizeCategorySlug,
   normalizeCondition,
-  normalizeSpecs,
   normalizePrice,
+  normalizeSpecs,
 } from "./normalize";
 
-const VALID_SLUGS = [
-  "phones-tablets",
-  "computers-laptops",
-  "electronics",
-  "home-appliances",
-];
+const VALID_SLUGS = ["phones-tablets", "computers-laptops", "electronics", "home-appliances"];
 
 describe("normalizeCategorySlug", () => {
   it("passes through an exact valid slug", () => {
-    expect(normalizeCategorySlug("phones-tablets", VALID_SLUGS)).toBe(
-      "phones-tablets",
-    );
+    expect(normalizeCategorySlug("phones-tablets", VALID_SLUGS)).toBe("phones-tablets");
   });
 
   it("trims, lowercases and accepts spaced variants", () => {
-    expect(normalizeCategorySlug("  Phones-Tablets ", VALID_SLUGS)).toBe(
-      "phones-tablets",
-    );
-    expect(normalizeCategorySlug("phones tablets", VALID_SLUGS)).toBe(
-      "phones-tablets",
-    );
+    expect(normalizeCategorySlug("  Phones-Tablets ", VALID_SLUGS)).toBe("phones-tablets");
+    expect(normalizeCategorySlug("phones tablets", VALID_SLUGS)).toBe("phones-tablets");
   });
 
   it("maps product keywords to a category", () => {
-    expect(normalizeCategorySlug("iPhone 13 Pro", VALID_SLUGS)).toBe(
-      "phones-tablets",
-    );
-    expect(normalizeCategorySlug("gaming laptop", VALID_SLUGS)).toBe(
-      "computers-laptops",
-    );
-    expect(normalizeCategorySlug("fridge for sale", VALID_SLUGS)).toBe(
-      "home-appliances",
-    );
+    expect(normalizeCategorySlug("iPhone 13 Pro", VALID_SLUGS)).toBe("phones-tablets");
+    expect(normalizeCategorySlug("gaming laptop", VALID_SLUGS)).toBe("computers-laptops");
+    expect(normalizeCategorySlug("fridge for sale", VALID_SLUGS)).toBe("home-appliances");
   });
 
   it("falls back to electronics for unknown titles", () => {
-    expect(normalizeCategorySlug("random gadget", VALID_SLUGS)).toBe(
-      "electronics",
-    );
+    expect(normalizeCategorySlug("random gadget", VALID_SLUGS)).toBe("electronics");
     expect(normalizeCategorySlug(undefined, VALID_SLUGS)).toBe("electronics");
   });
 
   it("falls back to the first valid slug when electronics is missing", () => {
-    expect(
-      normalizeCategorySlug("random gadget", ["phones-tablets"]),
-    ).toBe("phones-tablets");
+    expect(normalizeCategorySlug("random gadget", ["phones-tablets"])).toBe("phones-tablets");
     expect(normalizeCategorySlug("random gadget", [])).toBe("electronics");
   });
 });
 
 describe("normalizeCondition", () => {
-  it.each(["New", "Used", "Refurbished"])(
-    "accepts the valid condition %s",
-    (condition) => {
-      expect(normalizeCondition(condition)).toBe(condition);
-    },
-  );
+  it.each(["New", "Used", "Refurbished"])("accepts the valid condition %s", (condition) => {
+    expect(normalizeCondition(condition)).toBe(condition);
+  });
 
   it("defaults invalid and empty conditions to Used", () => {
     expect(normalizeCondition("Brand New")).toBe("Used");
@@ -73,9 +49,7 @@ describe("normalizeCondition", () => {
 
 describe("normalizeSpecs", () => {
   it("returns a non-empty string trimmed", () => {
-    expect(normalizeSpecs("  RAM: 8GB\nStorage: 256GB  ")).toBe(
-      "RAM: 8GB\nStorage: 256GB",
-    );
+    expect(normalizeSpecs("  RAM: 8GB\nStorage: 256GB  ")).toBe("RAM: 8GB\nStorage: 256GB");
   });
 
   it("returns the default when empty or not a string", () => {

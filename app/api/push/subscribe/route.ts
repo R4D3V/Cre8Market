@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { upsertPushSubscription, deletePushSubscription } from "@/lib/db/queries";
-import { pushSubscribeSchema } from "@/lib/validation";
+import { NextResponse } from "next/server";
+import { deletePushSubscription, upsertPushSubscription } from "@/lib/db/queries";
 import { rateLimit } from "@/lib/rate-limit";
+import { pushSubscribeSchema } from "@/lib/validation";
 
 export async function POST(req: Request) {
   try {

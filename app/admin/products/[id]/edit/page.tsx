@@ -1,18 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { Flame } from "lucide-react";
-import {
-  fetchProductByIdAction,
-  updateProductAction,
-} from "@/lib/actions/products";
-import { fetchCategoriesAction } from "@/lib/actions/categories";
-import { ProductImagePicker } from "@/components/ProductImagePicker";
-import { uploadProductImage } from "@/lib/uploadImage";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { AdminPanel } from "@/components/admin/AdminPanel";
+import { ProductImagePicker } from "@/components/ProductImagePicker";
+import { fetchCategoriesAction } from "@/lib/actions/categories";
+import { fetchProductByIdAction, updateProductAction } from "@/lib/actions/products";
 import type { CategoryDB } from "@/lib/types";
+import { uploadProductImage } from "@/lib/uploadImage";
 
 export default function EditProductPage() {
   const { id } = useParams();
@@ -79,7 +76,9 @@ export default function EditProductPage() {
         featured: p.featured ?? false,
         isDeal: p.isDeal ?? false,
         specs: Array.isArray(p.specs)
-          ? p.specs.map((s: { label: string; value: string }) => `${s.label}: ${s.value}`).join("\n")
+          ? p.specs
+              .map((s: { label: string; value: string }) => `${s.label}: ${s.value}`)
+              .join("\n")
           : "",
         sellerName: p.seller?.name ?? "",
         sellerPhone: p.seller?.phone ?? "",
@@ -118,10 +117,13 @@ export default function EditProductPage() {
         featured: form.featured,
         isDeal: form.isDeal,
         specs: form.specs
-          ? form.specs.split("\n").filter(Boolean).map((line) => {
-              const [label, value] = line.split(":").map((s) => s.trim());
-              return { label: label || "", value: value || "" };
-            })
+          ? form.specs
+              .split("\n")
+              .filter(Boolean)
+              .map((line) => {
+                const [label, value] = line.split(":").map((s) => s.trim());
+                return { label: label || "", value: value || "" };
+              })
           : [],
         images: imgs,
         seller: {
@@ -223,13 +225,11 @@ export default function EditProductPage() {
               className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             >
               <option value="">Select…</option>
-              {["New", "Used", "Refurbished"].map(
-                (c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ),
-              )}
+              {["New", "Used", "Refurbished"].map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </div>
           <div>
@@ -308,9 +308,7 @@ export default function EditProductPage() {
             onChange={(e) => update("featured", e.target.checked)}
             className="w-4 h-4 rounded border-border bg-card text-primary"
           />
-          <span className="text-sm font-semibold text-muted-foreground">
-            Mark as Featured
-          </span>
+          <span className="text-sm font-semibold text-muted-foreground">Mark as Featured</span>
         </label>
 
         <label className="flex items-center gap-2.5 cursor-pointer">

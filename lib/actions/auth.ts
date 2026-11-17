@@ -1,12 +1,12 @@
 "use server";
 
-import { pool } from "@/lib/db/pool";
 import bcrypt from "bcrypt";
+import { pool } from "@/lib/db/pool";
 import {
   checkPhoneExists,
   createUser,
-  getUserByPhone,
   getAdminUserByEmail,
+  getUserByPhone,
   logAudit,
 } from "@/lib/db/queries";
 
@@ -61,11 +61,7 @@ export async function registerUserAction(data: {
 // well-known value that anyone could use to take over an admin account.
 const ADMIN_RESET_PIN = process.env.ADMIN_RESET_PIN;
 
-export async function resetAdminPasswordAction(
-  email: string,
-  newPassword: string,
-  pin: string,
-) {
+export async function resetAdminPasswordAction(email: string, newPassword: string, pin: string) {
   if (!ADMIN_RESET_PIN) {
     throw new Error(
       "Admin password reset is disabled: ADMIN_RESET_PIN is not configured on the server.",
@@ -74,7 +70,9 @@ export async function resetAdminPasswordAction(
   if (!email || !newPassword) throw new Error("Email and password are required");
   if (newPassword.length < 6) throw new Error("Password must be at least 6 characters");
   if (pin !== ADMIN_RESET_PIN) {
-    throw new Error("Incorrect backup pin. Please enter the correct backup pin before resetting the admin password.");
+    throw new Error(
+      "Incorrect backup pin. Please enter the correct backup pin before resetting the admin password.",
+    );
   }
 
   const passwordHash = await bcrypt.hash(newPassword, 12);
@@ -115,13 +113,14 @@ export async function resetUserPasswordAction(phone: string, newPassword: string
   }
   if (!/^\d{4}$/.test(pin)) throw new Error("Enter the 4-digit reset pin you set when registering");
   const valid = await bcrypt.compare(pin, user.pin_hash);
-  if (!valid) throw new Error("Incorrect reset pin. Please enter the 4-digit pin you set when registering.");
+  if (!valid)
+    throw new Error("Incorrect reset pin. Please enter the 4-digit pin you set when registering.");
 
   const passwordHash = await bcrypt.hash(newPassword, 12);
-  const { rowCount } = await pool.query(
-    "UPDATE users SET password_hash = $1 WHERE phone = $2",
-    [passwordHash, phone],
-  );
+  const { rowCount } = await pool.query("UPDATE users SET password_hash = $1 WHERE phone = $2", [
+    passwordHash,
+    phone,
+  ]);
 
   if (rowCount === 0) throw new Error("No account found with that phone number");
   await logAudit({

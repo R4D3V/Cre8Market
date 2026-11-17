@@ -1,24 +1,24 @@
 "use client";
 
-import { type ReactNode, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { ImagePlus, Star } from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { type ReactNode, useEffect, useState } from "react";
+import { AdminPanel } from "@/components/admin/AdminPanel";
+import { PhoneInput, toFullNumber, toLocalPart } from "@/components/PhoneInput";
 import {
-  fetchUserByIdAction,
-  updateUserByAdminAction,
-  setUserActiveAction,
-  setUserPlanAction,
-  setUserAdminAction,
-  resetUserPasswordByAdminAction,
-} from "@/lib/actions/users";
-import {
-  fetchAllSubscriptionPlansAction,
   assignSubscriptionAction,
+  fetchAllSubscriptionPlansAction,
   fetchUserSubscriptionAction,
 } from "@/lib/actions/subscriptions";
-import { AdminPanel } from "@/components/admin/AdminPanel";
-import { PhoneInput, toLocalPart, toFullNumber } from "@/components/PhoneInput";
+import {
+  fetchUserByIdAction,
+  resetUserPasswordByAdminAction,
+  setUserActiveAction,
+  setUserAdminAction,
+  setUserPlanAction,
+  updateUserByAdminAction,
+} from "@/lib/actions/users";
 import { compressImage } from "@/lib/imageCompress";
 import type { AppUser } from "@/lib/types";
 
@@ -38,27 +38,18 @@ function Toggle({
       type="button"
       onClick={() => onChange(!checked)}
       className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all ${
-        checked
-          ? "bg-primary/10 text-primary"
-          : "bg-muted text-muted-foreground hover:bg-muted/70"
+        checked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground hover:bg-muted/70"
       }`}
     >
-      <span
-        className={`size-2 rounded-full ${checked ? "bg-primary" : "bg-muted-foreground"}`}
-      />
+      <span className={`size-2 rounded-full ${checked ? "bg-primary" : "bg-muted-foreground"}`} />
       {checked ? onLabel : offLabel}
     </button>
   );
 }
 
-function planIdFor(
-  user: AppUser,
-  planList: { id: string; name: string }[],
-): string {
+function planIdFor(user: AppUser, planList: { id: string; name: string }[]): string {
   const tier = user.isVip ? "Premium" : user.isVerified ? "Standard" : "Free";
-  return (
-    planList.find((p) => p.name.toLowerCase() === tier.toLowerCase())?.id ?? ""
-  );
+  return planList.find((p) => p.name.toLowerCase() === tier.toLowerCase())?.id ?? "";
 }
 
 export default function EditUserPage() {
@@ -89,9 +80,7 @@ export default function EditUserPage() {
 
     Promise.all([
       fetchUserByIdAction(id as string),
-      fetchAllSubscriptionPlansAction().catch(
-        () => [] as { id: string; name: string }[],
-      ),
+      fetchAllSubscriptionPlansAction().catch(() => [] as { id: string; name: string }[]),
       fetchUserSubscriptionAction(id as string).catch(() => null),
     ])
       .then(([u, planData, s]) => {
@@ -168,16 +157,8 @@ export default function EditUserPage() {
         await setUserActiveAction(id as string, isActive);
       }
 
-      const initialPlan = user?.isVip
-        ? "Premium"
-        : user?.isVerified
-          ? "Standard"
-          : "Free";
-      const nextPlan = isVip
-        ? "Premium"
-        : isVerified
-          ? "Standard"
-          : "Free";
+      const initialPlan = user?.isVip ? "Premium" : user?.isVerified ? "Standard" : "Free";
+      const nextPlan = isVip ? "Premium" : isVerified ? "Standard" : "Free";
       if (nextPlan !== initialPlan) {
         await setUserPlanAction(id as string, nextPlan);
       }
@@ -274,16 +255,11 @@ export default function EditUserPage() {
             Seller Page Banner
           </label>
           <p className="mb-3 text-xs text-muted-foreground">
-            Displayed at the top of this seller&apos;s public profile. Wide
-            images work best.
+            Displayed at the top of this seller&apos;s public profile. Wide images work best.
           </p>
           {banner && (
             <div className="mb-3 overflow-hidden rounded-2xl border border-border/70">
-              <img
-                src={banner}
-                alt="Seller page banner"
-                className="h-28 w-full object-cover"
-              />
+              <img src={banner} alt="Seller page banner" className="h-28 w-full object-cover" />
             </div>
           )}
           <div className="flex flex-wrap items-center gap-3">
@@ -294,9 +270,7 @@ export default function EditUserPage() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) =>
-                  handleBannerUpload(e.target.files?.[0] ?? null)
-                }
+                onChange={(e) => handleBannerUpload(e.target.files?.[0] ?? null)}
               />
             </label>
             {banner && (
@@ -380,8 +354,7 @@ export default function EditUserPage() {
             />
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            Current plan:{" "}
-            <span className="font-semibold text-foreground">{currentPlan}</span>
+            Current plan: <span className="font-semibold text-foreground">{currentPlan}</span>
             {" · "}Standard adds verified status, Premium adds VIP perks.
           </p>
           {isAdmin && (
@@ -393,9 +366,7 @@ export default function EditUserPage() {
 
         {/* Security */}
         <div>
-          <h2 className="mb-3 font-heading text-lg font-bold text-foreground">
-            Security
-          </h2>
+          <h2 className="mb-3 font-heading text-lg font-bold text-foreground">Security</h2>
           <div className="max-w-md">
             <label className="mb-1.5 block text-sm font-semibold text-muted-foreground">
               New Password (optional — leave blank to keep current)

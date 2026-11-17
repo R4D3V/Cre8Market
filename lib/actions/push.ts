@@ -1,11 +1,11 @@
 "use server";
 
+import { auth } from "@/lib/auth";
 import {
+  deletePushSubscription,
   getPushSubscriptions,
   upsertPushSubscription,
-  deletePushSubscription,
 } from "@/lib/db/queries";
-import { auth } from "@/lib/auth";
 
 async function requireAdmin() {
   const session = await auth();
@@ -19,7 +19,10 @@ export async function fetchPushSubscriptionsAction() {
   return getPushSubscriptions();
 }
 
-export async function upsertPushSubscriptionAction(endpoint: string, keys: { p256dh: string; auth: string }) {
+export async function upsertPushSubscriptionAction(
+  endpoint: string,
+  keys: { p256dh: string; auth: string },
+) {
   return upsertPushSubscription(endpoint, keys);
 }
 

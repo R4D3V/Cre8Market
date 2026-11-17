@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowRight, History } from "lucide-react";
+import Link from "next/link";
 import type { AuditEntry } from "@/lib/db/queries";
 import { AdminSection } from "./AdminSection";
 
@@ -57,17 +57,12 @@ export function RecentActivity({ entries }: { entries: AuditEntry[] }) {
           <span className="flex size-8 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary">
             <History className="size-4" />
           </span>
-          <p className="text-sm text-muted-foreground">
-            No activity recorded yet.
-          </p>
+          <p className="text-sm text-muted-foreground">No activity recorded yet.</p>
         </div>
       ) : (
         <ul className="divide-y divide-border/60">
           {entries.map((entry) => (
-            <li
-              key={entry.id}
-              className="flex items-start gap-3 py-2.5 first:pt-0 last:pb-0"
-            >
+            <li key={entry.id} className="flex items-start gap-3 py-2.5 first:pt-0 last:pb-0">
               <span
                 className={`mt-0.5 inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold ${actionTone(
                   entry.action,
@@ -81,10 +76,7 @@ export function RecentActivity({ entries }: { entries: AuditEntry[] }) {
                     {entry.actor_name ?? entry.actor_role ?? "System"}
                   </span>
                   {entry.target_type && (
-                    <span className="text-muted-foreground">
-                      {" "}
-                      · {entry.target_type}
-                    </span>
+                    <span className="text-muted-foreground"> · {entry.target_type}</span>
                   )}
                 </span>
                 <span className="block text-[11px] text-muted-foreground">

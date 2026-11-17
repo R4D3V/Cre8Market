@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import PageHero from "@/components/PageHero";
 import SellersDirectory from "@/components/sellers/SellersDirectory";
 import { getPublicUsers } from "@/lib/db/queries";
@@ -48,10 +48,7 @@ async function SellersContent() {
   try {
     users = await getPublicUsers();
   } catch (err) {
-    console.error(
-      "DB unavailable on sellers page load:",
-      (err as Error).message,
-    );
+    console.error("DB unavailable on sellers page load:", (err as Error).message);
   }
 
   return <SellersDirectory users={users} />;

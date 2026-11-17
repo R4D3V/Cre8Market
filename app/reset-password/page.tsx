@@ -1,8 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   AlertCircle,
   ArrowLeft,
@@ -13,13 +10,16 @@ import {
   ShieldCheck,
   Smartphone,
 } from "lucide-react";
-import { signIn, getSession } from "@/lib/auth-client";
-import Navbar from "@/components/Navbar";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Footer from "@/components/Footer";
-import { resetUserPasswordAction } from "@/lib/actions/auth";
-import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
+import Navbar from "@/components/Navbar";
 import PasswordInput from "@/components/PasswordInput";
+import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
 import ScrollReveal from "@/components/ScrollReveal";
+import { resetUserPasswordAction } from "@/lib/actions/auth";
+import { getSession, signIn } from "@/lib/auth-client";
 
 const FIELD_CLASS =
   "w-full rounded-xl border border-border/70 bg-muted/30 py-3 pl-10 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-muted/50";
@@ -91,8 +91,7 @@ export default function ResetPasswordPage() {
               backgroundImage:
                 "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
               backgroundSize: "56px 56px",
-              maskImage:
-                "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
+              maskImage: "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
               WebkitMaskImage:
                 "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
             }}
@@ -136,9 +135,8 @@ export default function ResetPasswordPage() {
                     </span>
                   </h1>
                   <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-                    Verify the phone number on your account, then set a new
-                    password. You&apos;ll be signed in automatically once it&apos;s
-                    done.
+                    Verify the phone number on your account, then set a new password. You&apos;ll be
+                    signed in automatically once it&apos;s done.
                   </p>
 
                   <ul className="mt-7 space-y-3">
@@ -151,9 +149,7 @@ export default function ResetPasswordPage() {
                           <Icon className="h-4 w-4" />
                         </span>
                         <div>
-                          <p className="text-sm font-bold text-foreground">
-                            {title}
-                          </p>
+                          <p className="text-sm font-bold text-foreground">{title}</p>
                           <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                             {description}
                           </p>
@@ -180,9 +176,7 @@ export default function ResetPasswordPage() {
                         <KeyRound className="h-5 w-5" />
                       </span>
                       <div>
-                        <h2 className="text-sm font-bold text-foreground">
-                          Reset your password
-                        </h2>
+                        <h2 className="text-sm font-bold text-foreground">Reset your password</h2>
                         <p className="text-xs text-muted-foreground">
                           Enter your phone number, a new password, and your pin.
                         </p>
@@ -246,16 +240,13 @@ export default function ResetPasswordPage() {
                             pattern="\d{4}"
                             maxLength={4}
                             value={pin}
-                            onChange={(e) =>
-                              setPin(e.target.value.replace(/\D/g, ""))
-                            }
+                            onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
                             placeholder="Pin from registration"
                             className={FIELD_CLASS}
                           />
                         </div>
                         <p className="mt-1.5 text-xs text-muted-foreground">
-                          The verification pin you set when creating your
-                          account.
+                          The verification pin you set when creating your account.
                         </p>
                       </div>
 
@@ -324,8 +315,8 @@ export default function ResetPasswordPage() {
                       <ShieldCheck className="h-4 w-4" />
                     </span>
                     <p className="text-xs leading-relaxed text-muted-foreground">
-                      Never share your password or pin with anyone. Cre8Market
-                      staff will never ask for them.
+                      Never share your password or pin with anyone. Cre8Market staff will never ask
+                      for them.
                     </p>
                   </div>
                 </div>

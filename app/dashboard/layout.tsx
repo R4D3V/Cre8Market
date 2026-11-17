@@ -1,15 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
+import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
+import { useSession } from "@/lib/auth-client";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { data: session, status } = useSession();
 
@@ -37,9 +33,7 @@ export default function DashboardLayout({
   return (
     <div className="page-ambient min-h-dvh bg-background text-foreground">
       <Navbar />
-      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
-        {children}
-      </main>
+      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">{children}</main>
     </div>
   );
 }

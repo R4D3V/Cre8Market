@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useState, useEffect } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
 import { isIOS, isStandalone } from "@/lib/pwa";
 
@@ -34,8 +34,8 @@ export default function EnableNotificationsButton() {
         <p>
           On iPhone, notifications need the installed app: tap the
           <span className="font-semibold"> Share </span> button, then
-          <span className="font-semibold"> Add to Home Screen</span>. Open the app from
-          your Home Screen, then come back here to turn on notifications.
+          <span className="font-semibold"> Add to Home Screen</span>. Open the app from your Home
+          Screen, then come back here to turn on notifications.
         </p>
       </div>
     );

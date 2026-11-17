@@ -1,8 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   AlertCircle,
   ArrowLeft,
@@ -18,13 +15,16 @@ import {
   UserRound,
   Zap,
 } from "lucide-react";
-import { signIn } from "@/lib/auth-client";
-import Navbar from "@/components/Navbar";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Footer from "@/components/Footer";
-import { registerUserAction } from "@/lib/actions/auth";
-import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
+import Navbar from "@/components/Navbar";
 import PasswordInput from "@/components/PasswordInput";
+import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
 import ScrollReveal from "@/components/ScrollReveal";
+import { registerUserAction } from "@/lib/actions/auth";
+import { signIn } from "@/lib/auth-client";
 import { PLANS } from "@/lib/plans";
 
 const FIELD_CLASS =
@@ -105,9 +105,7 @@ export default function RegisterPage() {
       setSuccess(true);
     } catch (err: unknown) {
       const message =
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again.";
+        err instanceof Error ? err.message : "Something went wrong. Please try again.";
       setError(message);
       if (message.includes("already exists")) setAccountExists(true);
     } finally {
@@ -144,8 +142,7 @@ export default function RegisterPage() {
                     Welcome, {surname} {givenName}!
                   </h1>
                   <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-                    Your account has been created. You can now post listings and
-                    contact sellers.
+                    Your account has been created. You can now post listings and contact sellers.
                   </p>
 
                   <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
@@ -188,8 +185,7 @@ export default function RegisterPage() {
               backgroundImage:
                 "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
               backgroundSize: "56px 56px",
-              maskImage:
-                "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
+              maskImage: "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
               WebkitMaskImage:
                 "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
             }}
@@ -233,38 +229,33 @@ export default function RegisterPage() {
                     </span>
                   </h1>
                   <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-                    Create a free account to buy, sell, and get the best deals
-                    in Uganda — directly with local people.
+                    Create a free account to buy, sell, and get the best deals in Uganda — directly
+                    with local people.
                   </p>
 
                   <ul className="mt-7 space-y-3">
-                    {BENEFITS.map(
-                      ({ icon: Icon, title, description }) => (
-                        <li
-                          key={title}
-                          className="flex items-start gap-3 rounded-2xl border border-border/50 bg-muted/20 p-3.5"
-                        >
-                          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
-                            <Icon className="h-4 w-4" />
-                          </span>
-                          <div>
-                            <p className="text-sm font-bold text-foreground">
-                              {title}
-                            </p>
-                            <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                              {description}
-                            </p>
-                          </div>
-                        </li>
-                      ),
-                    )}
+                    {BENEFITS.map(({ icon: Icon, title, description }) => (
+                      <li
+                        key={title}
+                        className="flex items-start gap-3 rounded-2xl border border-border/50 bg-muted/20 p-3.5"
+                      >
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">{title}</p>
+                          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                            {description}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
                   </ul>
 
                   <div className="mt-6 flex items-start gap-2 rounded-2xl border border-secondary/25 bg-secondary/10 p-3.5">
                     <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
                     <p className="text-[11px] leading-relaxed text-muted-foreground">
-                      Your details are only used to manage your account and
-                      connect you with buyers.
+                      Your details are only used to manage your account and connect you with buyers.
                     </p>
                   </div>
                 </div>
@@ -286,12 +277,8 @@ export default function RegisterPage() {
                         <UserRound className="h-5 w-5" />
                       </span>
                       <div>
-                        <h2 className="text-sm font-bold text-foreground">
-                          Create your account
-                        </h2>
-                        <p className="text-xs text-muted-foreground">
-                          It only takes a minute.
-                        </p>
+                        <h2 className="text-sm font-bold text-foreground">Create your account</h2>
+                        <p className="text-xs text-muted-foreground">It only takes a minute.</p>
                       </div>
                     </div>
 
@@ -451,16 +438,14 @@ export default function RegisterPage() {
                               maxLength={4}
                               autoComplete="off"
                               value={pin}
-                              onChange={(e) =>
-                                setPin(e.target.value.replace(/\D/g, ""))
-                              }
+                              onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
                               placeholder="e.g. 1234"
                               className={FIELD_CLASS}
                             />
                           </div>
                           <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                            You&apos;ll use this pin to verify your identity when
-                            resetting your password.
+                            You&apos;ll use this pin to verify your identity when resetting your
+                            password.
                           </p>
                         </div>
                       </div>
@@ -508,11 +493,8 @@ export default function RegisterPage() {
                             >
                               <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-secondary" />
                               <span>
-                                <span className="font-semibold text-foreground">
-                                  {p.name}
-                                </span>{" "}
-                                — {p.price} / {p.period.toLowerCase()},{" "}
-                                {p.features[0].toLowerCase()}
+                                <span className="font-semibold text-foreground">{p.name}</span> —{" "}
+                                {p.price} / {p.period.toLowerCase()}, {p.features[0].toLowerCase()}
                               </span>
                             </li>
                           ))}

@@ -1,21 +1,21 @@
 "use server";
 
 import bcrypt from "bcrypt";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import {
-  getAdminUserById,
-  getAdminUserByEmail,
-  getAdminUsers,
   createAdminUser,
   deleteAdminUser,
-  updateAdminProfile,
+  getAdminUserByEmail,
+  getAdminUserById,
   getAdminUserPasswordHash,
-  updateAdminUserPassword,
+  getAdminUsers,
   getFeatureFlags,
-  setFeatureFlag,
   logAudit,
+  setFeatureFlag,
+  updateAdminProfile,
+  updateAdminUserPassword,
 } from "@/lib/db/queries";
-import { revalidatePath } from "next/cache";
 
 async function requireAdmin() {
   const session = await auth();
@@ -129,7 +129,8 @@ export async function updateMyAdminProfileAction(data: {
 export async function changeMyAdminPasswordAction(currentPassword: string, newPassword: string) {
   const adminId = await requireAdmin();
   if (!currentPassword) throw new Error("Current password is required");
-  if (!newPassword || newPassword.length < 6) throw new Error("New password must be at least 6 characters");
+  if (!newPassword || newPassword.length < 6)
+    throw new Error("New password must be at least 6 characters");
 
   const currentHash = await getAdminUserPasswordHash(adminId);
   if (!currentHash) throw new Error("Admin not found");

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   ArrowRight,
   CalendarClock,
@@ -8,6 +7,7 @@ import {
   Sparkles,
   UserRound,
 } from "lucide-react";
+import Link from "next/link";
 import type { AdminOverview } from "@/lib/db/queries";
 import { AdminSection } from "./AdminSection";
 
@@ -69,18 +69,13 @@ export function SubscriptionHealth({ overview }: { overview: AdminOverview }) {
     >
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {stats.map(({ label, value, icon: Icon, tone }) => (
-          <div
-            key={label}
-            className="rounded-xl border border-border/60 bg-muted/20 p-3"
-          >
+          <div key={label} className="rounded-xl border border-border/60 bg-muted/20 p-3">
             <span
               className={`inline-flex size-7 items-center justify-center rounded-lg border ${tone}`}
             >
               <Icon className="size-3.5" />
             </span>
-            <p className="mt-2 font-heading text-2xl font-extrabold text-foreground">
-              {value}
-            </p>
+            <p className="mt-2 font-heading text-2xl font-extrabold text-foreground">{value}</p>
             <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {label}
             </p>
@@ -106,9 +101,7 @@ export function SubscriptionHealth({ overview }: { overview: AdminOverview }) {
               <Sparkles className="size-4" />
             </span>
             <div>
-              <p className="text-sm font-semibold text-foreground">
-                Nothing needs renewing
-              </p>
+              <p className="text-sm font-semibold text-foreground">Nothing needs renewing</p>
               <p className="text-xs text-muted-foreground">
                 No plan expires in the next seven days.
               </p>

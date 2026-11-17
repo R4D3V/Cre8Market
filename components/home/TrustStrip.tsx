@@ -1,9 +1,4 @@
-import {
-  BadgeCheck,
-  ShieldCheck,
-  Truck,
-  Zap,
-} from "lucide-react";
+import { BadgeCheck, ShieldCheck, Truck, Zap } from "lucide-react";
 
 const benefits = [
   {
@@ -42,9 +37,7 @@ export default function TrustStrip() {
             </span>
             <div>
               <p className="text-sm font-bold text-foreground">{title}</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                {description}
-              </p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
             </div>
           </div>
         ))}

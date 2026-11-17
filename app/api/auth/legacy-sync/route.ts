@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  syncLegacyAdminToBetterAuth,
-  syncLegacyUserToBetterAuth,
-} from "@/lib/auth";
+import { syncLegacyAdminToBetterAuth, syncLegacyUserToBetterAuth } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {

@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowRight, ImagePlus, Store } from "lucide-react";
+import Link from "next/link";
 import { AdminSection } from "./AdminSection";
 
 export function StoreIdentityCard({
@@ -28,11 +28,7 @@ export function StoreIdentityCard({
         <div className="relative h-24 w-full overflow-hidden bg-gradient-to-r from-primary/25 via-primary/10 to-secondary/20">
           {banner ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={banner}
-              alt="Store banner"
-              className="h-full w-full object-cover"
-            />
+            <img src={banner} alt="Store banner" className="h-full w-full object-cover" />
           ) : (
             <span className="absolute inset-0 grid place-items-center text-muted-foreground">
               <ImagePlus className="size-5" />
@@ -44,11 +40,7 @@ export function StoreIdentityCard({
             <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-card bg-primary text-xl font-bold text-primary-foreground">
               {avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={avatar}
-                  alt="Store avatar"
-                  className="h-full w-full object-cover"
-                />
+                <img src={avatar} alt="Store avatar" className="h-full w-full object-cover" />
               ) : (
                 "C"
               )}

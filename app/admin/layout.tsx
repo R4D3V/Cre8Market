@@ -1,25 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
-import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { useSession } from "@/lib/auth-client";
-import Navbar from "@/components/Navbar";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
+import { useSession } from "@/lib/auth-client";
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (pathname === "/admin/login" || pathname === "/admin/reset-password")
-      return;
+    if (pathname === "/admin/login" || pathname === "/admin/reset-password") return;
     // Defer navigation so it can't interrupt an in-flight RSC stream.
     const timer = setTimeout(() => {
       if (status === "unauthenticated") {

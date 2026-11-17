@@ -1,9 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -23,9 +19,13 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useSession, signOut } from "@/lib/auth-client";
-import { fetchMyProfileAction } from "@/lib/actions/users";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { fetchMyAdminProfileAction } from "@/lib/actions/admin";
+import { fetchMyProfileAction } from "@/lib/actions/users";
+import { signOut, useSession } from "@/lib/auth-client";
 
 const DESKTOP_LINKS = [
   { href: "/products", label: "All Products", Icon: ShoppingBag },
@@ -85,18 +85,15 @@ export default function Navbar() {
   } | null>(null);
   const liveProfile = loadedProfile?.id === userId ? loadedProfile : null;
   const displayName =
-    liveProfile?.name?.trim() ||
-    session?.user?.name?.trim() ||
-    (isAdmin ? "Admin" : "Account");
+    liveProfile?.name?.trim() || session?.user?.name?.trim() || (isAdmin ? "Admin" : "Account");
   const initial = displayName.charAt(0).toUpperCase();
   const avatar = liveProfile?.avatar ?? sessionAvatar;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname intentionally re-syncs the profile on route changes
   useEffect(() => {
     if (!isUser || !userId) return;
     let active = true;
-    const load = isAdmin
-      ? fetchMyAdminProfileAction()
-      : fetchMyProfileAction();
+    const load = isAdmin ? fetchMyAdminProfileAction() : fetchMyProfileAction();
     load
       .then((profile) => {
         if (active) {
@@ -144,11 +141,7 @@ export default function Navbar() {
       <div className="container relative">
         <div className="flex items-center gap-3 py-3 lg:gap-6">
           {/* Logo */}
-          <Link
-            href="/"
-            aria-label="CRE8MARKET home"
-            className="group flex shrink-0 items-center"
-          >
+          <Link href="/" aria-label="CRE8MARKET home" className="group flex shrink-0 items-center">
             <Image
               src="/brand/cre8-market-logo-transparent.svg"
               alt="Cre8 Market"
@@ -246,11 +239,7 @@ export default function Navbar() {
               onClick={() => setMobileOpen((v) => !v)}
               className="grid size-10 place-items-center rounded-full border border-border/60 bg-muted/20 text-foreground transition hover:border-primary/40 hover:bg-muted/40 lg:hidden"
             >
-              {mobileOpen ? (
-                <X className="size-5" />
-              ) : (
-                <Menu className="size-5" />
-              )}
+              {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
           </div>
         </div>
@@ -357,9 +346,7 @@ export default function Navbar() {
                       >
                         {label}
                       </span>
-                      <span className="block text-[11px] text-muted-foreground">
-                        {description}
-                      </span>
+                      <span className="block text-[11px] text-muted-foreground">{description}</span>
                     </span>
                     <ChevronRight className="size-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" />
                   </Link>

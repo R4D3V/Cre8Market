@@ -1,6 +1,3 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
   BadgeCheck,
@@ -18,8 +15,11 @@ import {
   Target,
   Users,
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 
@@ -69,8 +69,7 @@ const STATS = [
 const REASONS = [
   {
     title: "No middleman",
-    description:
-      "Contact the seller directly. No commissions, no platform fees, no bureaucracy.",
+    description: "Contact the seller directly. No commissions, no platform fees, no bureaucracy.",
   },
   {
     title: "Local & trusted",
@@ -129,9 +128,7 @@ export default function AboutPage() {
               </span>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-white">Kitoro, Entebbe</p>
-                <p className="text-xs text-white/60">
-                  Serving buyers and sellers across Uganda
-                </p>
+                <p className="text-xs text-white/60">Serving buyers and sellers across Uganda</p>
               </div>
             </div>
           </div>
@@ -189,10 +186,9 @@ export default function AboutPage() {
                   Local roots, modern marketplace.
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  CRE8MARKET ENTEBBE is a Ugandan-owned and operated marketplace
-                  based in Entebbe. We connect local buyers and sellers directly
-                  — no middleman, no hidden fees. From phones and laptops to
-                  furniture and vehicles, our platform makes it easy to find
+                  CRE8MARKET ENTEBBE is a Ugandan-owned and operated marketplace based in Entebbe.
+                  We connect local buyers and sellers directly — no middleman, no hidden fees. From
+                  phones and laptops to furniture and vehicles, our platform makes it easy to find
                   great deals or sell your items fast.
                 </p>
               </div>
@@ -216,15 +212,13 @@ export default function AboutPage() {
                   Make trading simple for everyone.
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  To make buying and selling in Uganda simple, direct, and
-                  accessible to everyone. We believe marketplace transactions
-                  should happen without unnecessary middlemen, hidden fees, or
-                  complicated processes.
+                  To make buying and selling in Uganda simple, direct, and accessible to everyone.
+                  We believe marketplace transactions should happen without unnecessary middlemen,
+                  hidden fees, or complicated processes.
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  By leveraging WhatsApp — Uganda&apos;s most widely used
-                  messaging platform — we remove barriers and let buyers and
-                  sellers connect instantly.
+                  By leveraging WhatsApp — Uganda&apos;s most widely used messaging platform — we
+                  remove barriers and let buyers and sellers connect instantly.
                 </p>
               </div>
             </div>
@@ -275,9 +269,7 @@ export default function AboutPage() {
                 <p className="bg-gradient-to-r from-primary to-emerald-300 bg-clip-text font-heading text-3xl font-extrabold tracking-tight text-transparent sm:text-4xl">
                   {stat.value}
                 </p>
-                <p className="mt-1 text-xs font-medium text-muted-foreground">
-                  {stat.label}
-                </p>
+                <p className="mt-1 text-xs font-medium text-muted-foreground">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -305,9 +297,7 @@ export default function AboutPage() {
                     <CheckCircle2 className="h-4 w-4" />
                   </span>
                   <div>
-                    <p className="text-sm font-bold text-foreground">
-                      {reason.title}
-                    </p>
+                    <p className="text-sm font-bold text-foreground">{reason.title}</p>
                     <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                       {reason.description}
                     </p>
@@ -333,8 +323,8 @@ export default function AboutPage() {
                 Let&apos;s talk.
               </h2>
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/60">
-                Have questions? We&apos;d love to hear from you. Reach us on
-                WhatsApp or send an email.
+                Have questions? We&apos;d love to hear from you. Reach us on WhatsApp or send an
+                email.
               </p>
               <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
                 <a

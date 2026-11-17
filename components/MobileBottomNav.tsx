@@ -1,8 +1,8 @@
 "use client";
 
+import { CirclePlus, House, ShoppingBag, Tag, User, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CirclePlus, House, ShoppingBag, Tag, User, Users } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { haptic } from "@/lib/haptics";
 

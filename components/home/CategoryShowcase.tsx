@@ -1,4 +1,4 @@
-import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import {
   ArrowUpRight,
   Bike,
@@ -21,7 +21,7 @@ import {
   Watch,
   Wrench,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 import type { Product } from "@/lib/types";
 import SectionHeading from "./SectionHeading";
 
@@ -101,10 +101,7 @@ function tint(color: string, percent: number) {
 }
 
 export default function CategoryShowcase({ products }: { products: Product[] }) {
-  const counts = new Map<
-    string,
-    { name: string; slug: string; count: number; color?: string }
-  >();
+  const counts = new Map<string, { name: string; slug: string; count: number; color?: string }>();
 
   for (const product of products) {
     const existing = counts.get(product.categorySlug);

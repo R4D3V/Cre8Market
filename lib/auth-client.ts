@@ -3,8 +3,7 @@
 import { createAuthClient } from "better-auth/react";
 import { APP_URL } from "./env";
 
-const baseURL =
-  typeof window !== "undefined" ? window.location.origin : APP_URL;
+const baseURL = typeof window !== "undefined" ? window.location.origin : APP_URL;
 
 export const authClient = createAuthClient({ baseURL });
 
@@ -30,7 +29,8 @@ function normalizeSession(session: unknown): { user: AppSessionUser } | null {
   return {
     user: {
       ...s.user,
-      role: (s.user.role as "admin" | "user" | undefined) ?? inferRoleFromEmail(s.user.email ?? null),
+      role:
+        (s.user.role as "admin" | "user" | undefined) ?? inferRoleFromEmail(s.user.email ?? null),
     },
   };
 }
@@ -116,8 +116,7 @@ export async function signIn(input: {
       } | null;
       return {
         error: {
-          message:
-            body?.error ?? "Could not prepare your account for sign-in.",
+          message: body?.error ?? "Could not prepare your account for sign-in.",
           status: syncResponse.status,
         },
       };
@@ -148,8 +147,7 @@ export async function signIn(input: {
   } catch (error) {
     return {
       error: {
-        message:
-          error instanceof Error ? error.message : "Invalid email or password",
+        message: error instanceof Error ? error.message : "Invalid email or password",
       },
     };
   }

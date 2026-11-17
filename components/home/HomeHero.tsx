@@ -1,12 +1,6 @@
+import { ArrowRight, Search, ShieldCheck, Star, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Search,
-  ShieldCheck,
-  Star,
-  TrendingUp,
-} from "lucide-react";
 
 const quickLinks = [
   { label: "Phones", href: "/products?category=phones-tablets" },
@@ -35,8 +29,7 @@ export default function HomeHero() {
           sizes="100vw"
           className="object-cover object-[68%_35%] opacity-[0.15] sm:opacity-[0.22] lg:opacity-[0.28]"
           style={{
-            maskImage:
-              "radial-gradient(ellipse 90% 80% at 72% 18%, black 30%, transparent 82%)",
+            maskImage: "radial-gradient(ellipse 90% 80% at 72% 18%, black 30%, transparent 82%)",
             WebkitMaskImage:
               "radial-gradient(ellipse 90% 80% at 72% 18%, black 30%, transparent 82%)",
           }}
@@ -52,8 +45,7 @@ export default function HomeHero() {
             backgroundImage:
               "linear-gradient(to right, rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.045) 1px, transparent 1px)",
             backgroundSize: "58px 58px",
-            maskImage:
-              "radial-gradient(ellipse 80% 65% at 50% 0%, black 35%, transparent 100%)",
+            maskImage: "radial-gradient(ellipse 80% 65% at 50% 0%, black 35%, transparent 100%)",
             WebkitMaskImage:
               "radial-gradient(ellipse 80% 65% at 50% 0%, black 35%, transparent 100%)",
           }}
@@ -80,9 +72,8 @@ export default function HomeHero() {
             </h1>
 
             <p className="mt-6 max-w-xl text-[0.95rem] leading-relaxed text-muted-foreground sm:text-base">
-              Hand-picked tech, verified local sellers, and honest prices — all
-              in one beautifully simple place. Shop Entebbe&apos;s best finds
-              without the guesswork.
+              Hand-picked tech, verified local sellers, and honest prices — all in one beautifully
+              simple place. Shop Entebbe&apos;s best finds without the guesswork.
             </p>
 
             {/* Search */}
@@ -147,9 +138,7 @@ export default function HomeHero() {
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} className="h-3.5 w-3.5 fill-current" />
                   ))}
-                  <span className="ml-1 text-xs font-bold text-foreground">
-                    4.9
-                  </span>
+                  <span className="ml-1 text-xs font-bold text-foreground">4.9</span>
                 </div>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">
                   Loved by 2,400+ shoppers &amp; sellers
@@ -217,9 +206,7 @@ export default function HomeHero() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#021321] via-transparent to-transparent" />
                   <div className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-1">
-                    <span className="text-[11px] font-bold text-white">
-                      Audio
-                    </span>
+                    <span className="text-[11px] font-bold text-white">Audio</span>
                     <span className="rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-semibold text-white/75 backdrop-blur">
                       24 items
                     </span>
@@ -236,9 +223,7 @@ export default function HomeHero() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#021321] via-transparent to-transparent" />
                   <div className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-1">
-                    <span className="text-[11px] font-bold text-white">
-                      Wearables
-                    </span>
+                    <span className="text-[11px] font-bold text-white">Wearables</span>
                     <span className="rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[9px] font-semibold text-white/75 backdrop-blur">
                       18 items
                     </span>
@@ -257,7 +242,6 @@ export default function HomeHero() {
                 <p className="text-[10px] text-white/55">120+ checked this month</p>
               </div>
             </div>
-
           </div>
         </div>
       </div>

@@ -11,12 +11,12 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import PageHero from "@/components/PageHero";
-import ScrollReveal from "@/components/ScrollReveal";
 import EnableNotificationsButton from "@/components/EnableNotificationsButton";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
+import PageHero from "@/components/PageHero";
 import InstallAppButton from "@/components/pwa/InstallAppButton";
+import ScrollReveal from "@/components/ScrollReveal";
 import { isFeatureEnabled } from "@/lib/db/queries";
 
 function AndroidPhoneSvg() {
@@ -80,23 +80,8 @@ function AndroidPhoneSvg() {
         strokeWidth="1"
         filter="url(#shadow)"
       />
-      <rect
-        x="138"
-        y="102"
-        width="60"
-        height="16"
-        rx="3"
-        fill="#dc2626"
-        fillOpacity="0.15"
-      />
-      <text
-        x="142"
-        y="114"
-        fontSize="6"
-        fill="#dc2626"
-        fontFamily="system-ui"
-        fontWeight="bold"
-      >
+      <rect x="138" y="102" width="60" height="16" rx="3" fill="#dc2626" fillOpacity="0.15" />
+      <text x="142" y="114" fontSize="6" fill="#dc2626" fontFamily="system-ui" fontWeight="bold">
         Install app
       </text>
       <text x="142" y="130" fontSize="6" fill="#475569" fontFamily="system-ui">
@@ -111,14 +96,7 @@ function AndroidPhoneSvg() {
       {/* Arrow callout */}
       <path d="M208 58 L220 50 L230 50" stroke="#dc2626" strokeWidth="1.5" />
       <polygon points="230,50 225,46 225,54" fill="#dc2626" />
-      <text
-        x="218"
-        y="44"
-        fontSize="6"
-        fill="#dc2626"
-        fontFamily="system-ui"
-        fontWeight="bold"
-      >
+      <text x="218" y="44" fontSize="6" fill="#dc2626" fontFamily="system-ui" fontWeight="bold">
         STEP 2-3
       </text>
       {/* Webpage content */}
@@ -128,28 +106,14 @@ function AndroidPhoneSvg() {
       <rect x="36" y="310" width="168" height="14" rx="3" fill="#cbd5e1" />
       {/* Install banner at bottom */}
       <rect x="28" y="370" width="184" height="40" fill="#021e40" />
-      <text
-        x="42"
-        y="385"
-        fontSize="7"
-        fill="white"
-        fontFamily="system-ui"
-        fontWeight="bold"
-      >
+      <text x="42" y="385" fontSize="7" fill="white" fontFamily="system-ui" fontWeight="bold">
         CRE8MARKET ENTEBBE
       </text>
       <text x="42" y="397" fontSize="6" fill="#94a3b8" fontFamily="system-ui">
         cre8market.com
       </text>
       <rect x="155" y="376" width="50" height="28" rx="14" fill="#6ce97a" />
-      <text
-        x="162"
-        y="394"
-        fontSize="8"
-        fill="#021e40"
-        fontFamily="system-ui"
-        fontWeight="bold"
-      >
+      <text x="162" y="394" fontSize="8" fill="#021e40" fontFamily="system-ui" fontWeight="bold">
         Install
       </text>
       {/* Home indicator */}
@@ -184,14 +148,7 @@ function IPhoneSvg() {
       {/* Screen */}
       <rect x="28" y="30" width="184" height="396" rx="2" fill="#f1f5f9" />
       {/* Status bar */}
-      <text
-        x="40"
-        y="46"
-        fontSize="8"
-        fill="#1e293b"
-        fontFamily="system-ui"
-        fontWeight="bold"
-      >
+      <text x="40" y="46" fontSize="8" fill="#1e293b" fontFamily="system-ui" fontWeight="bold">
         9:41
       </text>
       {/* Safari browser bar */}
@@ -223,23 +180,12 @@ function IPhoneSvg() {
         strokeDasharray="3 2"
       />
       {/* Share icon */}
-      <path
-        d="M192 68 L192 78 M188 72 L192 68 L196 72"
-        stroke="#dc2626"
-        strokeWidth="1.5"
-      />
+      <path d="M192 68 L192 78 M188 72 L192 68 L196 72" stroke="#dc2626" strokeWidth="1.5" />
       <rect x="188" y="78" width="8" height="2" rx="1" fill="#dc2626" />
       {/* Arrow callout */}
       <path d="M208 58 L220 50 L230 50" stroke="#dc2626" strokeWidth="1.5" />
       <polygon points="230,50 225,46 225,54" fill="#dc2626" />
-      <text
-        x="218"
-        y="44"
-        fontSize="6"
-        fill="#dc2626"
-        fontFamily="system-ui"
-        fontWeight="bold"
-      >
+      <text x="218" y="44" fontSize="6" fill="#dc2626" fontFamily="system-ui" fontWeight="bold">
         STEP 2
       </text>
       {/* Webpage content */}
@@ -271,36 +217,15 @@ function IPhoneSvg() {
       </text>
       {/* Share sheet rows */}
       <rect x="36" y="296" width="50" height="50" rx="10" fill="#e2e8f0" />
-      <text
-        x="61"
-        y="326"
-        fontSize="6"
-        fill="#475569"
-        fontFamily="system-ui"
-        textAnchor="middle"
-      >
+      <text x="61" y="326" fontSize="6" fill="#475569" fontFamily="system-ui" textAnchor="middle">
         Messages
       </text>
       <rect x="94" y="296" width="50" height="50" rx="10" fill="#e2e8f0" />
-      <text
-        x="119"
-        y="326"
-        fontSize="6"
-        fill="#475569"
-        fontFamily="system-ui"
-        textAnchor="middle"
-      >
+      <text x="119" y="326" fontSize="6" fill="#475569" fontFamily="system-ui" textAnchor="middle">
         Mail
       </text>
       <rect x="152" y="296" width="50" height="50" rx="10" fill="#e2e8f0" />
-      <text
-        x="177"
-        y="326"
-        fontSize="6"
-        fill="#475569"
-        fontFamily="system-ui"
-        textAnchor="middle"
-      >
+      <text x="177" y="326" fontSize="6" fill="#475569" fontFamily="system-ui" textAnchor="middle">
         Notes
       </text>
       {/* Add to Home Screen highlighted */}
@@ -326,44 +251,19 @@ function IPhoneSvg() {
       >
         Add to Home
       </text>
-      <path
-        d="M61 368 L61 378 M57 373 L61 368 L65 373"
-        stroke="#dc2626"
-        strokeWidth="1.5"
-      />
+      <path d="M61 368 L61 378 M57 373 L61 368 L65 373" stroke="#dc2626" strokeWidth="1.5" />
       <rect x="94" y="356" width="50" height="50" rx="10" fill="#e2e8f0" />
-      <text
-        x="119"
-        y="386"
-        fontSize="6"
-        fill="#475569"
-        fontFamily="system-ui"
-        textAnchor="middle"
-      >
+      <text x="119" y="386" fontSize="6" fill="#475569" fontFamily="system-ui" textAnchor="middle">
         Safari
       </text>
       <rect x="152" y="356" width="50" height="50" rx="10" fill="#e2e8f0" />
-      <text
-        x="177"
-        y="386"
-        fontSize="6"
-        fill="#475569"
-        fontFamily="system-ui"
-        textAnchor="middle"
-      >
+      <text x="177" y="386" fontSize="6" fill="#475569" fontFamily="system-ui" textAnchor="middle">
         Copy
       </text>
       {/* Arrow callout 2 */}
       <path d="M42 420 L60 430 L80 430" stroke="#dc2626" strokeWidth="1.5" />
       <polygon points="80,430 73,426 73,434" fill="#dc2626" />
-      <text
-        x="42"
-        y="432"
-        fontSize="6"
-        fill="#dc2626"
-        fontFamily="system-ui"
-        fontWeight="bold"
-      >
+      <text x="42" y="432" fontSize="6" fill="#dc2626" fontFamily="system-ui" fontWeight="bold">
         STEP 3
       </text>
       {/* Home indicator */}
@@ -387,14 +287,7 @@ function HomeScreenSvg() {
       />
       <rect x="28" y="30" width="184" height="396" rx="2" fill="#0f172a" />
       {/* Status bar */}
-      <text
-        x="40"
-        y="46"
-        fontSize="8"
-        fill="white"
-        fontFamily="system-ui"
-        fontWeight="bold"
-      >
+      <text x="40" y="46" fontSize="8" fill="white" fontFamily="system-ui" fontWeight="bold">
         10:28
       </text>
       {/* Home screen grid */}
@@ -425,27 +318,13 @@ function HomeScreenSvg() {
       <text x="66" y="96" fontSize="16" textAnchor="middle" fill="#6ce97a">
         C
       </text>
-      <text
-        x="66"
-        y="124"
-        fontSize="6"
-        textAnchor="middle"
-        fill="white"
-        fontFamily="system-ui"
-      >
+      <text x="66" y="124" fontSize="6" textAnchor="middle" fill="white" fontFamily="system-ui">
         CRE8MARKET
       </text>
       {/* Arrow callout */}
       <path d="M100 92 L130 82 L140 82" stroke="#6ce97a" strokeWidth="1.5" />
       <polygon points="140,82 133,78 133,86" fill="#6ce97a" />
-      <text
-        x="130"
-        y="76"
-        fontSize="6"
-        fill="#6ce97a"
-        fontFamily="system-ui"
-        fontWeight="bold"
-      >
+      <text x="130" y="76" fontSize="6" fill="#6ce97a" fontFamily="system-ui" fontWeight="bold">
         STEP 5
       </text>
       {/* Other icons */}
@@ -462,26 +341,11 @@ function HomeScreenSvg() {
           App
         </text>
       ))}
-      <text
-        x="156"
-        y="124"
-        fontSize="6"
-        textAnchor="middle"
-        fill="#94a3b8"
-        fontFamily="system-ui"
-      >
+      <text x="156" y="124" fontSize="6" textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">
         Photos
       </text>
       {/* Dock */}
-      <rect
-        x="28"
-        y="320"
-        width="184"
-        height="60"
-        rx="16"
-        fill="#1e293b"
-        fillOpacity="0.5"
-      />
+      <rect x="28" y="320" width="184" height="60" rx="16" fill="#1e293b" fillOpacity="0.5" />
       {[0, 1, 2].map((col) => (
         <rect
           key={`dock-${col}`}
@@ -493,34 +357,13 @@ function HomeScreenSvg() {
           fill="#334155"
         />
       ))}
-      <text
-        x="66"
-        y="382"
-        fontSize="6"
-        textAnchor="middle"
-        fill="#94a3b8"
-        fontFamily="system-ui"
-      >
+      <text x="66" y="382" fontSize="6" textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">
         Phone
       </text>
-      <text
-        x="122"
-        y="382"
-        fontSize="6"
-        textAnchor="middle"
-        fill="#94a3b8"
-        fontFamily="system-ui"
-      >
+      <text x="122" y="382" fontSize="6" textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">
         Messages
       </text>
-      <text
-        x="178"
-        y="382"
-        fontSize="6"
-        textAnchor="middle"
-        fill="#94a3b8"
-        fontFamily="system-ui"
-      >
+      <text x="178" y="382" fontSize="6" textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">
         Chrome
       </text>
       {/* Home indicator */}
@@ -542,24 +385,9 @@ function ConfirmInstallSvg() {
         strokeWidth="3"
         fill="#f8fafc"
       />
-      <rect
-        x="28"
-        y="30"
-        width="184"
-        height="396"
-        rx="2"
-        fill="#f1f5f9"
-        opacity="0.3"
-      />
+      <rect x="28" y="30" width="184" height="396" rx="2" fill="#f1f5f9" opacity="0.3" />
       {/* Backdrop overlay */}
-      <rect
-        x="28"
-        y="30"
-        width="184"
-        height="396"
-        fill="black"
-        fillOpacity="0.4"
-      />
+      <rect x="28" y="30" width="184" height="396" fill="black" fillOpacity="0.4" />
       {/* Install dialog */}
       <rect x="30" y="130" width="180" height="200" rx="16" fill="white" />
       <rect x="90" y="148" width="60" height="60" rx="14" fill="#021e40" />
@@ -585,24 +413,10 @@ function ConfirmInstallSvg() {
       >
         CRE8MARKET
       </text>
-      <text
-        x="120"
-        y="236"
-        fontSize="8"
-        textAnchor="middle"
-        fill="#64748b"
-        fontFamily="system-ui"
-      >
+      <text x="120" y="236" fontSize="8" textAnchor="middle" fill="#64748b" fontFamily="system-ui">
         cre8market.com
       </text>
-      <text
-        x="120"
-        y="258"
-        fontSize="8"
-        textAnchor="middle"
-        fill="#475569"
-        fontFamily="system-ui"
-      >
+      <text x="120" y="258" fontSize="8" textAnchor="middle" fill="#475569" fontFamily="system-ui">
         Add to Home screen
       </text>
       {/* Cancel button */}
@@ -634,14 +448,7 @@ function ConfirmInstallSvg() {
       {/* Arrow callout */}
       <path d="M200 278 L220 268 L230 268" stroke="#dc2626" strokeWidth="1.5" />
       <polygon points="230,268 223,264 223,272" fill="#dc2626" />
-      <text
-        x="218"
-        y="262"
-        fontSize="6"
-        fill="#dc2626"
-        fontFamily="system-ui"
-        fontWeight="bold"
-      >
+      <text x="218" y="262" fontSize="6" fill="#dc2626" fontFamily="system-ui" fontWeight="bold">
         STEP 4
       </text>
       {/* Home indicator */}
@@ -654,8 +461,7 @@ const WHY_INSTALL = [
   {
     icon: Zap,
     title: "Faster access",
-    description:
-      "Open the app directly from your home screen — no typing a URL.",
+    description: "Open the app directly from your home screen — no typing a URL.",
   },
   {
     icon: Bell,
@@ -843,8 +649,8 @@ export default async function InstallPage() {
               </div>
 
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Android devices (Chrome browser) support adding this website to
-                your home screen as an app. Follow the steps below:
+                Android devices (Chrome browser) support adding this website to your home screen as
+                an app. Follow the steps below:
               </p>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -879,9 +685,7 @@ export default async function InstallPage() {
                       {s.step}
                     </span>
                     <div>
-                      <p className="text-sm font-bold text-foreground">
-                        {s.title}
-                      </p>
+                      <p className="text-sm font-bold text-foreground">{s.title}</p>
                       <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                         {s.desc}
                       </p>
@@ -916,9 +720,8 @@ export default async function InstallPage() {
                 For the best experience, use Google Chrome on iPhone/iPad.
               </p>
               <p className="mt-1 leading-relaxed">
-                Chrome gives a smoother install flow and supports push
-                notifications so you can receive deal alerts and updates even
-                when the app is not open.
+                Chrome gives a smoother install flow and supports push notifications so you can
+                receive deal alerts and updates even when the app is not open.
               </p>
             </div>
 
@@ -927,8 +730,8 @@ export default async function InstallPage() {
                 Recommended flow
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Open in Chrome → Tap the menu → Choose &quot;Install app&quot; or
-                &quot;Add to Home Screen&quot;
+                Open in Chrome → Tap the menu → Choose &quot;Install app&quot; or &quot;Add to Home
+                Screen&quot;
               </p>
               <div className="mt-3">
                 <IPhoneSvg />
@@ -943,9 +746,7 @@ export default async function InstallPage() {
                   </span>
                   <div>
                     <p className="text-sm font-bold text-foreground">{s.title}</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                      {s.desc}
-                    </p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{s.desc}</p>
                   </div>
                 </li>
               ))}
@@ -966,9 +767,8 @@ export default async function InstallPage() {
                 </h2>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Once installed, the app icon appears on your home screen just
-                like any other app. Tap it to launch directly — no browser
-                needed.
+                Once installed, the app icon appears on your home screen just like any other app.
+                Tap it to launch directly — no browser needed.
               </p>
               <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
                 <Check className="h-3.5 w-3.5" />
@@ -990,10 +790,7 @@ export default async function InstallPage() {
             </p>
             <ul className="mt-4 space-y-2.5">
               {TIPS.map((tip) => (
-                <li
-                  key={tip}
-                  className="flex items-start gap-2.5 text-sm text-muted-foreground"
-                >
+                <li key={tip} className="flex items-start gap-2.5 text-sm text-muted-foreground">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
                   <span className="leading-relaxed">{tip}</span>
                 </li>

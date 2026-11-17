@@ -8,8 +8,8 @@ function deployedUrl(): string | undefined {
   // prefer the stable production domain.
   const host =
     process.env.VERCEL_ENV === "production"
-      ? process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL
-      : process.env.VERCEL_URL ?? process.env.VERCEL_PROJECT_PRODUCTION_URL;
+      ? (process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL)
+      : (process.env.VERCEL_URL ?? process.env.VERCEL_PROJECT_PRODUCTION_URL);
   return host ? `https://${host}` : undefined;
 }
 

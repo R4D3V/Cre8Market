@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   ArrowUpRight,
   ClipboardList,
@@ -10,14 +9,15 @@ import {
   UserCircle,
   Users,
 } from "lucide-react";
+import Link from "next/link";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import { AdminStatCard } from "@/components/admin/AdminStatCard";
-import { SubscriptionHealth } from "@/components/admin/SubscriptionHealth";
+import { FeatureFlagsPanel } from "@/components/admin/FeatureFlagsPanel";
 import { NeedsAttention } from "@/components/admin/NeedsAttention";
 import { RecentActivity } from "@/components/admin/RecentActivity";
 import { RecentListings } from "@/components/admin/RecentListings";
 import { StoreIdentityCard } from "@/components/admin/StoreIdentityCard";
-import { FeatureFlagsPanel } from "@/components/admin/FeatureFlagsPanel";
+import { SubscriptionHealth } from "@/components/admin/SubscriptionHealth";
 import { auth } from "@/lib/auth";
 import {
   getAdminOverview,
@@ -79,15 +79,14 @@ export default async function AdminDashboardPage() {
   const session = await auth();
   if (session?.user?.role !== "admin") return null;
 
-  const [overview, admins, auditEntries, recentProducts, storeProfile, flags] =
-    await Promise.all([
-      getAdminOverview(),
-      getAdminUsers(),
-      getAuditLog({ limit: 8 }),
-      getRecentProductsWithOwners(5),
-      getStoreAdminProfile(),
-      getFeatureFlags(),
-    ]);
+  const [overview, admins, auditEntries, recentProducts, storeProfile, flags] = await Promise.all([
+    getAdminOverview(),
+    getAdminUsers(),
+    getAuditLog({ limit: 8 }),
+    getRecentProductsWithOwners(5),
+    getStoreAdminProfile(),
+    getFeatureFlags(),
+  ]);
 
   const isMainAdmin = admins.length > 0 && admins[0].id === session?.user?.id;
   const quickActions = isMainAdmin
@@ -150,10 +149,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <StoreIdentityCard
-          avatar={storeProfile.avatar}
-          banner={storeProfile.banner}
-        />
+        <StoreIdentityCard avatar={storeProfile.avatar} banner={storeProfile.banner} />
         <FeatureFlagsPanel initialFlags={flags} />
       </div>
 
@@ -172,12 +168,8 @@ export default async function AdminDashboardPage() {
                 <Icon className="size-4" />
               </span>
               <span className="min-w-0">
-                <span className="block font-semibold text-foreground">
-                  {label}
-                </span>
-                <span className="block text-sm text-muted-foreground">
-                  {description}
-                </span>
+                <span className="block font-semibold text-foreground">{label}</span>
+                <span className="block text-sm text-muted-foreground">{description}</span>
               </span>
             </Link>
           ))}

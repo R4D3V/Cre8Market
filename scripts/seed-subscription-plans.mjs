@@ -3,9 +3,47 @@ import pg from "pg";
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 
 const plans = [
-  { name: "Free", price: 0, period: "Free Forever", features: ["Up to 3 active product listings", "Up to 3 photos per listing", "Direct WhatsApp and phone contact"], highlight: false, icon: "user", sort_order: 0 },
-  { name: "Standard", price: 10000, period: "2 Months", features: ["Up to 20 active product listings", "Up to 5 photos per listing", "Verified seller badge (after verification)", "Direct WhatsApp and phone contact"], highlight: true, icon: "star", sort_order: 1 },
-  { name: "Premium", price: 35000, period: "2 Months", features: ["Unlimited active product listings", "Up to 7 photos per listing", "Verified seller badge (after verification)", "Featured product opportunities"], highlight: false, icon: "rocket", sort_order: 2 },
+  {
+    name: "Free",
+    price: 0,
+    period: "Free Forever",
+    features: [
+      "Up to 3 active product listings",
+      "Up to 3 photos per listing",
+      "Direct WhatsApp and phone contact",
+    ],
+    highlight: false,
+    icon: "user",
+    sort_order: 0,
+  },
+  {
+    name: "Standard",
+    price: 10000,
+    period: "2 Months",
+    features: [
+      "Up to 20 active product listings",
+      "Up to 5 photos per listing",
+      "Verified seller badge (after verification)",
+      "Direct WhatsApp and phone contact",
+    ],
+    highlight: true,
+    icon: "star",
+    sort_order: 1,
+  },
+  {
+    name: "Premium",
+    price: 35000,
+    period: "2 Months",
+    features: [
+      "Unlimited active product listings",
+      "Up to 7 photos per listing",
+      "Verified seller badge (after verification)",
+      "Featured product opportunities",
+    ],
+    highlight: false,
+    icon: "rocket",
+    sort_order: 2,
+  },
 ];
 
 try {

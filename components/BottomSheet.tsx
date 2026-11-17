@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { haptic } from "@/lib/haptics";
 
@@ -22,7 +22,11 @@ const FOCUSABLE =
  */
 export default function BottomSheet({ open, onClose, title, children, footer }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
-  const drag = useRef<{ startY: number; dy: number; active: boolean }>({ startY: 0, dy: 0, active: false });
+  const drag = useRef<{ startY: number; dy: number; active: boolean }>({
+    startY: 0,
+    dy: 0,
+    active: false,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -127,7 +131,9 @@ export default function BottomSheet({ open, onClose, title, children, footer }: 
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-4">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-4">
+          {children}
+        </div>
 
         {footer && <div className="shrink-0 border-t border-border px-5 py-3">{footer}</div>}
       </div>

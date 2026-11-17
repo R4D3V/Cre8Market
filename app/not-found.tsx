@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { SearchX } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import Link from "next/link";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export default function NotFound() {
@@ -13,11 +13,12 @@ export default function NotFound() {
           <div className="rounded-2xl border border-border/70 bg-card/80 text-foreground inline-flex items-center justify-center w-24 h-24 rounded-2xl mb-6 mx-auto">
             <SearchX className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-4xl font-extrabold font-heading text-foreground mb-2 sm:text-5xl">404</h1>
+          <h1 className="text-4xl font-extrabold font-heading text-foreground mb-2 sm:text-5xl">
+            404
+          </h1>
           <p className="text-muted-foreground mb-2">Page not found</p>
           <p className="text-muted-foreground text-sm mb-8">
-            The page you&apos;re looking for doesn&apos;t exist or has been
-            moved.
+            The page you&apos;re looking for doesn&apos;t exist or has been moved.
           </p>
           <Link
             href="/"

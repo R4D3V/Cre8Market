@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-import Image from "next/image";
 import {
   BadgeCheck,
   Bitcoin,
@@ -13,13 +11,15 @@ import {
   User,
   Wallet,
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import type { Metadata } from "next";
+import Image from "next/image";
+import CopyButton from "@/components/CopyButton";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
-import CopyButton from "@/components/CopyButton";
-import { PLANS, PLAN_BENEFITS, PLAN_SLOGAN } from "@/lib/plans";
 import { fetchSubscriptionPlansAction } from "@/lib/actions/subscriptions";
+import { PLAN_BENEFITS, PLAN_SLOGAN, PLANS } from "@/lib/plans";
 
 export const metadata: Metadata = {
   title: "Seller Subscriptions | CRE8MARKET Entebbe",
@@ -229,18 +229,13 @@ export default async function SubscriptionPage() {
                     <p className="mt-2 bg-gradient-to-r from-primary to-emerald-300 bg-clip-text font-heading text-3xl font-extrabold tracking-tight text-transparent">
                       {plan.price}
                     </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {plan.period}
-                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{plan.period}</p>
 
                     <div className="my-5 h-px bg-border/60" />
 
                     <ul className="flex-1 space-y-3">
                       {plan.features.map((f) => (
-                        <li
-                          key={f}
-                          className="flex items-start gap-2.5 text-sm text-foreground"
-                        >
+                        <li key={f} className="flex items-start gap-2.5 text-sm text-foreground">
                           <span className="mt-0.5 grid h-4.5 w-4.5 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
                             <Check className="h-3 w-3" />
                           </span>
@@ -332,8 +327,8 @@ export default async function SubscriptionPage() {
                     </span>
                   </div>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                    A unique payment option — pay your subscription using the
-                    COINCRAFT ($CC) token and get an exclusive{" "}
+                    A unique payment option — pay your subscription using the COINCRAFT ($CC) token
+                    and get an exclusive{" "}
                     <span className="font-bold text-secondary">20% discount</span>.
                   </p>
                 </div>
@@ -344,9 +339,7 @@ export default async function SubscriptionPage() {
                   <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                     Coin name
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-foreground">
-                    COIN CRAFT ($CC)
-                  </p>
+                  <p className="mt-1 text-sm font-semibold text-foreground">COIN CRAFT ($CC)</p>
                 </div>
                 <div className="rounded-2xl border border-border/60 bg-card/60 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
@@ -360,9 +353,7 @@ export default async function SubscriptionPage() {
                   <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                     Chain
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-foreground">
-                    Solana
-                  </p>
+                  <p className="mt-1 text-sm font-semibold text-foreground">Solana</p>
                 </div>
                 <div className="rounded-2xl border border-border/60 bg-card/60 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
@@ -378,11 +369,10 @@ export default async function SubscriptionPage() {
               </div>
 
               <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-                COIN CRAFT is an open-source, community-owned meme coin on Solana
-                made for fun and the creator community. It has no intrinsic value
-                or expectation of financial return — use it at your own
-                discretion. Nothing here is financial advice; always do your own
-                research.
+                COIN CRAFT is an open-source, community-owned meme coin on Solana made for fun and
+                the creator community. It has no intrinsic value or expectation of financial return
+                — use it at your own discretion. Nothing here is financial advice; always do your
+                own research.
               </p>
 
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
@@ -399,6 +389,7 @@ export default async function SubscriptionPage() {
                   href="https://www.coincraft.cc/"
                   target="_blank"
                   rel="noreferrer"
+                  aria-label="Learn more about CoinCraft"
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-border/70 bg-card/60 px-6 py-3 text-sm font-semibold text-foreground transition hover:border-secondary/50 hover:text-secondary"
                 >
                   Learn more
@@ -450,8 +441,7 @@ export default async function SubscriptionPage() {
                 {PLAN_SLOGAN}
               </p>
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/60">
-                Ready to start selling? Pick a plan and message us on WhatsApp to
-                get set up.
+                Ready to start selling? Pick a plan and message us on WhatsApp to get set up.
               </p>
               <a
                 href={waUrl}

@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
-import { auth } from "@/lib/auth";
-import { getCategories } from "@/lib/db/queries";
 import {
   normalizeCategorySlug,
   normalizeCondition,
-  normalizeSpecs,
   normalizePrice,
+  normalizeSpecs,
 } from "@/lib/ai/normalize";
+import { auth } from "@/lib/auth";
+import { getCategories } from "@/lib/db/queries";
 
 // Simple in-memory per-IP rate limiter for the AI endpoint (best-effort; resets
 // on cold start). Limits abuse of the OpenAI-backed endpoint.
@@ -51,18 +51,14 @@ export async function POST(request: Request) {
     const title = typeof body?.title === "string" ? body.title.trim() : "";
 
     if (!title) {
-      return NextResponse.json(
-        { error: "Product title is required." },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Product title is required." }, { status: 400 });
     }
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
         {
-          error:
-            "OpenAI is not configured. Add OPENAI_API_KEY to your environment.",
+          error: "OpenAI is not configured. Add OPENAI_API_KEY to your environment.",
         },
         { status: 500 },
       );
@@ -105,35 +101,26 @@ export async function POST(request: Request) {
 
     const content = completion.choices[0]?.message?.content;
     if (!content) {
-      return NextResponse.json(
-        { error: "AI returned an empty response." },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "AI returned an empty response." }, { status: 500 });
     }
 
     let parsed: Record<string, unknown>;
     try {
       parsed = JSON.parse(content) as Record<string, unknown>;
     } catch {
-      return NextResponse.json(
-        { error: "AI returned invalid JSON." },
-        { status: 500 },
-      );
+      return NextResponse.json({ error: "AI returned invalid JSON." }, { status: 500 });
     }
 
     const result = {
       categorySlug: normalizeCategorySlug(
-        typeof parsed.categorySlug === "string"
-          ? parsed.categorySlug
-          : undefined,
+        typeof parsed.categorySlug === "string" ? parsed.categorySlug : undefined,
         validSlugs,
       ),
       condition: normalizeCondition(
         typeof parsed.condition === "string" ? parsed.condition : undefined,
       ),
       description:
-        typeof parsed.description === "string" &&
-        parsed.description.trim().length > 0
+        typeof parsed.description === "string" && parsed.description.trim().length > 0
           ? parsed.description.trim()
           : `Great condition ${title}. Ideal for everyday use and ready to sell.`,
       specs: normalizeSpecs(parsed.specs),
@@ -145,10 +132,7 @@ export async function POST(request: Request) {
     console.error("AI product fill error:", error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to generate product details.",
+        error: error instanceof Error ? error.message : "Failed to generate product details.",
       },
       { status: 500 },
     );

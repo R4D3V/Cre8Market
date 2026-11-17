@@ -1,21 +1,37 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 
-const icons = ['📱', '💻', '🖥️', '📺', '🚗', '👟', '👗', '⌚', '🎧', '🔌', '📷', '🧊', '🛋️', '🏠', '📦']
+const icons = [
+  "📱",
+  "💻",
+  "🖥️",
+  "📺",
+  "🚗",
+  "👟",
+  "👗",
+  "⌚",
+  "🎧",
+  "🔌",
+  "📷",
+  "🧊",
+  "🛋️",
+  "🏠",
+  "📦",
+];
 
-const animations = ['float-lr']
+const animations = ["float-lr"];
 
 interface FloatingIcon {
-  icon: string
-  y: number
-  size: number
-  duration: number
-  delay: number
+  icon: string;
+  y: number;
+  size: number;
+  duration: number;
+  delay: number;
 }
 
 export default function FloatingIcons() {
-  const [items, setItems] = useState<FloatingIcon[]>([])
+  const [items, setItems] = useState<FloatingIcon[]>([]);
 
   useEffect(() => {
     const generated: FloatingIcon[] = icons.map((icon) => ({
@@ -24,9 +40,9 @@ export default function FloatingIcons() {
       size: 16 + Math.random() * 48,
       duration: 24 + Math.random() * 24,
       delay: Math.random() * 20,
-    }))
-    setItems(generated)
-  }, [])
+    }));
+    setItems(generated);
+  }, []);
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
@@ -45,5 +61,5 @@ export default function FloatingIcons() {
         </span>
       ))}
     </div>
-  )
+  );
 }

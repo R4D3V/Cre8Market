@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import { Download, Share, SquarePlus, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import BottomSheet from "@/components/BottomSheet";
 import { useInstall } from "@/hooks/useInstall";
 import { haptic } from "@/lib/haptics";
@@ -46,6 +46,7 @@ export default function InstallPrompt() {
     countSessionOnce();
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: count a view on every route change
   useEffect(() => {
     pageViews.current += 1;
   }, [pathname]);
@@ -95,7 +96,9 @@ export default function InstallPrompt() {
             <img src="/icons/icon-192.png" alt="" className="size-12 shrink-0 rounded-xl" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-extrabold text-foreground">Get the Cre8Market app</p>
-              <p className="text-xs text-muted-foreground">Faster, full-screen, and works offline.</p>
+              <p className="text-xs text-muted-foreground">
+                Faster, full-screen, and works offline.
+              </p>
             </div>
             <button
               type="button"
@@ -117,14 +120,19 @@ export default function InstallPrompt() {
         </section>
       )}
 
-      <BottomSheet open={iosHelpOpen} onClose={() => setIosHelpOpen(false)} title="Add to Home Screen">
+      <BottomSheet
+        open={iosHelpOpen}
+        onClose={() => setIosHelpOpen(false)}
+        title="Add to Home Screen"
+      >
         <ol className="space-y-4 pt-1 text-sm text-muted-foreground">
           <li className="flex items-start gap-3">
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
               <Share className="size-5" aria-hidden="true" />
             </span>
             <span>
-              Tap the <strong className="text-foreground">Share</strong> button in your browser&apos;s toolbar.
+              Tap the <strong className="text-foreground">Share</strong> button in your
+              browser&apos;s toolbar.
             </span>
           </li>
           <li className="flex items-start gap-3">
@@ -132,8 +140,8 @@ export default function InstallPrompt() {
               <SquarePlus className="size-5" aria-hidden="true" />
             </span>
             <span>
-              Scroll down and choose <strong className="text-foreground">Add to Home Screen</strong>, then tap{" "}
-              <strong className="text-foreground">Add</strong>.
+              Scroll down and choose <strong className="text-foreground">Add to Home Screen</strong>
+              , then tap <strong className="text-foreground">Add</strong>.
             </span>
           </li>
           <li className="flex items-start gap-3">
@@ -141,8 +149,8 @@ export default function InstallPrompt() {
               <Download className="size-5" aria-hidden="true" />
             </span>
             <span>
-              Open <strong className="text-foreground">Cre8Market</strong> from your Home Screen. You can then turn on
-              notifications for deals and seller replies.
+              Open <strong className="text-foreground">Cre8Market</strong> from your Home Screen.
+              You can then turn on notifications for deals and seller replies.
             </span>
           </li>
         </ol>

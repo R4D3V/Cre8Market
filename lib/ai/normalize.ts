@@ -1,16 +1,12 @@
 const fallbackCategory = "electronics";
 
-export function normalizeCategorySlug(
-  value: string | undefined,
-  validSlugs: string[],
-) {
+export function normalizeCategorySlug(value: string | undefined, validSlugs: string[]) {
   if (!value) return fallbackCategory;
   const clean = String(value).trim().toLowerCase();
   if (validSlugs.includes(clean)) return clean;
 
   const exactMatch = validSlugs.find(
-    (slug) =>
-      slug === clean || slug.replace(/-/g, " ") === clean.replace(/-/g, " "),
+    (slug) => slug === clean || slug.replace(/-/g, " ") === clean.replace(/-/g, " "),
   );
   if (exactMatch) return exactMatch;
 
@@ -41,22 +37,14 @@ export function normalizeCategorySlug(
     if (lowered.includes(keyword)) return slug;
   }
 
-  return validSlugs.includes("electronics")
-    ? "electronics"
-    : validSlugs[0] || fallbackCategory;
+  return validSlugs.includes("electronics") ? "electronics" : validSlugs[0] || fallbackCategory;
 }
 
-const ALLOWED_CONDITIONS = [
-  "New",
-  "Used",
-  "Refurbished",
-] as const;
+const ALLOWED_CONDITIONS = ["New", "Used", "Refurbished"] as const;
 
 export function normalizeCondition(value: string | undefined) {
   const cleaned = String(value ?? "").trim();
-  return ALLOWED_CONDITIONS.includes(
-    cleaned as (typeof ALLOWED_CONDITIONS)[number],
-  )
+  return ALLOWED_CONDITIONS.includes(cleaned as (typeof ALLOWED_CONDITIONS)[number])
     ? cleaned
     : "Used";
 }

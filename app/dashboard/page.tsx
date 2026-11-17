@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRight,
@@ -18,37 +16,29 @@ import {
   Tag,
   UserCircle,
 } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
-import { fetchMyProfileAction } from "@/lib/actions/users";
+import { fetchMyListingLimitAction, fetchMyProductsAction } from "@/lib/actions/products";
 import { fetchMySubscriptionAction } from "@/lib/actions/subscriptions";
-import {
-  fetchMyListingLimitAction,
-  fetchMyProductsAction,
-} from "@/lib/actions/products";
+import { fetchMyProfileAction } from "@/lib/actions/users";
 import { formatPrice } from "@/lib/data";
-import {
-  getCurrentPlanName,
-  getPlanByName,
-  planTierFromName,
-  type PlanName,
-} from "@/lib/plans";
-import type { AppUser, Product, UserSubscription } from "@/lib/types";
+import { getCurrentPlanName, getPlanByName, type PlanName, planTierFromName } from "@/lib/plans";
 import { sellerPath } from "@/lib/seller-handle";
+import type { AppUser, Product, UserSubscription } from "@/lib/types";
 
 const HUB_CARDS = [
   {
     href: "/dashboard/profile",
     icon: UserCircle,
     label: "Profile",
-    description:
-      "View and edit your name, phone, WhatsApp, avatar and banner.",
+    description: "View and edit your name, phone, WhatsApp, avatar and banner.",
   },
   {
     href: "/dashboard/products",
     icon: Package,
     label: "Products",
-    description:
-      "Manage your listings: add, edit, duplicate or delete products.",
+    description: "Manage your listings: add, edit, duplicate or delete products.",
   },
 ];
 
@@ -69,9 +59,7 @@ function daysUntil(value: string | null, now: number) {
 export default function DashboardHubPage() {
   const [now] = useState(() => Date.now());
   const [profile, setProfile] = useState<AppUser | null>(null);
-  const [subscription, setSubscription] = useState<UserSubscription | null>(
-    null,
-  );
+  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [limitInfo, setLimitInfo] = useState<ListingLimit | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [copied, setCopied] = useState(false);
@@ -106,17 +94,18 @@ export default function DashboardHubPage() {
   const subscriptionActive =
     !!subscription &&
     subscription.status === "active" &&
-    (!subscription.expiresAt ||
-      new Date(subscription.expiresAt).getTime() > now);
+    (!subscription.expiresAt || new Date(subscription.expiresAt).getTime() > now);
   const subscriptionExpired = !!subscription && !subscriptionActive;
   const flagPlan = getCurrentPlanName(profile ?? {});
-  const planName = (subscriptionExpired
-    ? "Free"
-    : flagPlan !== "Free"
-      ? flagPlan
-      : subscriptionActive && subscription?.planName
-        ? (planTierFromName(subscription.planName) ?? "Free")
-        : "Free") as PlanName;
+  const planName = (
+    subscriptionExpired
+      ? "Free"
+      : flagPlan !== "Free"
+        ? flagPlan
+        : subscriptionActive && subscription?.planName
+          ? (planTierFromName(subscription.planName) ?? "Free")
+          : "Free"
+  ) as PlanName;
   const plan = getPlanByName(planName);
   const expiresInDays = daysUntil(subscription?.expiresAt ?? null, now);
 
@@ -124,11 +113,8 @@ export default function DashboardHubPage() {
   const listingLimit = limitInfo?.limit ?? null;
   const quotaFull = listingLimit !== null && productCount >= listingLimit;
   const quotaPercent =
-    listingLimit !== null
-      ? Math.min(100, Math.round((productCount / listingLimit) * 100))
-      : 100;
-  const remaining =
-    listingLimit !== null ? Math.max(listingLimit - productCount, 0) : null;
+    listingLimit !== null ? Math.min(100, Math.round((productCount / listingLimit) * 100)) : 100;
+  const remaining = listingLimit !== null ? Math.max(listingLimit - productCount, 0) : null;
 
   const dealCount = products.filter((product) => product.isDeal).length;
   const featuredCount = products.filter((product) => product.featured).length;
@@ -167,9 +153,7 @@ export default function DashboardHubPage() {
     },
   ];
   const completed = checklist.filter((item) => item.done).length;
-  const completionPercent = Math.round(
-    (completed / checklist.length) * 100,
-  );
+  const completionPercent = Math.round((completed / checklist.length) * 100);
   const storefrontPath = profile ? sellerPath(profile) : null;
 
   async function handleCopy() {
@@ -188,18 +172,11 @@ export default function DashboardHubPage() {
     if (!profile || !storefrontPath) return;
     const url = `${window.location.origin}${storefrontPath}`;
     const text = `Check out my store on CRE8MARKET: ${profile.name} — ${url}`;
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(text)}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   }
 
   return (
-    <DashboardPanel
-      title="Dashboard"
-      description="Manage your account, listings and storefront."
-    >
+    <DashboardPanel title="Dashboard" description="Manage your account, listings and storefront.">
       {/* Plan + status */}
       <div className="mb-6 rounded-2xl border border-border/70 bg-muted/30 p-4 sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -225,9 +202,7 @@ export default function DashboardHubPage() {
             </p>
             <p
               className={`mt-1 text-xs ${
-                subscriptionExpired
-                  ? "text-rose-600"
-                  : "text-muted-foreground"
+                subscriptionExpired ? "text-rose-600" : "text-muted-foreground"
               }`}
             >
               {subscription?.expiresAt
@@ -236,16 +211,12 @@ export default function DashboardHubPage() {
                       expiresInDays === 0
                         ? "today"
                         : `in ${expiresInDays} day${expiresInDays === 1 ? "" : "s"}`
-                    } · ${new Date(
-                      subscription.expiresAt,
-                    ).toLocaleDateString(undefined, {
+                    } · ${new Date(subscription.expiresAt).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
                     })}`
-                  : `Expired ${new Date(
-                      subscription.expiresAt,
-                    ).toLocaleDateString(undefined, {
+                  : `Expired ${new Date(subscription.expiresAt).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
@@ -265,10 +236,7 @@ export default function DashboardHubPage() {
         {plan && (
           <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-border/60 pt-3">
             {plan.features.map((feature) => (
-              <li
-                key={feature}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground"
-              >
+              <li key={feature} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <CheckCircle2 className="size-3.5 shrink-0 text-primary" />
                 {feature}
               </li>
@@ -290,69 +258,69 @@ export default function DashboardHubPage() {
       {/* Quota + snapshot */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {planName !== "Premium" && (
-                  <section className="rounded-2xl border border-border/70 bg-card/70 p-5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
-                          Listing quota
-                        </h2>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {listingLimit === null
-                            ? "Unlimited listings on your plan."
-                            : `${productCount} of ${listingLimit} listings used`}
-                        </p>
-                      </div>
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
-                        <Tag className="size-4" />
-                      </span>
-                    </div>
-          
-                    {listingLimit !== null && (
-                      <div className="mt-4">
-                        <div
-                          className="h-2 w-full overflow-hidden rounded-full bg-muted"
-                          role="progressbar"
-                          aria-valuemin={0}
-                          aria-valuemax={listingLimit}
-                          aria-valuenow={productCount}
-                          aria-label="Listing quota used"
-                        >
-                          <div
-                            className={`h-full rounded-full transition-all ${
-                              quotaFull ? "bg-rose-500" : "bg-primary"
-                            }`}
-                            style={{ width: `${quotaPercent}%` }}
-                          />
-                        </div>
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          {remaining !== null && remaining > 0
-                            ? `${remaining} listing${remaining === 1 ? "" : "s"} left on your current plan.`
-                            : "You have used every listing on your current plan."}
-                        </p>
-                      </div>
-                    )}
-          
-                    {quotaFull && (
-                      <div className="mt-3 flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/5 p-3">
-                        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-rose-600" />
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-foreground">
-                            Your listing limit is full
-                          </p>
-                          <p className="mt-0.5 text-xs text-muted-foreground">
-                            Delete a listing or upgrade to add more.
-                          </p>
-                          <Link
-                            href="/subscription"
-                            className="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
-                          >
-                            View plans
-                            <ArrowRight className="size-3.5" />
-                          </Link>
-                        </div>
-                      </div>
-                    )}
-                  </section>
+          <section className="rounded-2xl border border-border/70 bg-card/70 p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
+                  Listing quota
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {listingLimit === null
+                    ? "Unlimited listings on your plan."
+                    : `${productCount} of ${listingLimit} listings used`}
+                </p>
+              </div>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+                <Tag className="size-4" />
+              </span>
+            </div>
+
+            {listingLimit !== null && (
+              <div className="mt-4">
+                <div
+                  className="h-2 w-full overflow-hidden rounded-full bg-muted"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={listingLimit}
+                  aria-valuenow={productCount}
+                  aria-label="Listing quota used"
+                >
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      quotaFull ? "bg-rose-500" : "bg-primary"
+                    }`}
+                    style={{ width: `${quotaPercent}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {remaining !== null && remaining > 0
+                    ? `${remaining} listing${remaining === 1 ? "" : "s"} left on your current plan.`
+                    : "You have used every listing on your current plan."}
+                </p>
+              </div>
+            )}
+
+            {quotaFull && (
+              <div className="mt-3 flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/5 p-3">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-rose-600" />
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-foreground">
+                    Your listing limit is full
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Delete a listing or upgrade to add more.
+                  </p>
+                  <Link
+                    href="/subscription"
+                    className="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                  >
+                    View plans
+                    <ArrowRight className="size-3.5" />
+                  </Link>
+                </div>
+              </div>
+            )}
+          </section>
         )}
 
         <section className="rounded-2xl border border-border/70 bg-card/70 p-5">
@@ -361,9 +329,7 @@ export default function DashboardHubPage() {
               <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
                 Listing snapshot
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                How your shop looks right now.
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">How your shop looks right now.</p>
             </div>
             <Link
               href="/dashboard/products"
@@ -380,10 +346,7 @@ export default function DashboardHubPage() {
               { label: "Deals", value: dealCount, icon: Tag },
               { label: "Featured", value: featuredCount, icon: Star },
             ].map(({ label, value, icon: Icon }) => (
-              <div
-                key={label}
-                className="rounded-xl border border-border/60 bg-muted/20 p-3"
-              >
+              <div key={label} className="rounded-xl border border-border/60 bg-muted/20 p-3">
                 <Icon className="size-4 text-primary" />
                 <p className="mt-1.5 font-heading text-xl font-extrabold text-foreground">
                   {value}
@@ -473,10 +436,7 @@ export default function DashboardHubPage() {
 
           <ul className="mt-3 space-y-1">
             {checklist.map(({ label, done, hint }) => (
-              <li
-                key={label}
-                className="flex items-start gap-2.5 rounded-lg px-1 py-1.5"
-              >
+              <li key={label} className="flex items-start gap-2.5 rounded-lg px-1 py-1.5">
                 {done ? (
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
                 ) : (
@@ -490,9 +450,7 @@ export default function DashboardHubPage() {
                   >
                     {label}
                   </span>
-                  <span className="block text-[11px] text-muted-foreground">
-                    {hint}
-                  </span>
+                  <span className="block text-[11px] text-muted-foreground">{hint}</span>
                 </span>
               </li>
             ))}
@@ -551,8 +509,7 @@ export default function DashboardHubPage() {
             </div>
 
             <p className="mt-3 text-xs text-muted-foreground">
-              This is the page buyers see when they open your shop. Share it to
-              get more views.
+              This is the page buyers see when they open your shop. Share it to get more views.
             </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -606,9 +563,7 @@ export default function DashboardHubPage() {
             <h3 className="relative mt-1 font-heading text-lg font-extrabold tracking-tight text-foreground">
               {label}
             </h3>
-            <p className="relative text-sm text-muted-foreground">
-              {description}
-            </p>
+            <p className="relative text-sm text-muted-foreground">{description}</p>
             <span className="relative mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">
               Open {label}
               <ArrowUpRight className="size-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

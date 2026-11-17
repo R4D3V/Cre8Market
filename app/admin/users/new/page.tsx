@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Camera, CheckCircle2, ImagePlus } from "lucide-react";
-import { createUserByAdminAction } from "@/lib/actions/users";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { PhoneInput, toFullNumber } from "@/components/PhoneInput";
+import { createUserByAdminAction } from "@/lib/actions/users";
 import { compressImage } from "@/lib/imageCompress";
 
 export default function AdminNewUserPage() {
@@ -69,13 +69,8 @@ export default function AdminNewUserPage() {
   return (
     <div className="max-w-xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-extrabold text-foreground font-heading">
-          Add User
-        </h1>
-        <Link
-          href="/admin/users"
-          className="text-sm text-primary font-semibold hover:underline"
-        >
+        <h1 className="text-2xl font-extrabold text-foreground font-heading">Add User</h1>
+        <Link href="/admin/users" className="text-sm text-primary font-semibold hover:underline">
           ← Back to Users
         </Link>
       </div>
@@ -88,9 +83,7 @@ export default function AdminNewUserPage() {
           <h2 className="font-heading text-xl font-bold text-foreground mb-2">
             User added successfully
           </h2>
-          <p className="text-muted-foreground text-sm">
-            Redirecting back to users…
-          </p>
+          <p className="text-muted-foreground text-sm">Redirecting back to users…</p>
         </div>
       ) : (
         <form onSubmit={handleCreate} className="neu-card p-5 space-y-3">
@@ -138,9 +131,7 @@ export default function AdminNewUserPage() {
                 required
                 type="text"
                 value={form.password}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, password: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
                 className="neu-inset w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                 placeholder="At least 6 characters"
               />
@@ -175,9 +166,7 @@ export default function AdminNewUserPage() {
             </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <p className="mb-2 text-xs font-semibold text-muted-foreground">
-                  Profile photo
-                </p>
+                <p className="mb-2 text-xs font-semibold text-muted-foreground">Profile photo</p>
                 <div className="flex items-center gap-3">
                   <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xl font-bold text-primary-foreground">
                     {avatar ? (
@@ -198,9 +187,7 @@ export default function AdminNewUserPage() {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(e) =>
-                          handleAvatarUpload(e.target.files?.[0] ?? null)
-                        }
+                        onChange={(e) => handleAvatarUpload(e.target.files?.[0] ?? null)}
                       />
                     </label>
                     {avatar && (
@@ -222,11 +209,7 @@ export default function AdminNewUserPage() {
                 </p>
                 {banner && (
                   <div className="mb-2 overflow-hidden rounded-lg border border-border">
-                    <img
-                      src={banner}
-                      alt="Banner preview"
-                      className="h-16 w-full object-cover"
-                    />
+                    <img src={banner} alt="Banner preview" className="h-16 w-full object-cover" />
                   </div>
                 )}
                 <div className="flex flex-wrap items-center gap-2">
@@ -237,9 +220,7 @@ export default function AdminNewUserPage() {
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={(e) =>
-                        handleBannerUpload(e.target.files?.[0] ?? null)
-                      }
+                      onChange={(e) => handleBannerUpload(e.target.files?.[0] ?? null)}
                     />
                   </label>
                   {banner && (
@@ -255,8 +236,7 @@ export default function AdminNewUserPage() {
               </div>
             </div>
             <p className="mt-2 text-[11px] text-muted-foreground">
-              Shown on this seller&apos;s public profile. Wide images work best
-              for banners.
+              Shown on this seller&apos;s public profile. Wide images work best for banners.
             </p>
           </div>
 

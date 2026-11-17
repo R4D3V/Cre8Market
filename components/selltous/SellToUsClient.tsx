@@ -1,7 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   ArrowRight,
   Banknote,
@@ -19,8 +17,10 @@ import {
   Wallet,
   Zap,
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
@@ -47,18 +47,15 @@ const BENEFITS = [
 const STEPS = [
   {
     title: "Submit your item details",
-    description:
-      "Fill in the form with your item info, condition, and a short description.",
+    description: "Fill in the form with your item info, condition, and a short description.",
   },
   {
     title: "We review & respond",
-    description:
-      "Our team evaluates your item and sends a cash offer on WhatsApp within 24 hours.",
+    description: "Our team evaluates your item and sends a cash offer on WhatsApp within 24 hours.",
   },
   {
     title: "Get paid",
-    description:
-      "Accept the offer, bring your item to Kitoro, Entebbe, and receive instant cash.",
+    description: "Accept the offer, bring your item to Kitoro, Entebbe, and receive instant cash.",
   },
 ];
 
@@ -131,9 +128,7 @@ export default function SellToUsClient() {
                 <Icon className="h-4 w-4" />
               </span>
               <span>
-                <span className="block text-sm font-bold text-foreground">
-                  {title}
-                </span>
+                <span className="block text-sm font-bold text-foreground">{title}</span>
                 <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
                   {description}
                 </span>
@@ -162,9 +157,8 @@ export default function SellToUsClient() {
                   We&apos;re on it!
                 </h2>
                 <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-                  Your item details were sent to our team on WhatsApp. Expect a
-                  cash offer within 24 hours. Have photos ready for a faster
-                  quote.
+                  Your item details were sent to our team on WhatsApp. Expect a cash offer within 24
+                  hours. Have photos ready for a faster quote.
                 </p>
 
                 <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
@@ -219,9 +213,7 @@ export default function SellToUsClient() {
                         <Package className="h-5 w-5" />
                       </span>
                       <div>
-                        <p className="text-sm font-bold text-foreground">
-                          Item details
-                        </p>
+                        <p className="text-sm font-bold text-foreground">Item details</p>
                         <p className="text-xs text-muted-foreground">
                           Fields marked * are required
                         </p>
@@ -349,9 +341,8 @@ export default function SellToUsClient() {
                       <div className="flex items-start gap-3 rounded-2xl border border-secondary/30 bg-secondary/10 p-4">
                         <Camera className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
                         <p className="text-xs leading-relaxed text-secondary">
-                          <strong className="font-bold">Tip:</strong> After
-                          submitting, send clear photos of your item on WhatsApp
-                          for a faster and more accurate offer.
+                          <strong className="font-bold">Tip:</strong> After submitting, send clear
+                          photos of your item on WhatsApp for a faster and more accurate offer.
                         </p>
                       </div>
 
@@ -404,9 +395,7 @@ export default function SellToUsClient() {
                             {index + 1}
                           </span>
                           <div className="pt-0.5">
-                            <p className="text-sm font-bold text-foreground">
-                              {step.title}
-                            </p>
+                            <p className="text-sm font-bold text-foreground">{step.title}</p>
                             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                               {step.description}
                             </p>
@@ -419,9 +408,7 @@ export default function SellToUsClient() {
                       <Clock className="h-4 w-4 shrink-0 text-primary" />
                       <p className="text-xs text-muted-foreground">
                         Average response time:{" "}
-                        <span className="font-semibold text-foreground">
-                          under 24 hours
-                        </span>
+                        <span className="font-semibold text-foreground">under 24 hours</span>
                       </p>
                     </div>
                   </div>
@@ -441,8 +428,7 @@ export default function SellToUsClient() {
                         Prefer to chat first?
                       </h3>
                       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                        Message our buying team directly and we&apos;ll walk you
-                        through the offer.
+                        Message our buying team directly and we&apos;ll walk you through the offer.
                       </p>
                       <a
                         href="https://wa.me/256767155113?text=Hi%20CRE8MARKET%2C%20I%27d%20like%20to%20sell%20an%20item"
@@ -463,19 +449,10 @@ export default function SellToUsClient() {
                       <span className="grid h-9 w-9 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
                         <Banknote className="h-4 w-4" />
                       </span>
-                      <p className="text-sm font-bold text-foreground">
-                        What we buy
-                      </p>
+                      <p className="text-sm font-bold text-foreground">What we buy</p>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {[
-                        "Phones",
-                        "Laptops",
-                        "TVs",
-                        "Gaming",
-                        "Appliances",
-                        "Audio",
-                      ].map((tag) => (
+                      {["Phones", "Laptops", "TVs", "Gaming", "Appliances", "Audio"].map((tag) => (
                         <span
                           key={tag}
                           className="rounded-full border border-border/70 bg-muted/30 px-3 py-1 text-xs font-semibold text-muted-foreground"

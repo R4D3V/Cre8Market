@@ -1,6 +1,6 @@
-import pg from "pg";
 import fs from "node:fs";
 import path from "node:path";
+import pg from "pg";
 
 const url = process.env.DATABASE_URL;
 if (!url) {

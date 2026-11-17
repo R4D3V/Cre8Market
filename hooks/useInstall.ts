@@ -33,7 +33,9 @@ function recompute() {
     installed: isStandalone() || readStorage(INSTALLED_KEY) === "1",
     ios: isIOS(),
   };
-  listeners.forEach((l) => l());
+  listeners.forEach((l) => {
+    l();
+  });
 }
 
 if (typeof window !== "undefined") {

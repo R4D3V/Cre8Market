@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import {
   ArrowRight,
   CheckCircle2,
@@ -15,8 +13,10 @@ import {
   Tag,
   User,
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import Link from "next/link";
+import { useState } from "react";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import PageHero from "@/components/PageHero";
 import ScrollReveal from "@/components/ScrollReveal";
 
@@ -165,9 +165,7 @@ export default function ContactPage() {
                           {value}
                         </a>
                       ) : (
-                        <p className="mt-0.5 text-sm font-semibold text-foreground">
-                          {value}
-                        </p>
+                        <p className="mt-0.5 text-sm font-semibold text-foreground">{value}</p>
                       )}
                     </div>
                   </li>
@@ -211,8 +209,8 @@ export default function ContactPage() {
                   Prefer to chat?
                 </h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  Skip the form and message our team directly on WhatsApp. We
-                  usually reply within a few hours.
+                  Skip the form and message our team directly on WhatsApp. We usually reply within a
+                  few hours.
                 </p>
                 <a
                   href="https://wa.me/256767155113"
@@ -246,8 +244,8 @@ export default function ContactPage() {
                     Thanks for reaching out!
                   </h2>
                   <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-                    We&apos;ll get back to you on WhatsApp shortly. For anything
-                    urgent, message us directly and we&apos;ll jump on it.
+                    We&apos;ll get back to you on WhatsApp shortly. For anything urgent, message us
+                    directly and we&apos;ll jump on it.
                   </p>
 
                   <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
@@ -283,12 +281,8 @@ export default function ContactPage() {
                       <MessageSquare className="h-5 w-5" />
                     </span>
                     <div>
-                      <h2 className="text-sm font-bold text-foreground">
-                        Send us a message
-                      </h2>
-                      <p className="text-xs text-muted-foreground">
-                        Fields marked * are required
-                      </p>
+                      <h2 className="text-sm font-bold text-foreground">Send us a message</h2>
+                      <p className="text-xs text-muted-foreground">Fields marked * are required</p>
                     </div>
                   </div>
 

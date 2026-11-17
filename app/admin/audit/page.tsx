@@ -1,11 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { Download, RefreshCw, Search, Trash2, X } from "lucide-react";
-import {
-  fetchAuditLogAction,
-  clearAuditLogAction,
-} from "@/lib/actions/products";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { clearAuditLogAction, fetchAuditLogAction } from "@/lib/actions/products";
 
 interface AuditEntry {
   id: string;
@@ -83,10 +80,9 @@ export default function AdminAuditPage() {
   const [limit, setLimit] = useState(PAGE_SIZE);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const hasFilters = Boolean(
-    search || action || actorRole || targetType || from || to,
-  );
+  const hasFilters = Boolean(search || action || actorRole || targetType || from || to);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is an intentional manual refresh trigger
   useEffect(() => {
     let cancelled = false;
     const timer = setTimeout(() => {
@@ -119,9 +115,7 @@ export default function AdminAuditPage() {
         })
         .catch((err: unknown) => {
           if (cancelled) return;
-          setError(
-            err instanceof Error ? err.message : "Failed to load audit log",
-          );
+          setError(err instanceof Error ? err.message : "Failed to load audit log");
         })
         .finally(() => {
           if (!cancelled) setLoading(false);
@@ -223,8 +217,7 @@ export default function AdminAuditPage() {
             Audit Log
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Every create, update, delete and security action across the
-            marketplace.
+            Every create, update, delete and security action across the marketplace.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -259,9 +252,7 @@ export default function AdminAuditPage() {
 
       <div className="neu-card mb-5 grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-6">
         <label className="relative md:col-span-2 xl:col-span-2">
-          <span className="mb-1 block text-xs font-semibold text-muted-foreground">
-            Search
-          </span>
+          <span className="mb-1 block text-xs font-semibold text-muted-foreground">Search</span>
           <Search className="pointer-events-none absolute left-3 top-[2.1rem] size-4 text-muted-foreground" />
           <input
             value={search}
@@ -272,9 +263,7 @@ export default function AdminAuditPage() {
         </label>
 
         <label>
-          <span className="mb-1 block text-xs font-semibold text-muted-foreground">
-            Action
-          </span>
+          <span className="mb-1 block text-xs font-semibold text-muted-foreground">Action</span>
           <select
             value={action}
             onChange={(event) => setAction(event.target.value)}
@@ -290,9 +279,7 @@ export default function AdminAuditPage() {
         </label>
 
         <label>
-          <span className="mb-1 block text-xs font-semibold text-muted-foreground">
-            Actor role
-          </span>
+          <span className="mb-1 block text-xs font-semibold text-muted-foreground">Actor role</span>
           <select
             value={actorRole}
             onChange={(event) => setActorRole(event.target.value)}
@@ -326,9 +313,7 @@ export default function AdminAuditPage() {
         </label>
 
         <label>
-          <span className="mb-1 block text-xs font-semibold text-muted-foreground">
-            From
-          </span>
+          <span className="mb-1 block text-xs font-semibold text-muted-foreground">From</span>
           <input
             type="date"
             value={from}
@@ -338,9 +323,7 @@ export default function AdminAuditPage() {
         </label>
 
         <label>
-          <span className="mb-1 block text-xs font-semibold text-muted-foreground">
-            To
-          </span>
+          <span className="mb-1 block text-xs font-semibold text-muted-foreground">To</span>
           <input
             type="date"
             value={to}
@@ -381,10 +364,7 @@ export default function AdminAuditPage() {
           </thead>
           <tbody>
             {entries.map((entry) => (
-              <tr
-                key={entry.id}
-                className="border-b border-border/50 align-top last:border-0"
-              >
+              <tr key={entry.id} className="border-b border-border/50 align-top last:border-0">
                 <td className="whitespace-nowrap p-3 text-xs">
                   {new Date(entry.created_at).toLocaleString()}
                 </td>
@@ -407,16 +387,12 @@ export default function AdminAuditPage() {
                   </span>
                 </td>
                 <td className="p-3 text-xs">
-                  <span className="font-semibold">
-                    {entry.target_type ?? "—"}
-                  </span>
+                  <span className="font-semibold">{entry.target_type ?? "—"}</span>
                   <span className="block max-w-[180px] truncate text-muted-foreground">
                     {entry.target_id ?? ""}
                   </span>
                 </td>
-                <td className="p-3 text-xs text-muted-foreground">
-                  {entry.ip ?? "—"}
-                </td>
+                <td className="p-3 text-xs text-muted-foreground">{entry.ip ?? "—"}</td>
                 <td className="max-w-[360px] p-3">
                   {Object.keys(entry.metadata ?? {}).length > 0 ? (
                     <details>
@@ -438,9 +414,7 @@ export default function AdminAuditPage() {
 
         {!loading && entries.length === 0 ? (
           <p className="p-6 text-center text-sm text-muted-foreground">
-            {hasFilters
-              ? "No audit entries match these filters."
-              : "No audit entries yet."}
+            {hasFilters ? "No audit entries match these filters." : "No audit entries yet."}
           </p>
         ) : null}
       </div>

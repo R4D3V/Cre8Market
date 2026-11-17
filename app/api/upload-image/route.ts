@@ -27,9 +27,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing file" }, { status: 400 });
   }
   const isImage =
-    image.startsWith("data:image/") ||
-    image.startsWith("http://") ||
-    image.startsWith("https://");
+    image.startsWith("data:image/") || image.startsWith("http://") || image.startsWith("https://");
   const isVideo = image.startsWith("data:video/");
   // Allow image data URLs, remote http(s) URLs, or video data URLs.
   if (!isImage && !isVideo) {
@@ -53,8 +51,7 @@ export async function POST(request: Request) {
     console.error("Cloudinary upload error:", error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Failed to upload image.",
+        error: error instanceof Error ? error.message : "Failed to upload image.",
       },
       { status: 500 },
     );

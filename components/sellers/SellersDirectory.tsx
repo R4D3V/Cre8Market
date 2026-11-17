@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
 import { Search, SearchX, ShoppingBag, X } from "lucide-react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 import ScrollReveal from "@/components/ScrollReveal";
 import { sellerPath } from "@/lib/seller-handle";
 import type { AppUser } from "@/lib/types";
@@ -12,10 +12,7 @@ export default function SellersDirectory({ users }: { users: AppUser[] }) {
   const term = query.trim().toLowerCase();
 
   const filtered = useMemo(
-    () =>
-      term
-        ? users.filter((u) => u.name.toLowerCase().includes(term))
-        : users,
+    () => (term ? users.filter((u) => u.name.toLowerCase().includes(term)) : users),
     [users, term],
   );
 
@@ -75,9 +72,7 @@ export default function SellersDirectory({ users }: { users: AppUser[] }) {
             <span className="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
               <SearchX className="h-6 w-6" />
             </span>
-            <h3 className="font-bold text-foreground mb-1">
-              No sellers found
-            </h3>
+            <h3 className="font-bold text-foreground mb-1">No sellers found</h3>
             <p className="text-muted-foreground text-sm mb-4">
               No seller matches “{query.trim()}”. Try another name.
             </p>
@@ -101,11 +96,7 @@ export default function SellersDirectory({ users }: { users: AppUser[] }) {
                 <div className="mx-auto mb-3 flex flex-col items-center">
                   <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-2xl overflow-hidden shrink-0">
                     {u.avatar ? (
-                      <img
-                        src={u.avatar}
-                        alt={u.name}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={u.avatar} alt={u.name} className="w-full h-full object-cover" />
                     ) : (
                       u.name[0].toUpperCase()
                     )}
@@ -128,9 +119,7 @@ export default function SellersDirectory({ users }: { users: AppUser[] }) {
                     </span>
                   )}
                 </div>
-                <p className="font-bold text-foreground text-sm truncate">
-                  {u.name}
-                </p>
+                <p className="font-bold text-foreground text-sm truncate">{u.name}</p>
                 <p className="text-muted-foreground text-xs mt-1">
                   {u.productCount ?? 0} product
                   {(u.productCount ?? 0) !== 1 && "s"}

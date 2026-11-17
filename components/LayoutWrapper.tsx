@@ -1,20 +1,19 @@
-'use client'
+"use client";
 
-import { usePathname } from 'next/navigation'
-import FloatingIcons from './FloatingIcons'
-import InstallPrompt from './pwa/InstallPrompt'
-import NotificationPrompt from './pwa/NotificationPrompt'
-import ResubscribeBanner from './pwa/ResubscribeBanner'
-import NetworkStatus from './pwa/NetworkStatus'
-import AppBadgeClearer from './pwa/AppBadgeClearer'
-import MobileBottomNav from './MobileBottomNav'
-import InAppNotificationToast from './InAppNotificationToast'
+import { usePathname } from "next/navigation";
+import FloatingIcons from "./FloatingIcons";
+import InAppNotificationToast from "./InAppNotificationToast";
+import MobileBottomNav from "./MobileBottomNav";
+import AppBadgeClearer from "./pwa/AppBadgeClearer";
+import InstallPrompt from "./pwa/InstallPrompt";
+import NetworkStatus from "./pwa/NetworkStatus";
+import NotificationPrompt from "./pwa/NotificationPrompt";
+import ResubscribeBanner from "./pwa/ResubscribeBanner";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
-  const hideBottomNav =
-    pathname.startsWith('/admin') || pathname.startsWith('/dashboard')
+  const hideBottomNav = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
 
   return (
     <>
@@ -37,10 +36,14 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
       {!hideBottomNav && (
         <>
           {/* Room for the floating tab bar plus the home-indicator inset. */}
-          <div className="sm:hidden" style={{ height: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }} aria-hidden="true" />
+          <div
+            className="sm:hidden"
+            style={{ height: "calc(env(safe-area-inset-bottom, 0px) + 0.5rem)" }}
+            aria-hidden="true"
+          />
           <MobileBottomNav />
         </>
       )}
     </>
-  )
+  );
 }

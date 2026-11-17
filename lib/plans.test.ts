@@ -1,10 +1,5 @@
-import { describe, it, expect } from "vitest";
-import {
-  ADMIN_IMAGE_LIMIT,
-  PLAN_LIMITS,
-  limitsForPerks,
-  planForPerks,
-} from "./plans";
+import { describe, expect, it } from "vitest";
+import { ADMIN_IMAGE_LIMIT, limitsForPerks, PLAN_LIMITS, planForPerks } from "./plans";
 
 describe("plan limits", () => {
   it("Free allows 3 listings and 3 images per product", () => {

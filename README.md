@@ -7,18 +7,18 @@ accounts.
 
 ## Tech Stack
 
-| Layer      | Technology |
-|------------|-----------|
-| Framework  | **Next.js 16** (App Router, React Server Components, Server Actions) |
-| UI         | **React 19**, **Tailwind CSS 4** (CSS-first config), `next/font` (Inter, Sora), `lucide-react` |
-| Language   | **TypeScript 5** (strict) |
-| Database   | **PostgreSQL** on **Neon** via `pg` pool (with cold-start retry wrapper) |
-| ORM / SQL  | Raw parameterized SQL through a shared `pool` (see `lib/db/queries.ts`) |
-| Auth       | **better-auth** (email + password, phone-based legacy accounts, bcrypt) |
-| AI         | **OpenAI** `gpt-4o-mini` — auto-fills listing details on `/sell` |
-| Push       | **web-push** (VAPID) — browser notifications |
-| PWA        | `app/manifest.ts`, Serwist service worker (`app/sw.ts`), install prompt |
-| Scripts    | `scripts/seed-deals.mjs` (seeds the `/deals` page) |
+| Layer     | Technology                                                                                     |
+| --------- | ---------------------------------------------------------------------------------------------- |
+| Framework | **Next.js 16** (App Router, React Server Components, Server Actions)                           |
+| UI        | **React 19**, **Tailwind CSS 4** (CSS-first config), `next/font` (Inter, Sora), `lucide-react` |
+| Language  | **TypeScript 5** (strict)                                                                      |
+| Database  | **PostgreSQL** on **Neon** via `pg` pool (with cold-start retry wrapper)                       |
+| ORM / SQL | Raw parameterized SQL through a shared `pool` (see `lib/db/queries.ts`)                        |
+| Auth      | **better-auth** (email + password, phone-based legacy accounts, bcrypt)                        |
+| AI        | **OpenAI** `gpt-4o-mini` — auto-fills listing details on `/sell`                               |
+| Push      | **web-push** (VAPID) — browser notifications                                                   |
+| PWA       | `app/manifest.ts`, Serwist service worker (`app/sw.ts`), install prompt                        |
+| Scripts   | `scripts/seed-deals.mjs` (seeds the `/deals` page)                                             |
 
 ## Getting Started
 
@@ -49,33 +49,35 @@ See `.env.example` for the full annotated list. The essentials:
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `pnpm dev` | Start the dev server |
-| `pnpm build` | Production build |
-| `pnpm start` | Start the production server |
-| `pnpm lint` | ESLint via Next.js |
-| `pnpm test` | Run Vitest unit tests |
-| `pnpm migrate` | Apply pending migrations (idempotent) |
-| `pnpm seed:deals` | Seed the `/deals` products (idempotent) |
+| Command           | Description                                                               |
+| ----------------- | ------------------------------------------------------------------------- |
+| `pnpm dev`        | Start the dev server                                                      |
+| `pnpm build`      | Production build                                                          |
+| `pnpm start`      | Start the production server                                               |
+| `pnpm lint`       | Biome check (format + lint)                                               |
+| `pnpm lint:fix`   | Biome check with safe autofixes                                           |
+| `pnpm format`     | Format files with Biome                                                   |
+| `pnpm test`       | Run Vitest unit tests                                                     |
+| `pnpm migrate`    | Apply pending migrations (idempotent)                                     |
+| `pnpm seed:deals` | Seed the `/deals` products (idempotent)                                   |
 | `pnpm seed:plans` | Re-sync subscription plan rows from `scripts/seed-subscription-plans.mjs` |
 
 ## Routes
 
-| Route | Description |
-|---|---|
-| `/` | Homepage — hero, featured/latest listings, hot deals |
-| `/products` | All listings with sidebar filters (category, seller, price, search) |
-| `/products/[slug]` | Product detail — contact seller, make offer, related items |
-| `/deals` | Hot deals page |
-| `/sellers` | Public seller directory with per-seller listings |
-| `/dashboard/products/new` | Post a listing (regular users) with AI auto-fill |
-| `/admin/products/new` | Post a listing (admins) with AI auto-fill |
-| `/selltous` | Sell your item to CRE8MARKET ENTEBBE for cash |
-| `/login`, `/register`, `/reset-password` | Account management |
-| `/dashboard` | Logged-in users — profile, listings |
-| `/admin` | Admin dashboard — products, users, categories, admins |
-| `/contact`, `/about`, `/privacy`, `/terms`, `/install` | Static/info pages |
+| Route                                                  | Description                                                         |
+| ------------------------------------------------------ | ------------------------------------------------------------------- |
+| `/`                                                    | Homepage — hero, featured/latest listings, hot deals                |
+| `/products`                                            | All listings with sidebar filters (category, seller, price, search) |
+| `/products/[slug]`                                     | Product detail — contact seller, make offer, related items          |
+| `/deals`                                               | Hot deals page                                                      |
+| `/sellers`                                             | Public seller directory with per-seller listings                    |
+| `/dashboard/products/new`                              | Post a listing (regular users) with AI auto-fill                    |
+| `/admin/products/new`                                  | Post a listing (admins) with AI auto-fill                           |
+| `/selltous`                                            | Sell your item to CRE8MARKET ENTEBBE for cash                       |
+| `/login`, `/register`, `/reset-password`               | Account management                                                  |
+| `/dashboard`                                           | Logged-in users — profile, listings                                 |
+| `/admin`                                               | Admin dashboard — products, users, categories, admins               |
+| `/contact`, `/about`, `/privacy`, `/terms`, `/install` | Static/info pages                                                   |
 
 ## API Routes
 

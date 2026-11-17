@@ -1,4 +1,5 @@
 import pg from "pg";
+
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 try {
   await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS banner TEXT;");

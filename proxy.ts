@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 // Better Auth stores the session token in a cookie named
 // `better-auth.session_token`. On HTTPS deployments it prefixes that name with
@@ -9,10 +9,7 @@ import type { NextRequest } from "next/server";
 function hasSessionCookie(request: NextRequest) {
   return request.cookies.getAll().some(({ name }) => {
     const base = name.replace(/^__Secure-/, "");
-    return (
-      base === "better-auth.session_token" ||
-      base.startsWith("better-auth.session_token.")
-    );
+    return base === "better-auth.session_token" || base.startsWith("better-auth.session_token.");
   });
 }
 
@@ -24,8 +21,7 @@ export function proxy(request: NextRequest) {
   const isDashboardArea = pathname.startsWith("/dashboard");
 
   // Public sub-routes inside the admin area.
-  const isAdminPublic =
-    pathname === "/admin/login" || pathname === "/admin/reset-password";
+  const isAdminPublic = pathname === "/admin/login" || pathname === "/admin/reset-password";
 
   if ((isAdminArea && !isAdminPublic) || isDashboardArea) {
     if (!hasSession) {

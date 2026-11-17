@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test("products page lists product cards", async ({ page }) => {
   await page.goto("/products", { waitUntil: "domcontentloaded" });

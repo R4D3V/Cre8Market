@@ -20,13 +20,7 @@ export interface Product {
   createdAt?: string;
   description?: string;
   specs?: { label: string; value: string }[];
-  condition?:
-    | "New"
-    | "Used"
-    | "Refurbished"
-    | "Like New"
-    | "Used - Good"
-    | "Used - Fair";
+  condition?: "New" | "Used" | "Refurbished" | "Like New" | "Used - Good" | "Used - Fair";
   location?: string;
   seller?: Seller;
   user_id?: string | null;

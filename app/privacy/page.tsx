@@ -3,8 +3,7 @@ import LegalPage from "@/components/LegalPage";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | CRE8MARKET Entebbe",
-  description:
-    "How CRE8MARKET ENTEBBE collects, uses, and protects your personal information.",
+  description: "How CRE8MARKET ENTEBBE collects, uses, and protects your personal information.",
   alternates: {
     canonical: "/privacy",
   },
@@ -20,7 +19,7 @@ export default function PrivacyPage() {
         {
           title: "Information We Collect",
           paragraphs: [
-            "CRE8MARKET ENTEBBE (\"we\", \"us\", or \"our\") operates the cre8market.com website. This page informs you of our policies regarding the collection, use, and disclosure of personal information we receive from users of the Site.",
+            'CRE8MARKET ENTEBBE ("we", "us", or "our") operates the cre8market.com website. This page informs you of our policies regarding the collection, use, and disclosure of personal information we receive from users of the Site.',
             "We collect information you provide directly to us, such as your name, phone number, and the content of listings you post. We also collect usage data through cookies and similar technologies.",
           ],
         },

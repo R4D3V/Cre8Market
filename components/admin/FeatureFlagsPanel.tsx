@@ -1,16 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { toggleFeatureFlagAction } from "@/lib/actions/admin";
 import type { FeatureFlag } from "@/lib/db/queries";
 import { AdminSection } from "./AdminSection";
 
-export function FeatureFlagsPanel({
-  initialFlags,
-}: {
-  initialFlags: FeatureFlag[];
-}) {
+export function FeatureFlagsPanel({ initialFlags }: { initialFlags: FeatureFlag[] }) {
   const [flags, setFlags] = useState(initialFlags);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -24,9 +20,7 @@ export function FeatureFlagsPanel({
       const next = await toggleFeatureFlagAction(flag.key, !flag.enabled);
       setFlags(next);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Could not update the flag.",
-      );
+      setError(err instanceof Error ? err.message : "Could not update the flag.");
     } finally {
       setPendingKey(null);
     }
@@ -70,9 +64,7 @@ export function FeatureFlagsPanel({
                     </span>
                   )}
                 </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {flag.description}
-                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{flag.description}</p>
               </div>
 
               <button
@@ -104,8 +96,8 @@ export function FeatureFlagsPanel({
 
       <p className="mt-3 text-[11px] text-muted-foreground">
         Changes are audit-logged. Environment overrides named{" "}
-        <code className="rounded bg-muted px-1 py-0.5">FEATURE_*</code> take
-        priority over these switches.
+        <code className="rounded bg-muted px-1 py-0.5">FEATURE_*</code> take priority over these
+        switches.
       </p>
     </AdminSection>
   );

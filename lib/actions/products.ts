@@ -1,47 +1,42 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { auth } from "@/lib/auth";
+import type { AuditLogFilters, ProductsPageParams } from "@/lib/db/queries";
 import {
-  getProducts,
-  getProductsPage,
-  getFeaturedProducts,
-  getDeals,
-  getProductBySlug,
-  getProductById,
-  getRelatedProducts,
-  getUserProductsWithOwner,
+  checkSlugExists,
+  clearAuditLog,
+  countAuditLog,
   createProduct,
-  updateProduct,
   deleteProduct,
   deleteProductsByIds,
-  setProductsFeatured,
-  checkSlugExists,
-  getProductsWithOwners,
-  getProductsByUserId,
+  getAuditFacets,
+  getAuditLog,
+  getDeals,
+  getFeaturedProducts,
+  getProductById,
+  getProductBySlug,
   getProductOwnerId,
   getProductOwnerIds,
+  getProducts,
+  getProductsByUserId,
+  getProductsPage,
+  getProductsWithOwners,
+  getRelatedProducts,
   getSellers,
-  getUserById,
-  getUserByHandleOrId,
   getStoreProducts,
+  getUserByHandleOrId,
+  getUserById,
+  getUserProductsWithOwner,
   getUserSubscription,
   logAudit,
-  getAuditLog,
-  countAuditLog,
-  getAuditFacets,
-  clearAuditLog,
+  setProductsFeatured,
+  updateProduct,
 } from "@/lib/db/queries";
-import { auth } from "@/lib/auth";
+import { ADMIN_IMAGE_LIMIT, limitsForPerks, planForPerks } from "@/lib/plans";
 import { sendPushNotification } from "@/lib/push";
-import { revalidatePath } from "next/cache";
 import type { Product } from "@/lib/types";
-import type { ProductsPageParams } from "@/lib/db/queries";
-import type { AuditLogFilters } from "@/lib/db/queries";
 import { productInputSchema } from "@/lib/validation";
-import {
-  ADMIN_IMAGE_LIMIT,
-  limitsForPerks,
-  planForPerks,
-} from "@/lib/plans";
 
 async function requireAdmin() {
   const session = await auth();
@@ -111,11 +106,7 @@ async function uniqueSlug(base: string): Promise<string> {
 
 // Build the insert payload for a duplicated product: same content, fresh slug,
 // not featured, not a deal, listed "Just now".
-function buildDuplicateData(
-  source: Product,
-  ownerUserId: string | null,
-  maxImages: number,
-) {
+function buildDuplicateData(source: Product, ownerUserId: string | null, maxImages: number) {
   return {
     title: `${source.title} (Copy)`,
     slug: undefined as string | undefined,
@@ -396,9 +387,7 @@ export async function createMyProductAction(data: Record<string, unknown>) {
   const input = parsed.data;
   const images = input.images ?? [];
   if (images.length > limits.images) {
-    throw new Error(
-      `The ${plan} plan allows at most ${limits.images} photos per product`,
-    );
+    throw new Error(`The ${plan} plan allows at most ${limits.images} photos per product`);
   }
   const exists = await checkSlugExists(input.slug);
   if (exists) throw new Error("Slug already exists");

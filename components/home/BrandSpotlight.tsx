@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 const brands = [
   {
@@ -26,8 +26,7 @@ const brands = [
     description:
       "From brilliant displays to everyday flagships, Samsung brings the tech that keeps your work sharp and your downtime sharper.",
     href: "/products?q=samsung",
-    image:
-      "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=1200&q=80",
     alt: "Samsung Galaxy smartphones",
   },
   {

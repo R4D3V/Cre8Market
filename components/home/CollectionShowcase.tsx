@@ -1,6 +1,6 @@
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import SectionHeading from "./SectionHeading";
 
 const collections = [
@@ -21,8 +21,7 @@ const collections = [
     index: "02",
     badge: "Play more",
     title: "Level up your setup.",
-    description:
-      "Consoles, controllers and accessories for the nights you never want to end.",
+    description: "Consoles, controllers and accessories for the nights you never want to end.",
     cta: "Shop gaming",
     href: "/products?q=gaming",
     image:

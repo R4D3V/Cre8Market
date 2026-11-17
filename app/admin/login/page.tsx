@@ -1,8 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   AlertCircle,
   ArrowLeft,
@@ -15,8 +12,11 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
-import { signIn } from "@/lib/auth-client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import PasswordInput from "@/components/PasswordInput";
+import { signIn } from "@/lib/auth-client";
 
 const FIELD_CLASS =
   "w-full rounded-xl border border-border/70 bg-muted/30 py-3 pl-10 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-muted/50";
@@ -64,10 +64,7 @@ export default function AdminLoginPage() {
         setError(
           "Sign-in is blocked for this domain. The site's APP_URL does not match this address.",
         );
-      } else if (
-        status === 500 ||
-        /internal server error|database|connection/i.test(message)
-      ) {
+      } else if (status === 500 || /internal server error|database|connection/i.test(message)) {
         setError(
           "The server could not complete sign-in. Please try again or check the deployment logs.",
         );
@@ -124,9 +121,7 @@ export default function AdminLoginPage() {
                 <ShieldCheck className="h-5 w-5" />
               </span>
               <div>
-                <h2 className="text-sm font-bold text-foreground">
-                  Sign in to the dashboard
-                </h2>
+                <h2 className="text-sm font-bold text-foreground">Sign in to the dashboard</h2>
                 <p className="text-xs text-muted-foreground">
                   Use the email linked to your admin account.
                 </p>
@@ -249,9 +244,7 @@ export default function AdminLoginPage() {
                 </span>
                 <div>
                   <p className="text-xs font-bold text-foreground">{title}</p>
-                  <p className="text-[11px] leading-relaxed text-muted-foreground">
-                    {description}
-                  </p>
+                  <p className="text-[11px] leading-relaxed text-muted-foreground">{description}</p>
                 </div>
               </li>
             ))}

@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Camera, ImagePlus } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { AdminPanel } from "@/components/admin/AdminPanel";
+import PasswordInput from "@/components/PasswordInput";
 import {
+  changeMyAdminPasswordAction,
   fetchMyAdminProfileAction,
   updateMyAdminProfileAction,
-  changeMyAdminPasswordAction,
 } from "@/lib/actions/admin";
 import type { AdminUserRow } from "@/lib/db/queries";
 import { compressImage } from "@/lib/imageCompress";
-import PasswordInput from "@/components/PasswordInput";
-import { AdminPanel } from "@/components/admin/AdminPanel";
 
 export default function AdminProfilePage() {
   const [profile, setProfile] = useState<AdminUserRow | null>(null);
@@ -152,11 +152,7 @@ export default function AdminProfilePage() {
             </label>
             {banner && (
               <div className="mb-2 overflow-hidden rounded-xl border border-border">
-                <img
-                  src={banner}
-                  alt="Profile banner"
-                  className="w-full h-32 object-cover"
-                />
+                <img src={banner} alt="Profile banner" className="w-full h-32 object-cover" />
               </div>
             )}
             <div className="flex flex-wrap items-center gap-2">

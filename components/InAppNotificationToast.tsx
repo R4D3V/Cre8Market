@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface Toast {
   id: number;
@@ -53,17 +53,23 @@ export default function InAppNotificationToast() {
       {toasts.map((t) => (
         <div
           key={t.id}
+          role="button"
+          tabIndex={0}
           className="pointer-events-auto neu-card p-4 shadow-lg animate-slide-up cursor-pointer"
           onClick={() => open(t)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              open(t);
+            }
+          }}
         >
           <div className="flex items-start gap-3">
             <span className="text-2xl shrink-0 leading-none">🔔</span>
             <div className="min-w-0 flex-1">
               <p className="font-bold text-sm text-foreground">{t.title}</p>
               {t.body && (
-                <p className="text-muted-foreground text-xs mt-0.5 line-clamp-2">
-                  {t.body}
-                </p>
+                <p className="text-muted-foreground text-xs mt-0.5 line-clamp-2">{t.body}</p>
               )}
             </div>
             <button

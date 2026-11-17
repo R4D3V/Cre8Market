@@ -1,14 +1,10 @@
-import Link from "next/link";
 import { ArrowRight, Package, Star, Tag } from "lucide-react";
+import Link from "next/link";
 import { formatPrice } from "@/lib/data";
 import type { ProductWithOwner } from "@/lib/types";
 import { AdminSection } from "./AdminSection";
 
-export function RecentListings({
-  products,
-}: {
-  products: ProductWithOwner[];
-}) {
+export function RecentListings({ products }: { products: ProductWithOwner[] }) {
   return (
     <AdminSection
       title="Recent listings"
@@ -29,9 +25,7 @@ export function RecentListings({
           <span className="flex size-8 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary">
             <Package className="size-4" />
           </span>
-          <p className="text-sm text-muted-foreground">
-            No listings have been added yet.
-          </p>
+          <p className="text-sm text-muted-foreground">No listings have been added yet.</p>
         </div>
       ) : (
         <ul className="divide-y divide-border/60">
@@ -44,11 +38,7 @@ export function RecentListings({
                 <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-muted">
                   {product.images?.[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={product.images[0]}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={product.images[0]} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <Package className="size-4 text-muted-foreground" />
                   )}
@@ -65,16 +55,13 @@ export function RecentListings({
                       />
                     )}
                     {product.isDeal && (
-                      <Tag
-                        className="size-3 shrink-0 text-primary"
-                        aria-label="Deal"
-                      />
+                      <Tag className="size-3 shrink-0 text-primary" aria-label="Deal" />
                     )}
                   </span>
                   <span className="block truncate text-xs text-muted-foreground">
                     {product.ownerType === "admin"
                       ? "CRE8MARKET store"
-                      : product.ownerName ?? "Unassigned"}{" "}
+                      : (product.ownerName ?? "Unassigned")}{" "}
                     · {product.category}
                   </span>
                 </span>
@@ -82,9 +69,7 @@ export function RecentListings({
                   <span className="block text-sm font-bold text-foreground">
                     {formatPrice(product.price)}
                   </span>
-                  <span className="block text-[11px] text-muted-foreground">
-                    Edit
-                  </span>
+                  <span className="block text-[11px] text-muted-foreground">Edit</span>
                 </span>
               </Link>
             </li>

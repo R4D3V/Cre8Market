@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ScrollReveal from "@/components/ScrollReveal";
-import HomeHero from "@/components/home/HomeHero";
-import TrustStrip from "@/components/home/TrustStrip";
-import CategoryShowcase from "@/components/home/CategoryShowcase";
-import TrendingSection, {
-  type ProductGroup,
-} from "@/components/home/TrendingSection";
-import CollectionShowcase from "@/components/home/CollectionShowcase";
 import BrandSpotlight from "@/components/home/BrandSpotlight";
+import CategoryShowcase from "@/components/home/CategoryShowcase";
+import CollectionShowcase from "@/components/home/CollectionShowcase";
+import HomeHero from "@/components/home/HomeHero";
 import Recommendations from "@/components/home/Recommendations";
 import SellCta from "@/components/home/SellCta";
+import TrendingSection, { type ProductGroup } from "@/components/home/TrendingSection";
+import TrustStrip from "@/components/home/TrustStrip";
+import Navbar from "@/components/Navbar";
+import ScrollReveal from "@/components/ScrollReveal";
 import { latestProducts } from "@/lib/data";
 import { getProducts } from "@/lib/db/queries";
 import type { Product } from "@/lib/types";
@@ -53,10 +51,7 @@ async function ProductSections() {
   } catch (err) {
     // Neon free-tier cold-start timeout — fall back to static data so the page
     // still renders instead of showing a 500 error.
-    console.error(
-      "DB unavailable on homepage load, using fallback data:",
-      (err as Error).message,
-    );
+    console.error("DB unavailable on homepage load, using fallback data:", (err as Error).message);
   }
 
   const source = products.length > 0 ? products : latestProducts;
@@ -94,10 +89,7 @@ function ProductSectionsSkeleton() {
         <div className="mt-4 h-8 w-72 animate-pulse rounded-lg bg-muted" />
         <div className="mt-7 flex gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-9 w-28 animate-pulse rounded-full bg-muted/70"
-            />
+            <div key={i} className="h-9 w-28 animate-pulse rounded-full bg-muted/70" />
           ))}
         </div>
         <div className="mt-6 grid grid-cols-2 gap-3.5 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">

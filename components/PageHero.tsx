@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import Link from "next/link";
 import { ArrowLeft, type LucideIcon } from "lucide-react";
+import Link from "next/link";
+import type { ReactNode } from "react";
 
 interface Props {
   eyebrow?: string;
@@ -42,26 +42,15 @@ export default function PageHero({
             backgroundImage:
               "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
             backgroundSize: "56px 56px",
-            maskImage:
-              "radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%)",
+            maskImage: "radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%)",
             WebkitMaskImage:
               "radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%)",
           }}
         />
       </div>
 
-      <div
-        className={`container relative ${
-          large ? "py-14 sm:py-20" : "py-10 sm:py-14"
-        }`}
-      >
-        <div
-          className={
-            aside
-              ? "grid items-center gap-12 lg:grid-cols-2 lg:gap-16"
-              : undefined
-          }
-        >
+      <div className={`container relative ${large ? "py-14 sm:py-20" : "py-10 sm:py-14"}`}>
+        <div className={aside ? "grid items-center gap-12 lg:grid-cols-2 lg:gap-16" : undefined}>
           <div className={centered ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}>
             {backHref && (
               <Link
@@ -101,9 +90,7 @@ export default function PageHero({
 
             {description && (
               <p
-                className={`${
-                  centered ? "mx-auto max-w-xl" : ""
-                } ${
+                className={`${centered ? "mx-auto max-w-xl" : ""} ${
                   large ? "mt-5" : "mt-3"
                 } text-sm leading-relaxed text-muted-foreground sm:text-base`}
               >

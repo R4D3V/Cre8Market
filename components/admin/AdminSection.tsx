@@ -28,9 +28,7 @@ export function AdminSection({
           <h2 className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">
             {title}
           </h2>
-          {description && (
-            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-          )}
+          {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
         </div>
         {action}
       </header>

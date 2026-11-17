@@ -1,1 +1,2 @@
- Use an ORM(Object Relations Mapper). "https://medium.com/@mdburkee/what-is-the-purpose-of-an-orm-and-what-are-its-advantages-ae3882e9e91e"
+auto crop image to a certain resolution to fit the 
+formart images to webp

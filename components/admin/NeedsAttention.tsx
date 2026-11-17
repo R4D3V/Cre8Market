@@ -1,12 +1,5 @@
+import { ArrowRight, BadgeCheck, ImageOff, type LucideIcon, Store, UserX } from "lucide-react";
 import Link from "next/link";
-import {
-  ArrowRight,
-  BadgeCheck,
-  ImageOff,
-  Store,
-  UserX,
-  type LucideIcon,
-} from "lucide-react";
 import type { AdminOverview } from "@/lib/db/queries";
 import { AdminSection } from "./AdminSection";
 
@@ -71,12 +64,8 @@ export function NeedsAttention({
                 <Icon className="size-4" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-foreground">
-                  {label}
-                </span>
-                <span className="block text-xs text-muted-foreground">
-                  {hint}
-                </span>
+                <span className="block text-sm font-semibold text-foreground">{label}</span>
+                <span className="block text-xs text-muted-foreground">{hint}</span>
               </span>
               <span
                 className={`shrink-0 rounded-full border px-2 py-0.5 text-xs font-bold ${

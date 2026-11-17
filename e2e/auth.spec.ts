@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test("login page renders", async ({ page }) => {
   await page.goto("/login", { waitUntil: "domcontentloaded" });
@@ -8,7 +8,10 @@ test("login page renders", async ({ page }) => {
 
 test("invalid credentials show an error", async ({ page }) => {
   await page.goto("/login", { waitUntil: "domcontentloaded" });
-  await page.getByPlaceholder(/700 000 000|phone/i).fill("799999999").catch(() => {});
+  await page
+    .getByPlaceholder(/700 000 000|phone/i)
+    .fill("799999999")
+    .catch(() => {});
   const phoneInput = page.locator("input[type='tel'], input[name*='phone' i]").first();
   if (await phoneInput.isVisible()) await phoneInput.fill("799999999");
   await page.getByPlaceholder(/Enter your password/i).fill("wrongpassword");

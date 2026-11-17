@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test("seller link navigates to seller page", async ({ page }) => {
   await page.goto("/products", { waitUntil: "domcontentloaded" });

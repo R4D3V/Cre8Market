@@ -1,14 +1,14 @@
 "use server";
 
-import {
-  getCategories,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-  logAudit,
-} from "@/lib/db/queries";
-import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/lib/auth";
+import {
+  createCategory,
+  deleteCategory,
+  getCategories,
+  logAudit,
+  updateCategory,
+} from "@/lib/db/queries";
 
 async function requireAdmin() {
   const session = await auth();
@@ -22,7 +22,13 @@ export async function fetchCategoriesAction() {
   return getCategories();
 }
 
-export async function createCategoryAction(data: { name: string; slug: string; icon?: string; color?: string; bg_color?: string }) {
+export async function createCategoryAction(data: {
+  name: string;
+  slug: string;
+  icon?: string;
+  color?: string;
+  bg_color?: string;
+}) {
   const actorId = await requireAdmin();
   const category = await createCategory(data);
   await logAudit({
@@ -40,7 +46,10 @@ export async function createCategoryAction(data: { name: string; slug: string; i
   return category;
 }
 
-export async function updateCategoryAction(id: string, data: { name: string; slug: string; icon: string; color: string; bg_color: string }) {
+export async function updateCategoryAction(
+  id: string,
+  data: { name: string; slug: string; icon: string; color: string; bg_color: string },
+) {
   const actorId = await requireAdmin();
   const category = await updateCategory(id, data);
   await logAudit({

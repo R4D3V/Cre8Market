@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { sendPushNotification, getVapidPublicKey } from "@/lib/push";
-import { pushNotifySchema } from "@/lib/validation";
+import { getVapidPublicKey, sendPushNotification } from "@/lib/push";
 import { rateLimit } from "@/lib/rate-limit";
+import { pushNotifySchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

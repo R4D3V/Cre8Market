@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState, Suspense } from "react";
-import Link from "next/link";
 import { Package, Star } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { formatPrice } from "@/lib/data";
-import { fetchProductsWithOwnersAction, deleteProductsAction, setProductsFeaturedAction, duplicateProductsAction } from "@/lib/actions/products";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
-import type { ProductWithOwner } from "@/lib/types";
-import type { CategoryDB } from "@/lib/types";
+import {
+  deleteProductsAction,
+  duplicateProductsAction,
+  fetchProductsWithOwnersAction,
+  setProductsFeaturedAction,
+} from "@/lib/actions/products";
+import { formatPrice } from "@/lib/data";
+import type { CategoryDB, ProductWithOwner } from "@/lib/types";
 
 export default function AdminProductsPage() {
   return (
@@ -32,9 +36,7 @@ function AdminProductsPageInner() {
   const [ownerFilter, setOwnerFilter] = useState(
     ownerFromUrl === "admin" || ownerFromUrl === "user" ? ownerFromUrl : "all",
   );
-  const [missingImagesOnly, setMissingImagesOnly] = useState(
-    missingImagesFromUrl,
-  );
+  const [missingImagesOnly, setMissingImagesOnly] = useState(missingImagesFromUrl);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
@@ -82,14 +84,7 @@ function AdminProductsPageInner() {
       );
     }
     return list;
-  }, [
-    products,
-    categoryFilter,
-    ownerFilter,
-    selectedUserId,
-    missingImagesOnly,
-    search,
-  ]);
+  }, [products, categoryFilter, ownerFilter, selectedUserId, missingImagesOnly, search]);
 
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this product?")) return;
@@ -119,7 +114,8 @@ function AdminProductsPageInner() {
 
   async function handleBulkDelete() {
     if (selectedIds.length === 0) return;
-    if (!confirm(`Delete ${selectedIds.length} product${selectedIds.length !== 1 ? "s" : ""}?`)) return;
+    if (!confirm(`Delete ${selectedIds.length} product${selectedIds.length !== 1 ? "s" : ""}?`))
+      return;
     setBusy(true);
     await deleteProductsAction(selectedIds);
     setProducts((p) => p.filter((x) => !selected.has(x.id)));
@@ -131,9 +127,7 @@ function AdminProductsPageInner() {
     if (selectedIds.length === 0) return;
     setBusy(true);
     await setProductsFeaturedAction(selectedIds, featured);
-    setProducts((p) =>
-      p.map((x) => (selected.has(x.id) ? { ...x, featured } : x)),
-    );
+    setProducts((p) => p.map((x) => (selected.has(x.id) ? { ...x, featured } : x)));
     setSelected(new Set());
     setBusy(false);
   }
@@ -251,9 +245,7 @@ function AdminProductsPageInner() {
       {/* Bulk actions */}
       {selectedIds.length > 0 && (
         <div className="neu-card p-3 mb-4 flex flex-wrap items-center gap-3">
-          <span className="text-sm font-bold text-foreground">
-            {selectedIds.length} selected
-          </span>
+          <span className="text-sm font-bold text-foreground">{selectedIds.length} selected</span>
           <button
             onClick={() => handleBulkFeatured(true)}
             disabled={busy}
@@ -321,8 +313,7 @@ function AdminProductsPageInner() {
             <input
               type="checkbox"
               checked={
-                selectedIds.length === filteredProducts.length &&
-                filteredProducts.length > 0
+                selectedIds.length === filteredProducts.length && filteredProducts.length > 0
               }
               onChange={toggleAll}
               className="h-4 w-4 cursor-pointer rounded border-border bg-card text-primary"
@@ -357,12 +348,8 @@ function AdminProductsPageInner() {
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {p.category}
-                    </p>
-                    <p className="mt-1 text-sm font-bold text-primary">
-                      {formatPrice(p.price)}
-                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">{p.category}</p>
+                    <p className="mt-1 text-sm font-bold text-primary">{formatPrice(p.price)}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {p.ownerType === "user"
                         ? `Added by ${p.ownerName ?? "User"}`
@@ -400,91 +387,100 @@ function AdminProductsPageInner() {
 
           <div className="hidden overflow-x-auto rounded-xl border border-border/70 bg-card/80 lg:block">
             <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-muted-foreground text-xs uppercase tracking-wide">
-                <th className="pb-3 pr-4 font-semibold">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.length === filteredProducts.length && filteredProducts.length > 0}
-                    onChange={toggleAll}
-                    className="w-4 h-4 rounded border-border bg-card text-primary cursor-pointer"
-                  />
-                </th>
-                <th className="pb-3 pr-4 font-semibold">Product</th>
-                <th className="pb-3 pr-4 font-semibold">Category</th>
-                <th className="pb-3 pr-4 font-semibold">Price</th>
-                <th className="pb-3 pr-4 font-semibold">Added By</th>
-                <th className="pb-3 pr-4 font-semibold">Featured</th>
-                <th className="pb-3 pr-4 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts.map((p) => (
-                <tr
-                  key={`${p.id}-${p.slug}`}
-                  className={`border-t border-border ${selected.has(p.id) ? "bg-primary/5" : ""}`}
-                >
-                  <td className="py-3 pr-4">
+              <thead>
+                <tr className="text-left text-muted-foreground text-xs uppercase tracking-wide">
+                  <th className="pb-3 pr-4 font-semibold">
                     <input
                       type="checkbox"
-                      checked={selected.has(p.id)}
-                      onChange={() => toggleSelected(p.id)}
+                      checked={
+                        selectedIds.length === filteredProducts.length &&
+                        filteredProducts.length > 0
+                      }
+                      onChange={toggleAll}
                       className="w-4 h-4 rounded border-border bg-card text-primary cursor-pointer"
                     />
-                  </td>
-                  <td className="py-3 pr-4">
-                    <p className="font-semibold text-foreground truncate max-w-[200px]">{p.title}</p>
-                  </td>
-                  <td className="py-3 pr-4 text-muted-foreground">{p.category}</td>
-                  <td className="py-3 pr-4 text-primary font-bold">{formatPrice(p.price)}</td>
-                  <td className="py-3 pr-4">
-                    {p.ownerType === "user" ? (
-                      <span className="inline-flex items-center gap-1.5">
-                        <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shrink-0">
-                          {(p.ownerName ?? "U")[0].toUpperCase()}
-                        </span>
-                        <span className="text-muted-foreground text-xs font-semibold">{p.ownerName}</span>
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground text-xs font-semibold">Store (Admin)</span>
-                    )}
-                  </td>
-                  <td className="py-3 pr-4">
-                    {p.featured ? (
-                      <span className="inline-flex items-center gap-1 text-featured text-xs font-bold">
-                        <Star className="h-3 w-3 fill-current" />
-                        Featured
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">—</span>
-                    )}
-                  </td>
-                  <td className="py-3 pr-4">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/admin/products/${p.id}/edit`}
-                        className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 transition-all"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDuplicate(p.id)}
-                        disabled={busy}
-                        className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 transition-all disabled:opacity-60"
-                      >
-                        Duplicate
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="neu-pill bg-destructive text-white text-xs font-semibold px-3 py-1.5 transition-all"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+                  </th>
+                  <th className="pb-3 pr-4 font-semibold">Product</th>
+                  <th className="pb-3 pr-4 font-semibold">Category</th>
+                  <th className="pb-3 pr-4 font-semibold">Price</th>
+                  <th className="pb-3 pr-4 font-semibold">Added By</th>
+                  <th className="pb-3 pr-4 font-semibold">Featured</th>
+                  <th className="pb-3 pr-4 font-semibold">Actions</th>
                 </tr>
-              ))}
-            </tbody>
+              </thead>
+              <tbody>
+                {filteredProducts.map((p) => (
+                  <tr
+                    key={`${p.id}-${p.slug}`}
+                    className={`border-t border-border ${selected.has(p.id) ? "bg-primary/5" : ""}`}
+                  >
+                    <td className="py-3 pr-4">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(p.id)}
+                        onChange={() => toggleSelected(p.id)}
+                        className="w-4 h-4 rounded border-border bg-card text-primary cursor-pointer"
+                      />
+                    </td>
+                    <td className="py-3 pr-4">
+                      <p className="font-semibold text-foreground truncate max-w-[200px]">
+                        {p.title}
+                      </p>
+                    </td>
+                    <td className="py-3 pr-4 text-muted-foreground">{p.category}</td>
+                    <td className="py-3 pr-4 text-primary font-bold">{formatPrice(p.price)}</td>
+                    <td className="py-3 pr-4">
+                      {p.ownerType === "user" ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shrink-0">
+                            {(p.ownerName ?? "U")[0].toUpperCase()}
+                          </span>
+                          <span className="text-muted-foreground text-xs font-semibold">
+                            {p.ownerName}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs font-semibold">
+                          Store (Admin)
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 pr-4">
+                      {p.featured ? (
+                        <span className="inline-flex items-center gap-1 text-featured text-xs font-bold">
+                          <Star className="h-3 w-3 fill-current" />
+                          Featured
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="py-3 pr-4">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/admin/products/${p.id}/edit`}
+                          className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 transition-all"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          onClick={() => handleDuplicate(p.id)}
+                          disabled={busy}
+                          className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 transition-all disabled:opacity-60"
+                        >
+                          Duplicate
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p.id)}
+                          className="neu-pill bg-destructive text-white text-xs font-semibold px-3 py-1.5 transition-all"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         </>

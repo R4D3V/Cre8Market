@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -23,17 +22,15 @@ import {
   Star,
   Tag,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import ScrollReveal from "@/components/ScrollReveal";
-import type { Product } from "@/lib/types";
+import { fetchProductBySlugAction, fetchRelatedProductsAction } from "@/lib/actions/products";
 import { sellerHandle } from "@/lib/seller-handle";
-import {
-  fetchProductBySlugAction,
-  fetchRelatedProductsAction,
-} from "@/lib/actions/products";
+import type { Product } from "@/lib/types";
 
 function formatPrice(price: number) {
   return `UGX ${price.toLocaleString("en-UG")}`;
@@ -170,8 +167,8 @@ export default function ProductDetailPageClient({
               Listing not found
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              This listing may have been sold or removed. Browse the marketplace
-              for something similar.
+              This listing may have been sold or removed. Browse the marketplace for something
+              similar.
             </p>
             <Link
               href={backHref}
@@ -190,15 +187,11 @@ export default function ProductDetailPageClient({
   const bg = product.categoryBg ?? "#0a2238";
   const sellerName = product.ownerName ?? product.seller?.name;
   const sellerHref = product.user_id
-    ? `/sellers/${
-        product.ownerHandle ??
-        (sellerName ? sellerHandle(sellerName) : product.user_id)
-      }`
+    ? `/sellers/${product.ownerHandle ?? (sellerName ? sellerHandle(sellerName) : product.user_id)}`
     : null;
   const SellerWrapper = (sellerHref ? Link : "div") as React.ElementType;
   const isVerified = product.user_id ? !!product.ownerVerified : true;
-  const sellerWhatsapp =
-    product.ownerWhatsapp ?? product.seller?.whatsapp ?? "256751621506";
+  const sellerWhatsapp = product.ownerWhatsapp ?? product.seller?.whatsapp ?? "256751621506";
   const sellerPhone = product.ownerPhone ?? product.seller?.phone ?? sellerWhatsapp;
   const waContactUrl = `https://wa.me/${sellerWhatsapp}?text=${encodeURIComponent(
     `Hey, I would like to purchase this product.\n\n${shareUrl}`,
@@ -238,8 +231,7 @@ export default function ProductDetailPageClient({
               backgroundImage:
                 "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
               backgroundSize: "56px 56px",
-              maskImage:
-                "radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%)",
+              maskImage: "radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%)",
               WebkitMaskImage:
                 "radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%)",
             }}
@@ -352,9 +344,7 @@ export default function ProductDetailPageClient({
                         type="button"
                         aria-label="Previous image"
                         onClick={() =>
-                          setSelectedImage((i) =>
-                            i === 0 ? images.length - 1 : i - 1,
-                          )
+                          setSelectedImage((i) => (i === 0 ? images.length - 1 : i - 1))
                         }
                         className="absolute left-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-black/45 text-white backdrop-blur transition hover:bg-black/65"
                       >
@@ -364,9 +354,7 @@ export default function ProductDetailPageClient({
                         type="button"
                         aria-label="Next image"
                         onClick={() =>
-                          setSelectedImage((i) =>
-                            i === images.length - 1 ? 0 : i + 1,
-                          )
+                          setSelectedImage((i) => (i === images.length - 1 ? 0 : i + 1))
                         }
                         className="absolute right-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-black/45 text-white backdrop-blur transition hover:bg-black/65"
                       >
@@ -422,11 +410,7 @@ export default function ProductDetailPageClient({
             {product.description && (
               <ScrollReveal delay={80}>
                 <section className="rounded-3xl border border-border/70 bg-card/80 p-5 backdrop-blur-sm sm:p-6">
-                  <SectionHeading
-                    icon={FileText}
-                    eyebrow="Overview"
-                    title="About this listing"
-                  />
+                  <SectionHeading icon={FileText} eyebrow="Overview" title="About this listing" />
                   <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                     {product.description}
                   </p>
@@ -437,11 +421,7 @@ export default function ProductDetailPageClient({
             {product.specs && product.specs.length > 0 && (
               <ScrollReveal delay={100}>
                 <section className="rounded-3xl border border-border/70 bg-card/80 p-5 backdrop-blur-sm sm:p-6">
-                  <SectionHeading
-                    icon={Sparkles}
-                    eyebrow="Details"
-                    title="Specifications"
-                  />
+                  <SectionHeading icon={Sparkles} eyebrow="Details" title="Specifications" />
                   <dl className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {product.specs.map((s) => (
                       <div
@@ -451,9 +431,7 @@ export default function ProductDetailPageClient({
                         <dt className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                           {s.label}
                         </dt>
-                        <dd className="mt-1 text-sm font-semibold text-foreground">
-                          {s.value}
-                        </dd>
+                        <dd className="mt-1 text-sm font-semibold text-foreground">{s.value}</dd>
                       </div>
                     ))}
                   </dl>
@@ -463,11 +441,7 @@ export default function ProductDetailPageClient({
 
             <ScrollReveal delay={120}>
               <section className="rounded-3xl border border-border/70 bg-card/80 p-5 backdrop-blur-sm sm:p-6">
-                <SectionHeading
-                  icon={Tag}
-                  eyebrow="At a glance"
-                  title="Listing details"
-                />
+                <SectionHeading icon={Tag} eyebrow="At a glance" title="Listing details" />
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   {[
                     {
@@ -519,11 +493,7 @@ export default function ProductDetailPageClient({
 
             <ScrollReveal delay={140}>
               <section className="rounded-3xl border border-border/70 bg-card/80 p-5 backdrop-blur-sm sm:p-6">
-                <SectionHeading
-                  icon={Share2}
-                  eyebrow="Share"
-                  title="Spread the word"
-                />
+                <SectionHeading icon={Share2} eyebrow="Share" title="Spread the word" />
                 <div className="mt-4 flex flex-wrap gap-2.5">
                   <a
                     href={`https://wa.me/?text=${encodeURIComponent(
@@ -541,11 +511,7 @@ export default function ProductDetailPageClient({
                     onClick={handleCopyLink}
                     className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-4 py-2.5 text-xs font-bold text-foreground transition hover:border-primary/40 hover:text-primary"
                   >
-                    {copied ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     {copied ? "Link copied!" : "Copy link"}
                   </button>
                 </div>
@@ -651,9 +617,7 @@ export default function ProductDetailPageClient({
                 href={sellerHref ?? undefined}
                 data-testid="seller-link"
                 className={`block rounded-3xl border border-border/70 bg-card/80 p-5 backdrop-blur-sm transition ${
-                  sellerHref
-                    ? "group hover:border-primary/40"
-                    : ""
+                  sellerHref ? "group hover:border-primary/40" : ""
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -679,9 +643,7 @@ export default function ProductDetailPageClient({
                   </div>
                   <div className="min-w-0">
                     <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
-                      <span className="truncate">
-                        {sellerName ?? "Private Seller"}
-                      </span>
+                      <span className="truncate">{sellerName ?? "Private Seller"}</span>
                       {isVerified && (
                         <BadgeCheck
                           className="h-4 w-4 shrink-0 text-secondary"

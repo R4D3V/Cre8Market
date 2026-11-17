@@ -1,6 +1,6 @@
 import { Mail, MessageCircle, ShieldCheck } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import PageHero from "@/components/PageHero";
 
 export interface LegalSection {
@@ -58,11 +58,7 @@ export default function LegalPage({
             />
             <div className="relative space-y-8">
               {sections.map((section) => (
-                <section
-                  key={section.title}
-                  id={slugify(section.title)}
-                  className="scroll-mt-28"
-                >
+                <section key={section.title} id={slugify(section.title)} className="scroll-mt-28">
                   <h2 className="font-heading text-lg font-extrabold tracking-tight text-foreground sm:text-xl">
                     {section.title}
                   </h2>

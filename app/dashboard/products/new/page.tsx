@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
-import Link from "next/link";
 import { Flame, Lock } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
+import { fetchCategoriesAction } from "@/lib/actions/categories";
 import {
-  createMyProductAction,
   checkSlugAction,
+  createMyProductAction,
   fetchMyListingLimitAction,
 } from "@/lib/actions/products";
-import { fetchCategoriesAction } from "@/lib/actions/categories";
-import { uploadProductImage } from "@/lib/uploadImage";
+import { useSession } from "@/lib/auth-client";
 import { PLAN_LIMITS } from "@/lib/plans";
-import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { CategoryDB } from "@/lib/types";
+import { uploadProductImage } from "@/lib/uploadImage";
 
 export default function NewMyProductPage() {
   const router = useRouter();
@@ -140,9 +140,7 @@ export default function NewMyProductPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(
-          data?.error || "AI could not generate product details.",
-        );
+        throw new Error(data?.error || "AI could not generate product details.");
       }
 
       setForm((prev) => ({
@@ -154,11 +152,7 @@ export default function NewMyProductPage() {
         price: data.price || prev.price,
       }));
     } catch (err: unknown) {
-      setAiError(
-        err instanceof Error
-          ? err.message
-          : "Failed to generate product details.",
-      );
+      setAiError(err instanceof Error ? err.message : "Failed to generate product details.");
     } finally {
       setAiLoading(false);
     }
@@ -289,8 +283,8 @@ export default function NewMyProductPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {limit && limit.limit !== null && (
             <div className="bg-primary/10 border border-primary/40 text-primary text-xs font-semibold rounded-xl px-4 py-3">
-              You're on the {limit.plan} plan — {limit.productCount} of{" "}
-              {limit.limit} listings used, up to {maxImages} photos per listing.{" "}
+              You're on the {limit.plan} plan — {limit.productCount} of {limit.limit} listings used,
+              up to {maxImages} photos per listing.{" "}
               {limit.isVerified
                 ? "Go Premium for unlimited listings and 7 photos."
                 : "Upgrade for more listings and photos."}
@@ -298,15 +292,13 @@ export default function NewMyProductPage() {
           )}
           {limit && limit.isVip && (
             <div className="bg-primary/10 border border-primary/40 text-primary text-xs font-semibold rounded-xl px-4 py-3">
-              Premium sellers have unlimited listings and up to {maxImages}{" "}
-              photos per listing. You've posted {limit.productCount} so far.
+              Premium sellers have unlimited listings and up to {maxImages} photos per listing.
+              You've posted {limit.productCount} so far.
             </div>
           )}
           <div>
             <div className="flex items-center justify-between gap-3 mb-1.5">
-              <label className="block text-sm font-semibold text-muted-foreground">
-                Title *
-              </label>
+              <label className="block text-sm font-semibold text-muted-foreground">Title *</label>
               <button
                 type="button"
                 onClick={generateProductDetails}
@@ -351,21 +343,15 @@ export default function NewMyProductPage() {
                   ) : (
                     <div className="flex flex-col items-center gap-1 text-muted-foreground">
                       <span className="text-xl">📷</span>
-                      <span className="text-[10px] font-semibold">
-                        Image {i + 1}
-                      </span>
-                      <span className="text-[9px] text-muted-foreground/80">
-                        Landscape
-                      </span>
+                      <span className="text-[10px] font-semibold">Image {i + 1}</span>
+                      <span className="text-[9px] text-muted-foreground/80">Landscape</span>
                     </div>
                   )}
                   <input
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) =>
-                      handleImageUpload(i, e.target.files?.[0] ?? null)
-                    }
+                    onChange={(e) => handleImageUpload(i, e.target.files?.[0] ?? null)}
                   />
                 </label>
               ))}
@@ -417,11 +403,7 @@ export default function NewMyProductPage() {
                 className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
               >
                 <option value="">Select…</option>
-                {[
-                  "New",
-                "Used",
-                "Refurbished",
-                ].map((c) => (
+                {["New", "Used", "Refurbished"].map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
@@ -456,9 +438,7 @@ export default function NewMyProductPage() {
 
           <div>
             <div className="flex items-center justify-between gap-2 mb-1.5">
-              <label className="block text-sm font-semibold text-muted-foreground">
-                Specs
-              </label>
+              <label className="block text-sm font-semibold text-muted-foreground">Specs</label>
               <button
                 type="button"
                 onClick={addSpecRow}
@@ -469,10 +449,7 @@ export default function NewMyProductPage() {
             </div>
             <div className="space-y-2">
               {form.specs.map((spec, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1.2fr_auto]"
-                >
+                <div key={index} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1.2fr_auto]">
                   <input
                     value={spec.label}
                     onChange={(e) => updateSpec(index, "label", e.target.value)}
@@ -516,12 +493,11 @@ export default function NewMyProductPage() {
               Buyers will contact you at
             </p>
             <p className="text-sm font-semibold text-foreground">
-              {session?.user?.name} · WhatsApp{" "}
-              {session?.user?.whatsapp ?? session?.user?.phone}
+              {session?.user?.name} · WhatsApp {session?.user?.whatsapp ?? session?.user?.phone}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              This comes from your account — update your WhatsApp number in your
-              profile if it changes.
+              This comes from your account — update your WhatsApp number in your profile if it
+              changes.
             </p>
           </div>
 

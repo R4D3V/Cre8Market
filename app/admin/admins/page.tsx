@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useSession } from "@/lib/auth-client";
+import { useCallback, useEffect, useState } from "react";
+import PasswordInput from "@/components/PasswordInput";
 import {
-  fetchAdminUsersAction,
   createAdminUserAction,
   deleteAdminUserAction,
+  fetchAdminUsersAction,
   isMainAdminAction,
 } from "@/lib/actions/admin";
+import { useSession } from "@/lib/auth-client";
 import type { AdminUserRow } from "@/lib/db/queries";
 import { compressImage } from "@/lib/imageCompress";
-import PasswordInput from "@/components/PasswordInput";
 
 export default function AdminUsersPage() {
   const { data: session } = useSession();
@@ -32,7 +32,10 @@ export default function AdminUsersPage() {
   const load = useCallback(async () => {
     const main = await isMainAdminAction();
     setIsMain(main);
-    if (!main) { setLoading(false); return; }
+    if (!main) {
+      setLoading(false);
+      return;
+    }
     const data = await fetchAdminUsersAction();
     setAdmins(data ?? []);
     setLoading(false);
@@ -74,9 +77,7 @@ export default function AdminUsersPage() {
         avatar: "",
         password: "",
       });
-      setMsg(
-        "New admin added. They can now log in with the email and password.",
-      );
+      setMsg("New admin added. They can now log in with the email and password.");
       await load();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to add admin");
@@ -86,12 +87,7 @@ export default function AdminUsersPage() {
   }
 
   async function handleDelete(id: string, email: string) {
-    if (
-      !confirm(
-        `Remove ${email}? They will no longer be able to access the dashboard.`,
-      )
-    )
-      return;
+    if (!confirm(`Remove ${email}? They will no longer be able to access the dashboard.`)) return;
     setError("");
     try {
       await deleteAdminUserAction(id);
@@ -131,18 +127,12 @@ export default function AdminUsersPage() {
 
       {/* Add admin */}
       <div className="neu-card p-6 mb-6">
-        <h2 className="font-bold text-foreground mb-4 font-heading">
-          Add a New Admin
-        </h2>
+        <h2 className="font-bold text-foreground mb-4 font-heading">Add a New Admin</h2>
         <form onSubmit={handleCreate} className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-2xl shrink-0 overflow-hidden">
               {form.avatar ? (
-                <img
-                  src={form.avatar}
-                  alt="Admin avatar"
-                  className="w-full h-full object-cover"
-                />
+                <img src={form.avatar} alt="Admin avatar" className="w-full h-full object-cover" />
               ) : (
                 (form.name || "A")[0].toUpperCase()
               )}
@@ -154,9 +144,7 @@ export default function AdminUsersPage() {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) =>
-                    handleAvatarUpload(e.target.files?.[0] ?? null)
-                  }
+                  onChange={(e) => handleAvatarUpload(e.target.files?.[0] ?? null)}
                 />
               </label>
               {form.avatar && (
@@ -258,9 +246,7 @@ export default function AdminUsersPage() {
 
       {/* Existing admins */}
       <div className="neu-card p-6">
-        <h2 className="font-bold text-foreground mb-4 font-heading">
-          Current Admins
-        </h2>
+        <h2 className="font-bold text-foreground mb-4 font-heading">Current Admins</h2>
         {loading ? (
           <p className="text-muted-foreground text-sm">Loading…</p>
         ) : admins.length === 0 ? (
@@ -268,10 +254,7 @@ export default function AdminUsersPage() {
         ) : (
           <ul className="divide-y divide-border">
             {admins.map((a) => (
-              <li
-                key={a.id}
-                className="py-3 flex items-center justify-between gap-3"
-              >
+              <li key={a.id} className="py-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0 overflow-hidden">
                     {a.avatar ? (
@@ -293,9 +276,7 @@ export default function AdminUsersPage() {
                         </span>
                       )}
                     </p>
-                    <p className="text-muted-foreground text-xs truncate">
-                      {a.email}
-                    </p>
+                    <p className="text-muted-foreground text-xs truncate">{a.email}</p>
                   </div>
                 </div>
                 <button

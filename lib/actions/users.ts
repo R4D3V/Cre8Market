@@ -1,34 +1,34 @@
 "use server";
 
 import bcrypt from "bcrypt";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import {
-  getUsers,
-  getPublicUsers,
-  getUserById,
-  getUserByHandleOrId,
-  getStoreAdminProfile,
-  createUser,
-  updateUserStatus,
-  updateUserProfile,
-  updateUserContact,
-  updateUserAdminStatus,
-  updateUserVerifiedStatus,
-  updateUserVipStatus,
-  updateUserPlanFlags,
-  getSubscriptionPlanByName,
-  setUserSubscription,
   cancelUserSubscriptions,
-  getUserPasswordHash,
-  updateUserPassword,
-  deleteUser,
   checkPhoneExists,
   checkPhoneExistsExcluding,
+  createUser,
+  deleteUser,
+  getPublicUsers,
+  getStoreAdminProfile,
+  getSubscriptionPlanByName,
+  getUserByHandleOrId,
+  getUserById,
+  getUserPasswordHash,
+  getUsers,
   logAudit,
+  setUserSubscription,
+  updateUserAdminStatus,
+  updateUserContact,
+  updateUserPassword,
+  updateUserPlanFlags,
+  updateUserProfile,
+  updateUserStatus,
+  updateUserVerifiedStatus,
+  updateUserVipStatus,
 } from "@/lib/db/queries";
-import type { AppUser } from "@/lib/types";
 import { sellerPath } from "@/lib/seller-handle";
-import { revalidatePath } from "next/cache";
+import type { AppUser } from "@/lib/types";
 
 async function requireAdmin() {
   const session = await auth();
@@ -236,10 +236,7 @@ export async function setUserVipAction(id: string, isVip: boolean) {
 // Admin selects Free / Standard / Premium for a seller. This keeps the user's
 // plan flags and their subscription record in sync, so the dashboard shows the
 // same plan the admin picked.
-export async function setUserPlanAction(
-  id: string,
-  plan: "Free" | "Standard" | "Premium",
-) {
+export async function setUserPlanAction(id: string, plan: "Free" | "Standard" | "Premium") {
   await requireAdmin();
   const session = await auth();
 
@@ -377,7 +374,8 @@ export async function updateMyProfileAction(data: {
 export async function changeMyPasswordAction(currentPassword: string, newPassword: string) {
   const userId = await requireUser();
   if (!currentPassword) throw new Error("Current password is required");
-  if (!newPassword || newPassword.length < 6) throw new Error("New password must be at least 6 characters");
+  if (!newPassword || newPassword.length < 6)
+    throw new Error("New password must be at least 6 characters");
 
   const currentHash = await getUserPasswordHash(userId);
   if (!currentHash) throw new Error("User not found");

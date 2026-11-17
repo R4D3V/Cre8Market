@@ -15,9 +15,7 @@ function buildConnectionString(): string {
   // 'verify-full'. pg-connection-string treats require/prefer/verify-ca as
   // aliases for verify-full today but will adopt weaker libpq semantics in
   // v3, which would trigger the deprecation warning and weaken security.
-  const withoutSslmode = base
-    .replace(/([?&])sslmode=[^&]*/g, "$1")
-    .replace(/[?&]$/, "");
+  const withoutSslmode = base.replace(/([?&])sslmode=[^&]*/g, "$1").replace(/[?&]$/, "");
   const separator = withoutSslmode.includes("?") ? "&" : "?";
   return `${withoutSslmode}${separator}sslmode=verify-full`;
 }
@@ -69,7 +67,7 @@ async function queryWithRetry(
       lastError = err;
       if (!isRetryable(err) || attempt === retries) break;
       // Exponential back-off: 2s, 4s, 8s, 16s — gives Neon time to wake up.
-      const delay = 2000 * Math.pow(2, attempt);
+      const delay = 2000 * 2 ** attempt;
       console.warn(
         `DB query failed (attempt ${attempt + 1}), retrying in ${delay}ms:`,
         (err as Error).message,

@@ -19,10 +19,7 @@ export function isCloudinaryConfigured(): boolean {
 }
 
 // Upload a data URL (or remote URL) to Cloudinary and return the secure URL.
-export async function uploadImage(
-  source: string,
-  folder = "cre8market/products",
-): Promise<string> {
+export async function uploadImage(source: string, folder = "cre8market/products"): Promise<string> {
   if (!isCloudinaryConfigured()) {
     throw new Error(
       "Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET.",

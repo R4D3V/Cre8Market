@@ -1,21 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
-import Link from "next/link";
 import { Flame } from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
+import { ProductImagePicker } from "@/components/ProductImagePicker";
+import { fetchCategoriesAction } from "@/lib/actions/categories";
 import {
-  fetchMyProductsAction,
-  updateMyProductAction,
   deleteMyProductAction,
   fetchMyListingLimitAction,
+  fetchMyProductsAction,
+  updateMyProductAction,
 } from "@/lib/actions/products";
-import { fetchCategoriesAction } from "@/lib/actions/categories";
-import { uploadProductImage, uploadProductVideo } from "@/lib/uploadImage";
-import { ProductImagePicker } from "@/components/ProductImagePicker";
-import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
+import { useSession } from "@/lib/auth-client";
 import type { CategoryDB } from "@/lib/types";
+import { uploadProductImage, uploadProductVideo } from "@/lib/uploadImage";
 
 export default function EditMyProductPage() {
   const { id } = useParams();
@@ -85,7 +85,9 @@ export default function EditMyProductPage() {
 
   useEffect(() => {
     fetchCategoriesAction().then((data) => setCategories(data ?? []));
-    fetchMyListingLimitAction().then(setLimit).catch(() => {});
+    fetchMyListingLimitAction()
+      .then(setLimit)
+      .catch(() => {});
     // fetchMyProductsAction only returns products owned by the current session's user,
     // so looking the id up in that list doubles as an ownership check.
     fetchMyProductsAction().then((products) => {
@@ -182,11 +184,7 @@ export default function EditMyProductPage() {
   }
 
   if (loading) {
-    return (
-      <div className="text-center py-12 text-muted-foreground text-sm">
-        Loading…
-      </div>
-    );
+    return <div className="text-center py-12 text-muted-foreground text-sm">Loading…</div>;
   }
 
   if (notFoundOrNotOwned) {
@@ -278,7 +276,6 @@ export default function EditMyProductPage() {
           </div>
         )}
 
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
@@ -323,11 +320,7 @@ export default function EditMyProductPage() {
               className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             >
               <option value="">Select…</option>
-              {[
-                "New",
-                "Used",
-                "Refurbished",
-              ].map((c) => (
+              {["New", "Used", "Refurbished"].map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -388,8 +381,7 @@ export default function EditMyProductPage() {
             Buyers will contact you at
           </p>
           <p className="text-sm font-semibold text-foreground">
-            {session?.user?.name} · WhatsApp{" "}
-            {session?.user?.whatsapp ?? session?.user?.phone}
+            {session?.user?.name} · WhatsApp {session?.user?.whatsapp ?? session?.user?.phone}
           </p>
         </div>
 

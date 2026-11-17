@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 interface Props {
   eyebrow?: string;
@@ -20,9 +20,7 @@ export default function SectionHeading({
   className = "",
 }: Props) {
   return (
-    <div
-      className={`flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between ${className}`}
-    >
+    <div className={`flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between ${className}`}>
       <div className="max-w-2xl">
         {eyebrow && (
           <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">

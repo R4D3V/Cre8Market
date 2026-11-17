@@ -1,6 +1,5 @@
-import { getPushSubscriptions, deletePushSubscription } from "@/lib/db/queries";
-
 import * as webpush from "web-push";
+import { deletePushSubscription, getPushSubscriptions } from "@/lib/db/queries";
 
 // VAPID keys must come from the environment. Auto-generating them at runtime is
 // dangerous in serverless deployments (each instance would get a different pair,
@@ -20,8 +19,7 @@ function isValidVapidPublicKey(key: string | undefined): key is string {
   }
 }
 
-const vapidPublicKey =
-  process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
 
 // Guard against malformed keys so a bad value in the hosting env doesn't crash
@@ -46,9 +44,7 @@ export async function sendPushNotification(opts: {
   url?: string;
 }): Promise<{ sent: number; total: number }> {
   if (!configured) {
-    console.warn(
-      "Push notification skipped: VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY not configured.",
-    );
+    console.warn("Push notification skipped: VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY not configured.");
     return { sent: 0, total: 0 };
   }
 
@@ -65,10 +61,7 @@ export async function sendPushNotification(opts: {
 
   const results = await Promise.allSettled(
     subscriptions.map((sub) =>
-      webpush.sendNotification(
-        { endpoint: sub.endpoint, keys: sub.keys },
-        payload,
-      ),
+      webpush.sendNotification({ endpoint: sub.endpoint, keys: sub.keys }, payload),
     ),
   );
 
@@ -90,7 +83,8 @@ export async function sendPushNotification(opts: {
   // Remove subscriptions that are no longer valid (410 Gone / 404 Not Found).
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
-    const code = r.status === "rejected" ? (r.reason as { statusCode?: number })?.statusCode : undefined;
+    const code =
+      r.status === "rejected" ? (r.reason as { statusCode?: number })?.statusCode : undefined;
     if (code === 410 || code === 404) {
       await deletePushSubscription(subscriptions[i].endpoint);
     }
@@ -103,12 +97,8 @@ export async function sendPushNotification(opts: {
   return { sent, total: subscriptions.length };
 }
 
-
 export function getVapidPublicKey(): string | null {
-  const key =
-    process.env.VAPID_PUBLIC_KEY ||
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
-    null;
+  const key = process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || null;
   if (!key || !isValidVapidPublicKey(key)) return null;
   return key;
 }

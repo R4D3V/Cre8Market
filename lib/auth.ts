@@ -5,14 +5,11 @@ import { betterAuth } from "better-auth";
 import { toNextJsHandler } from "better-auth/next-js";
 import { PostgresDialect } from "kysely";
 import { headers } from "next/headers";
-import { APP_URL } from "./env";
 import { pool } from "./db/pool";
 import { getAdminUserByEmail, getUserByPhone } from "./db/queries";
+import { APP_URL } from "./env";
 
-async function verifyPasswordHash(
-  hash: string,
-  password: string,
-): Promise<boolean> {
+async function verifyPasswordHash(hash: string, password: string): Promise<boolean> {
   if (!hash) return false;
 
   if (hash.startsWith("$2")) {
@@ -54,9 +51,7 @@ const trustedOrigins = Array.from(
         ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
         : undefined,
       process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-      process.env.VERCEL_BRANCH_URL
-        ? `https://${process.env.VERCEL_BRANCH_URL}`
-        : undefined,
+      process.env.VERCEL_BRANCH_URL ? `https://${process.env.VERCEL_BRANCH_URL}` : undefined,
       process.env.NEXT_PUBLIC_APP_URL,
       process.env.APP_URL,
       process.env.AUTH_URL,
@@ -69,10 +64,7 @@ const trustedOrigins = Array.from(
 
 const appAuth = betterAuth({
   appName: "Cre8Market",
-  secret:
-    process.env.AUTH_SECRET ??
-    process.env.BETTER_AUTH_SECRET ??
-    "dev-secret-key",
+  secret: process.env.AUTH_SECRET ?? process.env.BETTER_AUTH_SECRET ?? "dev-secret-key",
   baseURL: APP_URL,
   trustedOrigins,
   database: new PostgresDialect({ pool }),

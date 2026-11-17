@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Flame } from "lucide-react";
-import { createProductAction, checkSlugAction } from "@/lib/actions/products";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { AdminPanel } from "@/components/admin/AdminPanel";
 import { fetchMyAdminProfileAction } from "@/lib/actions/admin";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
-import { uploadProductImage } from "@/lib/uploadImage";
+import { checkSlugAction, createProductAction } from "@/lib/actions/products";
 import { ADMIN_IMAGE_LIMIT } from "@/lib/plans";
-import { AdminPanel } from "@/components/admin/AdminPanel";
 import type { CategoryDB } from "@/lib/types";
+import { uploadProductImage } from "@/lib/uploadImage";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -134,9 +134,7 @@ export default function NewProductPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(
-          data?.error || "AI could not generate product details.",
-        );
+        throw new Error(data?.error || "AI could not generate product details.");
       }
 
       setForm((prev) => ({
@@ -148,11 +146,7 @@ export default function NewProductPage() {
         price: data.price || prev.price,
       }));
     } catch (err: unknown) {
-      setAiError(
-        err instanceof Error
-          ? err.message
-          : "Failed to generate product details.",
-      );
+      setAiError(err instanceof Error ? err.message : "Failed to generate product details.");
     } finally {
       setAiLoading(false);
     }
@@ -227,10 +221,7 @@ export default function NewProductPage() {
 
       router.push("/admin");
     } catch (err: unknown) {
-      alert(
-        "Error saving: " +
-          (err instanceof Error ? err.message : "Unknown error"),
-      );
+      alert("Error saving: " + (err instanceof Error ? err.message : "Unknown error"));
       setSaving(false);
     }
   }
@@ -255,9 +246,7 @@ export default function NewProductPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <div className="flex items-center justify-between gap-3 mb-1.5">
-            <label className="block text-sm font-semibold text-muted-foreground">
-              Title *
-            </label>
+            <label className="block text-sm font-semibold text-muted-foreground">Title *</label>
             <button
               type="button"
               onClick={generateProductDetails}
@@ -302,21 +291,15 @@ export default function NewProductPage() {
                 ) : (
                   <div className="flex flex-col items-center gap-1 text-muted-foreground">
                     <span className="text-xl">📷</span>
-                    <span className="text-[10px] font-semibold">
-                      Image {i + 1}
-                    </span>
-                    <span className="text-[9px] text-muted-foreground/80">
-                      Landscape
-                    </span>
+                    <span className="text-[10px] font-semibold">Image {i + 1}</span>
+                    <span className="text-[9px] text-muted-foreground/80">Landscape</span>
                   </div>
                 )}
                 <input
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) =>
-                    handleImageUpload(i, e.target.files?.[0] ?? null)
-                  }
+                  onChange={(e) => handleImageUpload(i, e.target.files?.[0] ?? null)}
                 />
               </label>
             ))}
@@ -367,11 +350,7 @@ export default function NewProductPage() {
               className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             >
               <option value="">Select…</option>
-              {[
-                "New",
-                "Used",
-                "Refurbished",
-              ].map((c) => (
+              {["New", "Used", "Refurbished"].map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -406,9 +385,7 @@ export default function NewProductPage() {
 
         <div>
           <div className="flex items-center justify-between gap-2 mb-1.5">
-            <label className="block text-sm font-semibold text-muted-foreground">
-              Specs
-            </label>
+            <label className="block text-sm font-semibold text-muted-foreground">Specs</label>
             <button
               type="button"
               onClick={addSpecRow}
@@ -419,10 +396,7 @@ export default function NewProductPage() {
           </div>
           <div className="space-y-2">
             {form.specs.map((spec, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1.2fr_auto]"
-              >
+              <div key={index} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1.2fr_auto]">
                 <input
                   value={spec.label}
                   onChange={(e) => updateSpec(index, "label", e.target.value)}
@@ -453,15 +427,12 @@ export default function NewProductPage() {
             Seller (from your profile)
           </p>
           <p className="text-sm font-semibold text-foreground">
-            {form.sellerName || "—"} · Phone {form.sellerPhone || "—"} ·
-            WhatsApp {form.sellerWhatsapp || "—"}
+            {form.sellerName || "—"} · Phone {form.sellerPhone || "—"} · WhatsApp{" "}
+            {form.sellerWhatsapp || "—"}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             This is taken from your admin profile. Update it in{" "}
-            <Link
-              href="/admin/profile"
-              className="text-primary hover:underline"
-            >
+            <Link href="/admin/profile" className="text-primary hover:underline">
               My Profile
             </Link>{" "}
             if it changes.
@@ -475,9 +446,7 @@ export default function NewProductPage() {
             onChange={(e) => update("featured", e.target.checked)}
             className="w-4 h-4 rounded border-border bg-card text-primary focus:ring-primary"
           />
-          <span className="text-sm font-semibold text-muted-foreground">
-            Mark as Featured
-          </span>
+          <span className="text-sm font-semibold text-muted-foreground">Mark as Featured</span>
         </label>
 
         <label className="flex items-center gap-2.5 cursor-pointer">

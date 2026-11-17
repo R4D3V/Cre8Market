@@ -1,21 +1,21 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import {
-  getSubscriptionPlans,
-  getSubscriptionPlanById,
-  upsertSubscriptionPlan,
-  deleteSubscriptionPlan,
-  getUserSubscription,
-  setUserSubscription,
   cancelUserSubscriptions,
-  updateUserPlanFlags,
+  deleteSubscriptionPlan,
+  getSubscriptionPlanById,
+  getSubscriptionPlans,
+  getUserSubscription,
   logAudit,
+  setUserSubscription,
+  updateUserPlanFlags,
+  upsertSubscriptionPlan,
 } from "@/lib/db/queries";
 import { planTierFromName } from "@/lib/plans";
 import { sellerPath } from "@/lib/seller-handle";
 import type { UserSubscription } from "@/lib/types";
-import { revalidatePath } from "next/cache";
 
 async function requireAdmin() {
   const session = await auth();
@@ -83,7 +83,11 @@ export async function fetchUserSubscriptionAction(userId: string) {
   return getUserSubscription(userId);
 }
 
-export async function assignSubscriptionAction(userId: string, planId: string, expiresAt: string | null) {
+export async function assignSubscriptionAction(
+  userId: string,
+  planId: string,
+  expiresAt: string | null,
+) {
   const adminId = await requireAdmin();
   const plan = await getSubscriptionPlanById(planId);
   if (!plan) throw new Error("Subscription plan not found");

@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Package, SearchX } from "lucide-react";
-import { useSession } from "@/lib/auth-client";
-import { formatPrice } from "@/lib/data";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import {
-  fetchMyProductsAction,
   deleteMyProductsAction,
   duplicateMyProductsAction,
+  fetchMyProductsAction,
 } from "@/lib/actions/products";
-import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
+import { useSession } from "@/lib/auth-client";
+import { formatPrice } from "@/lib/data";
 import type { Product } from "@/lib/types";
 
 // Re-export the existing products management UI. This page is the moved home
@@ -41,7 +41,9 @@ export default function MyProductsListPage() {
       await deleteMyProductsAction([id]);
     } catch (e) {
       setProducts(previous);
-      setError(e instanceof Error ? e.message : "Couldn't delete that product. It has been restored.");
+      setError(
+        e instanceof Error ? e.message : "Couldn't delete that product. It has been restored.",
+      );
     }
   }
 
@@ -83,7 +85,8 @@ export default function MyProductsListPage() {
 
   async function handleBulkDelete() {
     if (selectedIds.length === 0) return;
-    if (!confirm(`Delete ${selectedIds.length} product${selectedIds.length !== 1 ? "s" : ""}?`)) return;
+    if (!confirm(`Delete ${selectedIds.length} product${selectedIds.length !== 1 ? "s" : ""}?`))
+      return;
     setBusy(true);
     setError("");
     const previous = products;
@@ -95,7 +98,9 @@ export default function MyProductsListPage() {
     } catch (e) {
       setProducts(previous);
       setSelected(previousSelected);
-      setError(e instanceof Error ? e.message : "Couldn't delete those products. They have been restored.");
+      setError(
+        e instanceof Error ? e.message : "Couldn't delete those products. They have been restored.",
+      );
     } finally {
       setBusy(false);
     }
@@ -175,9 +180,7 @@ export default function MyProductsListPage() {
       )}
       {selectedIds.length > 0 && (
         <div className="border border-border/70 bg-card/80 rounded-xl p-3 mb-4 flex flex-wrap items-center gap-3">
-          <span className="text-sm font-bold text-foreground">
-            {selectedIds.length} selected
-          </span>
+          <span className="text-sm font-bold text-foreground">{selectedIds.length} selected</span>
           <button
             onClick={() => handleBulkDuplicate()}
             disabled={busy}
@@ -226,9 +229,7 @@ export default function MyProductsListPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-muted-foreground text-sm">
-          Loading…
-        </div>
+        <div className="text-center py-12 text-muted-foreground text-sm">Loading…</div>
       ) : products.length === 0 ? (
         <div className="border border-border/70 bg-card/80 rounded-xl text-center py-12">
           <span className="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
@@ -252,9 +253,7 @@ export default function MyProductsListPage() {
           <span className="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
             <SearchX className="h-6 w-6" />
           </span>
-          <h3 className="font-bold text-foreground mb-1">
-            No matching products
-          </h3>
+          <h3 className="font-bold text-foreground mb-1">No matching products</h3>
           <p className="text-muted-foreground text-sm mb-4">
             Try another keyword or clear the search.
           </p>
@@ -312,12 +311,8 @@ export default function MyProductsListPage() {
                         {formatPrice(p.price)}
                       </span>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {p.category}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Listed {p.timeAgo}
-                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">{p.category}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Listed {p.timeAgo}</p>
                   </div>
                 </div>
 
@@ -357,9 +352,7 @@ export default function MyProductsListPage() {
                       type="checkbox"
                       checked={
                         filteredProducts.length > 0 &&
-                        filteredProducts.every((product) =>
-                          selected.has(product.id),
-                        )
+                        filteredProducts.every((product) => selected.has(product.id))
                       }
                       onChange={toggleAll}
                       className="w-4 h-4 rounded border-border bg-card text-primary cursor-pointer"
@@ -395,15 +388,9 @@ export default function MyProductsListPage() {
                         {p.title}
                       </Link>
                     </td>
-                    <td className="py-3 pr-4 text-muted-foreground">
-                      {p.category}
-                    </td>
-                    <td className="py-3 pr-4 text-primary font-bold">
-                      {formatPrice(p.price)}
-                    </td>
-                    <td className="py-3 pr-4 text-muted-foreground">
-                      {p.timeAgo}
-                    </td>
+                    <td className="py-3 pr-4 text-muted-foreground">{p.category}</td>
+                    <td className="py-3 pr-4 text-primary font-bold">{formatPrice(p.price)}</td>
+                    <td className="py-3 pr-4 text-muted-foreground">{p.timeAgo}</td>
                     <td className="py-3 pr-4">
                       <div className="flex items-center gap-2">
                         <Link

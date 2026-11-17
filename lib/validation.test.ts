@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { productInputSchema, pushSubscribeSchema, pushNotifySchema } from "./validation";
+import { describe, expect, it } from "vitest";
+import { productInputSchema, pushNotifySchema, pushSubscribeSchema } from "./validation";
 
 describe("productInputSchema", () => {
   it("accepts a valid product", () => {

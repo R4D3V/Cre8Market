@@ -19,7 +19,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck 2>/dev/null || npx tsc --noEmit
-      - run: pnpm lint 2>/dev/null || true
+      - run: pnpm lint
       - run: pnpm test
       - run: pnpm build
         env:

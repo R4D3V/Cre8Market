@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import type { CategoryDB } from "@/lib/types";
 

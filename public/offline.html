@@ -48,9 +48,9 @@
     </div>
   </main>
   <script>
-    document.getElementById("retry").addEventListener("click", function () { location.reload(); });
+    document.getElementById("retry").addEventListener("click", () => { location.reload(); });
     // Come back automatically as soon as the connection returns.
-    window.addEventListener("online", function () { location.reload(); });
+    window.addEventListener("online", () => { location.reload(); });
   </script>
 </body>
 </html>

@@ -22,9 +22,7 @@ export function DashboardPanel({ title, description, action, children }: Dashboa
           <h1 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
             {title}
           </h1>
-          {description && (
-            <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>
-          )}
+          {description && <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>}
         </div>
         {action}
       </header>

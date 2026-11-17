@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import ProductCard from "@/components/ProductCard";
-import SectionHeading from "./SectionHeading";
 import type { Product } from "@/lib/types";
+import SectionHeading from "./SectionHeading";
 
 export interface ProductGroup {
   name: string;

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Download } from "lucide-react";
+import { useState } from "react";
 import { useInstall } from "@/hooks/useInstall";
 import { haptic } from "@/lib/haptics";
 

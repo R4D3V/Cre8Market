@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import {
+  deleteSubscriptionPlanAction,
   fetchAllSubscriptionPlansAction,
   upsertSubscriptionPlanAction,
-  deleteSubscriptionPlanAction,
 } from "@/lib/actions/subscriptions";
 import type { SubscriptionPlan } from "@/lib/types";
 
@@ -129,9 +129,7 @@ export default function AdminSubscriptionsPage() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
-              Name
-            </label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Name</label>
             <input
               required
               value={form.name}
@@ -161,9 +159,7 @@ export default function AdminSubscriptionsPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
-              Icon
-            </label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Icon</label>
             <select
               value={form.icon}
               onChange={(e) => setForm({ ...form, icon: e.target.value })}

@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
+import PasswordInput from "@/components/PasswordInput";
 import {
+  changeMyPasswordAction,
   fetchMyProfileAction,
   updateMyProfileAction,
-  changeMyPasswordAction,
 } from "@/lib/actions/users";
 import { compressImage } from "@/lib/imageCompress";
-import PasswordInput from "@/components/PasswordInput";
-import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import type { AppUser } from "@/lib/types";
 
 export default function ProfilePage() {
@@ -92,11 +92,7 @@ export default function ProfilePage() {
   }
 
   if (loading) {
-    return (
-      <div className="text-center py-12 text-muted-foreground text-sm">
-        Loading…
-      </div>
-    );
+    return <div className="text-center py-12 text-muted-foreground text-sm">Loading…</div>;
   }
 
   return (
@@ -123,11 +119,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-2xl shrink-0 overflow-hidden">
               {avatar ? (
-                <img
-                  src={avatar}
-                  alt="Profile avatar"
-                  className="w-full h-full object-cover"
-                />
+                <img src={avatar} alt="Profile avatar" className="w-full h-full object-cover" />
               ) : (
                 (name || profile?.name || "U")[0].toUpperCase()
               )}
@@ -139,9 +131,7 @@ export default function ProfilePage() {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) =>
-                    handleAvatarUpload(e.target.files?.[0] ?? null)
-                  }
+                  onChange={(e) => handleAvatarUpload(e.target.files?.[0] ?? null)}
                 />
               </label>
               {avatar && (
@@ -161,11 +151,7 @@ export default function ProfilePage() {
             </label>
             {banner && (
               <div className="mb-2 overflow-hidden rounded-xl border border-border">
-                <img
-                  src={banner}
-                  alt="Profile banner"
-                  className="w-full h-32 object-cover"
-                />
+                <img src={banner} alt="Profile banner" className="w-full h-32 object-cover" />
               </div>
             )}
             <div className="flex items-center gap-2">
@@ -175,9 +161,7 @@ export default function ProfilePage() {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) =>
-                    handleBannerUpload(e.target.files?.[0] ?? null)
-                  }
+                  onChange={(e) => handleBannerUpload(e.target.files?.[0] ?? null)}
                 />
               </label>
               {banner && (
@@ -229,8 +213,7 @@ export default function ProfilePage() {
               className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Buyers will contact you on this number. Leave blank to use your
-              phone number.
+              Buyers will contact you on this number. Leave blank to use your phone number.
             </p>
           </div>
 

@@ -103,7 +103,8 @@ export function usePushSubscription() {
       else if (Notification.permission === "denied") next = "denied";
       else if (Notification.permission === "granted") {
         const registration = await waitForServiceWorker();
-        next = registration && (await registration.pushManager.getSubscription()) ? "granted" : "idle";
+        next =
+          registration && (await registration.pushManager.getSubscription()) ? "granted" : "idle";
       }
       if (!cancelled) setStatus(next);
     })().catch(() => {});

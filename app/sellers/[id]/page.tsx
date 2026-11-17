@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import SellerPageClient from "@/components/sellers/SellerPageClient";
-import { fetchPublicUserAction } from "@/lib/actions/users";
 import { fetchPublicUserProductsAction } from "@/lib/actions/products";
+import { fetchPublicUserAction } from "@/lib/actions/users";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
 import type { AppUser, Product } from "@/lib/types";
 
@@ -67,11 +67,5 @@ export default async function SellerPage({ params }: Props) {
   const { id } = await params;
   const { user, products } = await load(id);
 
-  return (
-    <SellerPageClient
-      id={id}
-      initialUser={user}
-      initialProducts={products}
-    />
-  );
+  return <SellerPageClient id={id} initialUser={user} initialProducts={products} />;
 }

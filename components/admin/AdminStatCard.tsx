@@ -7,12 +7,7 @@ type AdminStatCardProps = {
   hint?: string;
 };
 
-export function AdminStatCard({
-  label,
-  value,
-  icon: Icon,
-  hint,
-}: AdminStatCardProps) {
+export function AdminStatCard({ label, value, icon: Icon, hint }: AdminStatCardProps) {
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card/80 p-5 transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_28px_60px_-30px_rgba(0,0,0,0.9)]">
       <div
@@ -28,9 +23,7 @@ export function AdminStatCard({
       <p className="relative mt-4 font-heading text-3xl font-extrabold tracking-tight text-foreground">
         {value}
       </p>
-      {hint && (
-        <p className="relative mt-0.5 text-xs text-muted-foreground">{hint}</p>
-      )}
+      {hint && <p className="relative mt-0.5 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }

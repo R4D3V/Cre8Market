@@ -1,22 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import Navbar from "@/components/Navbar";
+import { Clock, Search, SlidersHorizontal, Star, WifiOff } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import BottomSheet from "@/components/BottomSheet";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 import PageHero from "@/components/PageHero";
 import ProductCard from "@/components/ProductCard";
 import ScrollReveal from "@/components/ScrollReveal";
-import { Clock, Search, SlidersHorizontal, Star, WifiOff } from "lucide-react";
-import BottomSheet from "@/components/BottomSheet";
-import {
-  fetchProductsPageAction,
-  fetchSellersAction,
-} from "@/lib/actions/products";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
-import type { Product } from "@/lib/types";
-import type { CategoryDB } from "@/lib/types";
+import { fetchProductsPageAction, fetchSellersAction } from "@/lib/actions/products";
 import { sellerHandle } from "@/lib/seller-handle";
+import type { CategoryDB, Product } from "@/lib/types";
 
 const ITEMS_PER_PAGE = 16;
 
@@ -40,17 +36,19 @@ function ProductCardSkeleton() {
   );
 }
 
-export default function ProductsPageClient(props: {
-  initialProducts?: Product[];
-  initialTotal?: number;
-  initialCategories?: CategoryDB[];
-  initialSellers?: {
-    id: string;
-    name: string;
-    handle?: string | null;
-    productCount: number;
-  }[];
-} = {}) {
+export default function ProductsPageClient(
+  props: {
+    initialProducts?: Product[];
+    initialTotal?: number;
+    initialCategories?: CategoryDB[];
+    initialSellers?: {
+      id: string;
+      name: string;
+      handle?: string | null;
+      productCount: number;
+    }[];
+  } = {},
+) {
   return (
     <Suspense fallback={null}>
       <ProductsPageContent {...props} />
@@ -87,9 +85,7 @@ function ProductsPageContent({
 
   const [products, setProducts] = useState<Product[]>(initialProducts ?? []);
   const [total, setTotal] = useState(initialTotal ?? 0);
-  const [categories, setCategories] = useState<CategoryDB[]>(
-    initialCategories ?? [],
-  );
+  const [categories, setCategories] = useState<CategoryDB[]>(initialCategories ?? []);
   const [sellers, setSellers] = useState<
     {
       id: string;
@@ -112,9 +108,7 @@ function ProductsPageContent({
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const skipInitialProductsRef = useRef(!!initialProducts);
-  const skipInitialMetaRef = useRef(
-    !!(initialCategories || initialSellers),
-  );
+  const skipInitialMetaRef = useRef(!!(initialCategories || initialSellers));
 
   useEffect(() => {
     setSelectedCategory(categoryParam);
@@ -143,6 +137,7 @@ function ProductsPageContent({
   }, [search]);
 
   // Fetch one page of products, letting Postgres handle filtering and sorting.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reloadKey is an intentional manual refresh trigger
   useEffect(() => {
     if (skipInitialProductsRef.current) {
       skipInitialProductsRef.current = false;
@@ -202,104 +197,100 @@ function ProductsPageContent({
     setPage(1);
   }
 
-  const activeFilterCount = [
-    search,
-    selectedCategory,
-    selectedSeller,
-    minPrice,
-    maxPrice,
-  ].filter(Boolean).length;
+  const activeFilterCount = [search, selectedCategory, selectedSeller, minPrice, maxPrice].filter(
+    Boolean,
+  ).length;
 
   const filterFields = (
     <>
-    <div className="mb-4">
-      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
-        Search
-      </label>
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setPage(1);
-        }}
-        placeholder="Search listings…"
-        className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-      />
-    </div>
-
-    <div className="mb-4">
-      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
-        Category
-      </label>
-      <select
-        value={selectedCategory}
-        onChange={(e) => {
-          setSelectedCategory(e.target.value);
-          setPage(1);
-        }}
-        className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-      >
-        <option value="">All Categories</option>
-        {categories.map((c) => (
-          <option key={c.id} value={c.slug}>
-            {c.icon} {c.name}
-          </option>
-        ))}
-      </select>
-    </div>
-
-    <div className="mb-4">
-      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
-        Seller
-      </label>
-      <select
-        value={selectedSeller}
-        onChange={(e) => {
-          setSelectedSeller(e.target.value);
-          setPage(1);
-        }}
-        className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-      >
-        <option value="">All Sellers</option>
-        {sellers.map((s) => (
-          <option
-            key={s.id}
-            value={s.id === "store" ? "store" : s.handle ?? sellerHandle(s.name)}
-          >
-            {s.name} ({s.productCount})
-          </option>
-        ))}
-      </select>
-    </div>
-
-    <div className="mb-4">
-      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
-        Price (UGX)
-      </label>
-      <div className="flex gap-2">
+      <div className="mb-4">
+        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
+          Search
+        </label>
         <input
-          type="number"
-          value={minPrice}
+          type="text"
+          value={search}
           onChange={(e) => {
-            setMinPrice(e.target.value);
+            setSearch(e.target.value);
             setPage(1);
           }}
-          placeholder="Min"
-          className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-        />
-        <input
-          type="number"
-          value={maxPrice}
-          onChange={(e) => {
-            setMaxPrice(e.target.value);
-            setPage(1);
-          }}
-          placeholder="Max"
-          className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+          placeholder="Search listings…"
+          className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
       </div>
-    </div>
+
+      <div className="mb-4">
+        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
+          Category
+        </label>
+        <select
+          value={selectedCategory}
+          onChange={(e) => {
+            setSelectedCategory(e.target.value);
+            setPage(1);
+          }}
+          className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+        >
+          <option value="">All Categories</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.slug}>
+              {c.icon} {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mb-4">
+        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
+          Seller
+        </label>
+        <select
+          value={selectedSeller}
+          onChange={(e) => {
+            setSelectedSeller(e.target.value);
+            setPage(1);
+          }}
+          className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+        >
+          <option value="">All Sellers</option>
+          {sellers.map((s) => (
+            <option
+              key={s.id}
+              value={s.id === "store" ? "store" : (s.handle ?? sellerHandle(s.name))}
+            >
+              {s.name} ({s.productCount})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mb-4">
+        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block mb-1.5">
+          Price (UGX)
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="number"
+            value={minPrice}
+            onChange={(e) => {
+              setMinPrice(e.target.value);
+              setPage(1);
+            }}
+            placeholder="Min"
+            className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+          />
+          <input
+            type="number"
+            value={maxPrice}
+            onChange={(e) => {
+              setMaxPrice(e.target.value);
+              setPage(1);
+            }}
+            placeholder="Max"
+            className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+          />
+        </div>
+      </div>
     </>
   );
 
@@ -387,8 +378,14 @@ function ProductsPageContent({
                 ))}
               </div>
             ) : loadError ? (
-              <div className="rounded-2xl border border-border/70 bg-card/80 text-center py-16 px-4" role="alert">
-                <WifiOff className="mx-auto mb-4 size-10 text-muted-foreground" aria-hidden="true" />
+              <div
+                className="rounded-2xl border border-border/70 bg-card/80 text-center py-16 px-4"
+                role="alert"
+              >
+                <WifiOff
+                  className="mx-auto mb-4 size-10 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <h3 className="font-heading text-lg font-bold text-foreground mb-2">
                   Couldn&apos;t load listings
                 </h3>
@@ -440,24 +437,22 @@ function ProductsPageContent({
                 >
                   ← Previous
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (n) => (
-                    <button
-                      key={n}
-                      onClick={() => {
-                        setPage(n);
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      }}
-                      className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${
-                        page === n
-                          ? "bg-primary text-primary-foreground neu-dark-pill"
-                          : "border border-border bg-card text-muted-foreground"
-                      }`}
-                    >
-                      {n}
-                    </button>
-                  ),
-                )}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => {
+                      setPage(n);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${
+                      page === n
+                        ? "bg-primary text-primary-foreground neu-dark-pill"
+                        : "border border-border bg-card text-muted-foreground"
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
                 <button
                   onClick={() => {
                     setPage((p) => Math.min(totalPages, p + 1));

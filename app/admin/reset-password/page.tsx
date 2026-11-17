@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import {
   AlertCircle,
   ArrowLeft,
@@ -11,8 +9,10 @@ import {
   Mail,
   ShieldCheck,
 } from "lucide-react";
-import { resetAdminPasswordAction } from "@/lib/actions/auth";
+import Link from "next/link";
+import { useState } from "react";
 import PasswordInput from "@/components/PasswordInput";
+import { resetAdminPasswordAction } from "@/lib/actions/auth";
 
 const FIELD_CLASS =
   "w-full rounded-xl border border-border/70 bg-muted/30 py-3 pl-10 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-muted/50";
@@ -87,9 +87,7 @@ export default function ResetPasswordPage() {
                 <ShieldCheck className="h-5 w-5" />
               </span>
               <div>
-                <h2 className="text-sm font-bold text-foreground">
-                  Verify your identity
-                </h2>
+                <h2 className="text-sm font-bold text-foreground">Verify your identity</h2>
                 <p className="text-xs text-muted-foreground">
                   Your backup pin confirms the request.
                 </p>
@@ -212,8 +210,8 @@ export default function ResetPasswordPage() {
             <ShieldCheck className="h-4 w-4" />
           </span>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Admin recovery requires the backup pin issued with the account. If
-            you don&apos;t have it, contact the site owner.
+            Admin recovery requires the backup pin issued with the account. If you don&apos;t have
+            it, contact the site owner.
           </p>
         </div>
       </div>
