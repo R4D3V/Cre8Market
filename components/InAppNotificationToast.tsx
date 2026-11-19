@@ -29,6 +29,8 @@ export default function InAppNotificationToast() {
   const recentUrls = useRef(new Map<string, number>());
 
   const addToast = useCallback((toast: Omit<Toast, "id">) => {
+    // Never surface in-app toasts while the browser is offline.
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
     const now = Date.now();
     if ((recentUrls.current.get(toast.url) ?? 0) > now) return;
     recentUrls.current.set(toast.url, now + DEDUPE_MS);
@@ -63,6 +65,8 @@ export default function InAppNotificationToast() {
     let cancelled = false;
 
     async function poll() {
+      // Skip polling while offline; the browser will retry when back online.
+      if (typeof navigator !== "undefined" && !navigator.onLine) return;
       let cursor: string | null = null;
       try {
         cursor = window.localStorage.getItem(CURSOR_KEY);
@@ -97,16 +101,22 @@ export default function InAppNotificationToast() {
     }
 
     function pollIfVisible() {
-      if (document.visibilityState === "visible") poll();
+      if (document.visibilityState === "visible" && navigator.onLine) poll();
     }
 
     poll();
     const interval = setInterval(pollIfVisible, POLL_MS);
     document.addEventListener("visibilitychange", pollIfVisible);
+    const clearOnOffline = () => setToasts([]);
+    // Resume polling as soon as connectivity returns.
+    window.addEventListener("online", pollIfVisible);
+    window.addEventListener("offline", clearOnOffline);
     return () => {
       cancelled = true;
       clearInterval(interval);
       document.removeEventListener("visibilitychange", pollIfVisible);
+      window.removeEventListener("online", pollIfVisible);
+      window.removeEventListener("offline", clearOnOffline);
     };
   }, [addToast]);
 

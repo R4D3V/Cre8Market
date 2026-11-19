@@ -1,4 +1,4 @@
-import { ArrowRight, BadgeCheck, ImageOff, type LucideIcon, Store, UserX } from "lucide-react";
+import { ArrowRight, BadgeCheck, ImageOff, type LucideIcon, UserX } from "lucide-react";
 import Link from "next/link";
 import type { AdminOverview } from "@/lib/db/queries";
 import { AdminSection } from "./AdminSection";
@@ -44,13 +44,6 @@ export function NeedsAttention({
       count: needsAttention.missingImages,
       href: "/admin/products?missingImages=1",
       icon: ImageOff,
-    },
-    {
-      label: "Store listings without owner",
-      hint: "These appear under the CRE8MARKET storefront.",
-      count: needsAttention.storeListings,
-      href: "/admin/products?owner=admin",
-      icon: Store,
     },
   ];
 
