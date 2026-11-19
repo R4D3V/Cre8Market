@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { ADMIN_IMAGE_LIMIT, limitsForPerks, PLAN_LIMITS, planForPerks } from "./plans";
 
 describe("plan limits", () => {
-  it("Free allows 3 listings and 3 images per product", () => {
-    expect(PLAN_LIMITS.Free).toEqual({ listings: 3, images: 3 });
+  it("Free allows 5 listings and 3 images per product", () => {
+    expect(PLAN_LIMITS.Free).toEqual({ listings: 5, images: 3 });
   });
 
-  it("Standard allows 20 listings and 5 images per product", () => {
-    expect(PLAN_LIMITS.Standard).toEqual({ listings: 20, images: 5 });
+  it("Standard allows 30 listings and 5 images per product", () => {
+    expect(PLAN_LIMITS.Standard).toEqual({ listings: 30, images: 5 });
   });
 
   it("Premium allows unlimited listings and 7 images per product", () => {
@@ -27,9 +27,9 @@ describe("plan limits", () => {
   });
 
   it("derives listing and image limits from account flags", () => {
-    expect(limitsForPerks({})).toEqual({ listings: 3, images: 3 });
+    expect(limitsForPerks({})).toEqual({ listings: 5, images: 3 });
     expect(limitsForPerks({ isVerified: true })).toEqual({
-      listings: 20,
+      listings: 30,
       images: 5,
     });
     expect(limitsForPerks({ isVip: true })).toEqual({

@@ -8,7 +8,7 @@ const plans = [
     price: 0,
     period: "Free Forever",
     features: [
-      "Up to 3 active product listings",
+      "Up to 5 active product listings",
       "Up to 3 photos per listing",
       "Direct WhatsApp and phone contact",
     ],
@@ -21,7 +21,7 @@ const plans = [
     price: 10000,
     period: "2 Months",
     features: [
-      "Up to 20 active product listings",
+      "Up to 30 active product listings",
       "Up to 5 photos per listing",
       "Verified seller badge (after verification)",
       "Direct WhatsApp and phone contact",

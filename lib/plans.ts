@@ -19,7 +19,7 @@ export const PLANS: Plan[] = [
     highlight: false,
     icon: "user",
     features: [
-      "Up to 3 active product listings",
+      "Up to 5 active product listings",
       "Up to 3 photos per listing",
       "Direct WhatsApp and phone contact",
     ],
@@ -32,7 +32,7 @@ export const PLANS: Plan[] = [
     highlight: true,
     icon: "star",
     features: [
-      "Up to 20 active product listings",
+      "Up to 30 active product listings",
       "Up to 5 photos per listing",
       "Verified seller badge (after verification)",
       "Direct WhatsApp and phone contact",
@@ -76,8 +76,8 @@ export interface PlanLimits {
 }
 
 export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
-  Free: { listings: 3, images: 3 },
-  Standard: { listings: 20, images: 5 },
+  Free: { listings: 5, images: 3 },
+  Standard: { listings: 30, images: 5 },
   Premium: { listings: null, images: 7 },
 };
 
