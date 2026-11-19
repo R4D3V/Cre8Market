@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  verification: {
+    google: "_-m9WGRnpuY5KH1xGRHn5athoqk0GaXp_QYbs_B2oNM",
+  },
 };
 
 export const revalidate = 60;
