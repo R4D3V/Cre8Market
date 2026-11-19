@@ -32,6 +32,9 @@ export const metadata: Metadata = {
   },
   description:
     "Buy and sell phones, laptops, appliances, and local deals in Entebbe with CRE8MARKET — trusted, direct, and easy to use.",
+  verification: {
+    google: "_-m9WGRnpuY5KH1xGRHn5athoqk0GaXp_QYbs_B2oNM",
+  },
   openGraph: {
     title: "CRE8MARKET Entebbe | Buy & Sell in Entebbe",
     description:
