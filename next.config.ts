@@ -38,6 +38,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
+  serverExternalPackages: ["esbuild", "esbuild-wasm"],
   async headers() {
     return [
       {
