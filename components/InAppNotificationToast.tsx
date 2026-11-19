@@ -29,7 +29,9 @@ export default function InAppNotificationToast() {
   const recentUrls = useRef(new Map<string, number>());
 
   const addToast = useCallback((toast: Omit<Toast, "id">) => {
-    // Never surface in-app toasts while the browser is offline.
+    // Only surface in-app toasts on an active, visible, online browser.
+    // Never queue them for later — they are live-only.
+    if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
     if (typeof navigator !== "undefined" && !navigator.onLine) return;
     const now = Date.now();
     if ((recentUrls.current.get(toast.url) ?? 0) > now) return;
@@ -108,13 +110,18 @@ export default function InAppNotificationToast() {
     const interval = setInterval(pollIfVisible, POLL_MS);
     document.addEventListener("visibilitychange", pollIfVisible);
     const clearOnOffline = () => setToasts([]);
+    const clearOnHidden = () => {
+      if (document.visibilityState !== "visible") setToasts([]);
+    };
     // Resume polling as soon as connectivity returns.
     window.addEventListener("online", pollIfVisible);
     window.addEventListener("offline", clearOnOffline);
+    document.addEventListener("visibilitychange", clearOnHidden);
     return () => {
       cancelled = true;
       clearInterval(interval);
       document.removeEventListener("visibilitychange", pollIfVisible);
+      document.removeEventListener("visibilitychange", clearOnHidden);
       window.removeEventListener("online", pollIfVisible);
       window.removeEventListener("offline", clearOnOffline);
     };
