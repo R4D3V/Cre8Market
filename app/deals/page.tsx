@@ -2,7 +2,6 @@ import { BellRing, Flame } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-// import CategoryBar from "@/components/CategoryBar";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import PageHero from "@/components/PageHero";
@@ -59,7 +58,10 @@ async function DealsContent() {
   try {
     deals = await getDeals();
   } catch (err) {
-    console.error("DB unavailable on deals page load, using empty list:", (err as Error).message);
+    console.error(
+      "DB unavailable on deals page load, using empty list:",
+      (err as Error).message,
+    );
   }
 
   return (
@@ -73,7 +75,9 @@ async function DealsContent() {
             <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-foreground">
               Today&apos;s Deals
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">{deals.length} deals available</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {deals.length} deals available
+            </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-featured/25 bg-featured/10 px-3 py-1.5 text-xs font-bold text-featured">
             <span className="h-2 w-2 animate-pulse rounded-full bg-featured" />
@@ -88,7 +92,9 @@ async function DealsContent() {
             <span className="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
               <Flame className="h-6 w-6" />
             </span>
-            <h3 className="mb-1 font-bold text-foreground">No active deals right now</h3>
+            <h3 className="mb-1 font-bold text-foreground">
+              No active deals right now
+            </h3>
             <p className="text-sm text-muted-foreground">
               Check back soon or browse everything on the marketplace.
             </p>
@@ -102,7 +108,11 @@ async function DealsContent() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
             {deals.map((p) => (
-              <ProductCard key={`${p.id}-${p.slug}`} product={p} source="deals" />
+              <ProductCard
+                key={`${p.id}-${p.slug}`}
+                product={p}
+                source="deals"
+              />
             ))}
           </div>
         )}
@@ -141,7 +151,6 @@ export default function DealsPage() {
   return (
     <>
       <Navbar />
-      {/* <CategoryBar /> */}
 
       <PageHero
         eyebrow="Updated daily"
@@ -151,7 +160,7 @@ export default function DealsPage() {
             Hot Deals
           </span>
         }
-        description="The best prices on electronics, phones, laptops and more in Uganda — refreshed every day."
+        description="The best prices on electronics, phones, laptops and more in Entebbe — refreshed every day."
       >
         <div className="inline-flex items-center gap-2 rounded-full border border-featured/25 bg-featured/10 px-3 py-1.5 text-xs font-bold text-featured">
           <span className="h-2 w-2 animate-pulse rounded-full bg-featured" />

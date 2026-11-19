@@ -26,7 +26,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 export const metadata: Metadata = {
   title: "About CRE8MARKET Entebbe | Trusted Local Marketplace",
   description:
-    "Learn about CRE8MARKET Entebbe, a trusted local marketplace connecting buyers and sellers directly across Uganda.",
+    "Learn about CRE8MARKET Entebbe, a trusted local marketplace connecting buyers and sellers directly across Entebbe.",
   alternates: {
     canonical: "/about",
   },
@@ -69,7 +69,8 @@ const STATS = [
 const REASONS = [
   {
     title: "No middleman",
-    description: "Contact the seller directly. No commissions, no platform fees, no bureaucracy.",
+    description:
+      "Contact the seller directly. No commissions, no platform fees, no bureaucracy.",
   },
   {
     title: "Local & trusted",
@@ -84,7 +85,7 @@ const REASONS = [
   {
     title: "WhatsApp integrated",
     description:
-      "All communication happens on WhatsApp — Uganda's favourite messaging platform. Fast and familiar.",
+      "All communication happens on WhatsApp — Entebbe's favourite messaging platform. Fast and familiar.",
   },
 ];
 
@@ -105,7 +106,7 @@ export default function AboutPage() {
             </span>
           </>
         }
-        description="CRE8MARKET ENTEBBE is a Ugandan-owned marketplace that connects local buyers and sellers directly — no middleman, no hidden fees. From phones and laptops to furniture and vehicles, we make it easy to find a great deal or sell something fast."
+        description="CRE8MARKET ENTEBBE is a Entebbe-owned marketplace that connects local buyers and sellers directly — no middleman, no hidden fees. From phones and laptops to furniture and vehicles, we make it easy to find a great deal or sell something fast."
         aside={
           <div className="relative h-[300px] overflow-hidden rounded-[2rem] border border-border/60 sm:h-[400px]">
             <Image
@@ -119,7 +120,7 @@ export default function AboutPage() {
 
             <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/35 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white backdrop-blur-md">
               <BadgeCheck className="h-3 w-3 text-primary" />
-              Ugandan-owned
+              Entebbe-owned
             </span>
 
             <div className="absolute inset-x-4 bottom-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 p-3.5 backdrop-blur-md">
@@ -128,7 +129,9 @@ export default function AboutPage() {
               </span>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-white">Kitoro, Entebbe</p>
-                <p className="text-xs text-white/60">Serving buyers and sellers across Uganda</p>
+                <p className="text-xs text-white/60">
+                  Serving buyers and sellers across Entebbe
+                </p>
               </div>
             </div>
           </div>
@@ -186,9 +189,10 @@ export default function AboutPage() {
                   Local roots, modern marketplace.
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  CRE8MARKET ENTEBBE is a Ugandan-owned and operated marketplace based in Entebbe.
-                  We connect local buyers and sellers directly — no middleman, no hidden fees. From
-                  phones and laptops to furniture and vehicles, our platform makes it easy to find
+                  CRE8MARKET ENTEBBE is a Entebbe-owned and operated marketplace
+                  based in Entebbe. We connect local buyers and sellers directly
+                  — no middleman, no hidden fees. From phones and laptops to
+                  furniture and vehicles, our platform makes it easy to find
                   great deals or sell your items fast.
                 </p>
               </div>
@@ -212,13 +216,15 @@ export default function AboutPage() {
                   Make trading simple for everyone.
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  To make buying and selling in Uganda simple, direct, and accessible to everyone.
-                  We believe marketplace transactions should happen without unnecessary middlemen,
-                  hidden fees, or complicated processes.
+                  To make buying and selling in Entebbe simple, direct, and
+                  accessible to everyone. We believe marketplace transactions
+                  should happen without unnecessary middlemen, hidden fees, or
+                  complicated processes.
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  By leveraging WhatsApp — Uganda&apos;s most widely used messaging platform — we
-                  remove barriers and let buyers and sellers connect instantly.
+                  By leveraging WhatsApp — Entebbe&apos;s most widely used
+                  messaging platform — we remove barriers and let buyers and
+                  sellers connect instantly.
                 </p>
               </div>
             </div>
@@ -269,7 +275,9 @@ export default function AboutPage() {
                 <p className="bg-gradient-to-r from-primary to-emerald-300 bg-clip-text font-heading text-3xl font-extrabold tracking-tight text-transparent sm:text-4xl">
                   {stat.value}
                 </p>
-                <p className="mt-1 text-xs font-medium text-muted-foreground">{stat.label}</p>
+                <p className="mt-1 text-xs font-medium text-muted-foreground">
+                  {stat.label}
+                </p>
               </div>
             ))}
           </div>
@@ -297,7 +305,9 @@ export default function AboutPage() {
                     <CheckCircle2 className="h-4 w-4" />
                   </span>
                   <div>
-                    <p className="text-sm font-bold text-foreground">{reason.title}</p>
+                    <p className="text-sm font-bold text-foreground">
+                      {reason.title}
+                    </p>
                     <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                       {reason.description}
                     </p>
@@ -311,7 +321,10 @@ export default function AboutPage() {
         {/* Contact CTA */}
         <ScrollReveal>
           <div className="relative mt-14 overflow-hidden rounded-[2rem] border border-primary/20 bg-[#04202b] p-8 text-center sm:p-12">
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0"
+            >
               <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-primary/20 blur-[110px]" />
               <div className="absolute -bottom-28 left-1/4 h-64 w-64 rounded-full bg-secondary/20 blur-[120px]" />
             </div>
@@ -323,8 +336,8 @@ export default function AboutPage() {
                 Let&apos;s talk.
               </h2>
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/60">
-                Have questions? We&apos;d love to hear from you. Reach us on WhatsApp or send an
-                email.
+                Have questions? We&apos;d love to hear from you. Reach us on
+                WhatsApp or send an email.
               </p>
               <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
                 <a

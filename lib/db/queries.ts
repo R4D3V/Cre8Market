@@ -2,6 +2,8 @@ import { sellerHandle } from "../seller-handle";
 import type {
   AppUser,
   CategoryDB,
+  ChatConversation,
+  ChatMessage,
   Product,
   ProductWithOwner,
   SubscriptionPlan,
@@ -510,6 +512,28 @@ export async function updateAdminProfile(
   return rows[0] ?? null;
 }
 
+// Full profile overwrite used when the main admin edits another admin. Unlike
+// updateAdminProfile above, null values clear the field instead of keeping it.
+export async function updateAdminUser(
+  id: string,
+  data: {
+    name: string;
+    phone: string | null;
+    whatsapp: string | null;
+    avatar: string | null;
+    banner: string | null;
+  },
+): Promise<AdminUserRow | null> {
+  const { rows } = await pool.query(
+    `UPDATE admin_users
+        SET name = $1, phone = $2, whatsapp = $3, avatar = $4, banner = $5
+      WHERE id = $6
+      RETURNING *`,
+    [data.name, data.phone, data.whatsapp, data.avatar, data.banner, id],
+  );
+  return rows[0] ?? null;
+}
+
 // Banner and avatar shown on the public store seller page (/sellers/store).
 // The store is represented by the earliest-created admin account.
 export async function getStoreAdminProfile(): Promise<{
@@ -564,6 +588,13 @@ export async function createAdminUser(data: {
 }
 
 export async function deleteAdminUser(id: string): Promise<void> {
+  // Shared 'store' threads are kept; only this admin's own start/reply id goes.
+  await pool.query(
+    `DELETE FROM conversations
+      WHERE (initiator_role = 'admin' AND initiator_id = $1)
+         OR (counterparty_role = 'admin' AND counterparty_id = $1)`,
+    [id],
+  );
   await pool.query("DELETE FROM admin_users WHERE id = $1", [id]);
 }
 
@@ -579,12 +610,13 @@ export interface UserRow {
   pin_hash: string | null;
   is_active: boolean;
   is_admin: boolean;
+  account_type: string;
   created_at: string;
 }
 
 export async function getUsers(): Promise<AppUser[]> {
   const { rows } = await pool.query(`
-    SELECT u.id, u.name, u.handle, u.phone, u.whatsapp, u.avatar, u.banner, u.is_active, u.is_admin, u.is_verified, u.is_vip, u.created_at,
+    SELECT u.id, u.name, u.handle, u.phone, u.whatsapp, u.avatar, u.banner, u.is_active, u.is_admin, u.is_verified, u.is_vip, u.account_type, u.created_at,
            COUNT(p.id)::int AS product_count
     FROM users u
     LEFT JOIN products p ON p.user_id = u.id
@@ -594,15 +626,16 @@ export async function getUsers(): Promise<AppUser[]> {
   return rows.map(mapUser);
 }
 
-// Public sellers directory: active registered users who currently have listings.
+// Public sellers directory: active seller accounts who currently have listings.
+// Buyers never appear here — they browse, they don't sell.
 export async function getPublicUsers(): Promise<AppUser[]> {
   const { rows } = await pool.query(`
-    SELECT u.id, u.name, u.handle, u.phone, u.whatsapp, u.avatar, u.banner, u.is_active, u.is_admin, u.is_verified, u.is_vip, u.created_at,
+    SELECT u.id, u.name, u.handle, u.phone, u.whatsapp, u.avatar, u.banner, u.is_active, u.is_admin, u.is_verified, u.is_vip, u.account_type, u.created_at,
            COUNT(p.id)::int AS product_count
     FROM users u
     LEFT JOIN products p ON p.user_id = u.id
     GROUP BY u.id
-    HAVING COUNT(p.id) > 0 AND u.is_active = true
+    HAVING COUNT(p.id) > 0 AND u.is_active = true AND u.account_type = 'seller'
     ORDER BY u.name ASC
   `);
   const users = rows.map(mapUser);
@@ -667,7 +700,7 @@ export async function getSellers(): Promise<
 
 // ── Admin overview ───────────────────────────────────────────────────────────
 
-export interface AdminRenewal {
+interface AdminRenewal {
   id: string;
   name: string;
   planName: string;
@@ -689,7 +722,8 @@ export interface AdminOverview {
   };
   needsAttention: {
     unverifiedSellers: number;
-    inactiveUsers: number;
+    inactiveSellers: number;
+    inactiveBuyers: number;
     missingImages: number;
     storeListings: number;
   };
@@ -710,7 +744,8 @@ export async function getAdminOverview(): Promise<AdminOverview> {
           WHERE COALESCE(jsonb_array_length(CASE WHEN jsonb_typeof(images) = 'array' THEN images END), 0) = 0
         ) AS missing_images,
         (SELECT COUNT(*)::int FROM users) AS total_users,
-        (SELECT COUNT(*)::int FROM users WHERE is_active = false) AS inactive_users,
+        (SELECT COUNT(*)::int FROM users WHERE is_active = false AND account_type = 'seller') AS inactive_sellers,
+        (SELECT COUNT(*)::int FROM users WHERE is_active = false AND account_type = 'buyer') AS inactive_buyers,
         (SELECT COUNT(*)::int FROM admin_users) AS total_admins,
         (SELECT COUNT(*)::int FROM users u
           WHERE u.is_verified = false
@@ -800,7 +835,8 @@ export async function getAdminOverview(): Promise<AdminOverview> {
     },
     needsAttention: {
       unverifiedSellers: Number(row.unverified_sellers ?? 0),
-      inactiveUsers: Number(row.inactive_users ?? 0),
+      inactiveSellers: Number(row.inactive_sellers ?? 0),
+      inactiveBuyers: Number(row.inactive_buyers ?? 0),
       missingImages: Number(row.missing_images ?? 0),
       storeListings: Number(row.store_listings ?? 0),
     },
@@ -810,7 +846,7 @@ export async function getAdminOverview(): Promise<AdminOverview> {
 
 export async function getUserById(id: string): Promise<AppUser | null> {
   const { rows } = await pool.query(
-    "SELECT id, name, handle, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, is_vip, (pin_hash IS NOT NULL) AS has_pin, created_at FROM users WHERE id = $1",
+    "SELECT id, name, handle, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, is_vip, account_type, (pin_hash IS NOT NULL) AS has_pin, created_at FROM users WHERE id = $1",
     [id],
   );
   return rows[0] ? mapUser(rows[0]) : null;
@@ -820,7 +856,7 @@ export async function getUserById(id: string): Promise<AppUser | null> {
 // still use the UUID. Accept both, preferring an exact id match.
 export async function getUserByHandleOrId(value: string): Promise<AppUser | null> {
   const { rows } = await pool.query(
-    `SELECT id, name, handle, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, is_vip, (pin_hash IS NOT NULL) AS has_pin, created_at
+    `SELECT id, name, handle, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, is_vip, account_type, (pin_hash IS NOT NULL) AS has_pin, created_at
      FROM users
      WHERE id::text = $1 OR lower(handle) = lower($1)
      ORDER BY (id::text = $1) DESC, created_at ASC
@@ -840,17 +876,6 @@ export async function checkPhoneExists(phone: string): Promise<boolean> {
   return rows.length > 0;
 }
 
-export async function checkPhoneExistsExcluding(
-  phone: string,
-  excludeId: string,
-): Promise<boolean> {
-  const { rows } = await pool.query("SELECT 1 FROM users WHERE phone = $1 AND id != $2", [
-    phone,
-    excludeId,
-  ]);
-  return rows.length > 0;
-}
-
 async function sellerHandleTaken(handle: string, excludeId?: string): Promise<boolean> {
   const { rows } = await pool.query(
     excludeId
@@ -863,7 +888,7 @@ async function sellerHandleTaken(handle: string, excludeId?: string): Promise<bo
 
 // Build a unique, name-based handle for the public storefront URL. Duplicate
 // names get a numeric suffix: mary-jane, mary-jane-2, mary-jane-3, …
-export async function generateUniqueSellerHandle(
+async function generateUniqueSellerHandle(
   name: string,
   excludeId?: string,
 ): Promise<string> {
@@ -888,6 +913,7 @@ export async function createUser(data: {
   is_active?: boolean;
   avatar?: string | null;
   banner?: string | null;
+  account_type?: "seller" | "buyer";
 }): Promise<AppUser> {
   // Retry once if two registrations race for the same handle; the unique index
   // catches the loser and the next attempt picks the following suffix.
@@ -895,8 +921,8 @@ export async function createUser(data: {
     const handle = await generateUniqueSellerHandle(data.name);
     try {
       const { rows } = await pool.query(
-        `INSERT INTO users (name, phone, whatsapp, password_hash, pin_hash, is_active, avatar, banner, handle)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id, name, handle, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, created_at`,
+        `INSERT INTO users (name, phone, whatsapp, password_hash, pin_hash, is_active, avatar, banner, handle, account_type)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id, name, handle, phone, whatsapp, avatar, banner, is_active, is_admin, is_verified, account_type, created_at`,
         [
           data.name,
           data.phone,
@@ -907,6 +933,7 @@ export async function createUser(data: {
           data.avatar ?? null,
           data.banner ?? null,
           handle,
+          data.account_type ?? "seller",
         ],
       );
       return mapUser(rows[0]);
@@ -945,7 +972,7 @@ export async function updateUserContact(
   data: {
     name: string;
     phone: string;
-    whatsapp?: string;
+    whatsapp?: string | null;
     avatar?: string | null;
     banner?: string | null;
   },
@@ -1016,9 +1043,59 @@ export async function updateUserPassword(id: string, passwordHash: string): Prom
   await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [passwordHash, id]);
 }
 
-export async function deleteUser(id: string): Promise<void> {
-  // Products created by this user are kept, with user_id set to NULL (ON DELETE SET NULL).
+export async function deleteUser(
+  id: string,
+  opts: { deleteListings?: boolean } = {},
+): Promise<void> {
+  // Threads this user took part in go too. buyer_id cascades on its own, but
+  // seller-initiated threads only reference the participant by role + id text.
+  await pool.query(
+    `DELETE FROM conversations
+      WHERE (initiator_role IN ('buyer', 'user') AND initiator_id = $1)
+         OR (counterparty_role IN ('buyer', 'user') AND counterparty_id = $1)`,
+    [id],
+  );
+  // Self-service deletions wipe the seller's listings as well. Admin deletions
+  // keep them, with user_id set to NULL (ON DELETE SET NULL).
+  if (opts.deleteListings) {
+    await pool.query("DELETE FROM products WHERE user_id = $1", [id]);
+  }
   await pool.query("DELETE FROM users WHERE id = $1", [id]);
+  // Drop the better-auth mirror too. Leaving it behind means a later account
+  // that reuses this phone number collides with the orphan's unique email and
+  // can never sign in (see syncLegacyUserToBetterAuth). Sessions and the
+  // credential row go with it via ON DELETE CASCADE.
+  await pool.query('DELETE FROM "user" WHERE id = $1', [id]);
+}
+
+export type InactiveAccount = {
+  id: string;
+  name: string;
+  phone: string;
+  accountType: "seller" | "buyer";
+  lastLoginAt: string | null;
+};
+
+// Accounts whose last sign-in (or creation, for anyone who has never signed in
+// since the column was added) is older than `cutoff`. Used by the scheduled
+// dormant-account cleanup. Legacy admin rows are always excluded.
+export async function getInactiveUsers(cutoff: Date, limit = 500): Promise<InactiveAccount[]> {
+  const { rows } = await pool.query(
+    `SELECT id, name, phone, account_type, last_login_at
+       FROM users
+      WHERE is_admin = false
+        AND COALESCE(last_login_at, created_at) < $1
+      ORDER BY COALESCE(last_login_at, created_at) ASC
+      LIMIT $2`,
+    [cutoff, limit],
+  );
+  return rows.map((row) => ({
+    id: row.id as string,
+    name: row.name as string,
+    phone: row.phone as string,
+    accountType: row.account_type === "buyer" ? "buyer" : "seller",
+    lastLoginAt: row.last_login_at ? new Date(row.last_login_at as string).toISOString() : null,
+  }));
 }
 
 function mapUser(row: Record<string, unknown>): AppUser {
@@ -1035,6 +1112,7 @@ function mapUser(row: Record<string, unknown>): AppUser {
     isVerified: (row.is_verified as boolean) ?? false,
     isVip: (row.is_vip as boolean) ?? false,
     hasPin: (row.has_pin as boolean) ?? undefined,
+    accountType: (row.account_type as AppUser["accountType"]) ?? "seller",
     createdAt: row.created_at as string,
     productCount: row.product_count !== undefined ? Number(row.product_count) : undefined,
   };
@@ -1319,7 +1397,7 @@ export interface FeatureFlag {
 
 // Flags the app actually reads. Values here are the fallback used before a
 // row exists in feature_flags, so existing features stay on after deploy.
-export const FEATURE_FLAG_CATALOG = [
+const FEATURE_FLAG_CATALOG = [
   {
     key: "deals",
     label: "Deals",
@@ -1544,7 +1622,7 @@ export async function setUserSubscription(
   return full ?? mapUserSubscription(rows[0]);
 }
 
-export function mapSubscriptionPlan(row: Record<string, unknown>): SubscriptionPlan {
+function mapSubscriptionPlan(row: Record<string, unknown>): SubscriptionPlan {
   return {
     id: row.id as string,
     name: row.name as string,
@@ -1559,7 +1637,7 @@ export function mapSubscriptionPlan(row: Record<string, unknown>): SubscriptionP
   };
 }
 
-export function mapUserSubscription(row: Record<string, unknown>): UserSubscription {
+function mapUserSubscription(row: Record<string, unknown>): UserSubscription {
   return {
     id: row.id as string,
     userId: row.user_id as string,
@@ -1572,3 +1650,371 @@ export function mapUserSubscription(row: Record<string, unknown>): UserSubscript
   };
 }
 
+// ── Direct chat (buyer ⇄ seller/admin, always about a product) ──────────────
+// Any party can start a thread; the other side replies from their chat panel.
+// Messages self-destruct CHAT_MESSAGE_TTL_DAYS after they are sent — purge
+// runs before every read, so an expired message can never be returned and a
+// thread with nothing left simply drops out of the list.
+
+export const CHAT_MESSAGE_TTL_DAYS = 3;
+
+export type ChatViewer =
+  | { role: "buyer"; id: string }
+  | { role: "user"; id: string }
+  | { role: "admin"; id: string };
+
+export async function purgeExpiredChatMessages(): Promise<number> {
+  const res = await pool.query("DELETE FROM messages WHERE expires_at <= now()");
+  return res.rowCount ?? 0;
+}
+
+// Ensures the single shared admin-only chat thread ("CRE8-MARKET") exists.
+// Every admin sees it; its messages live for 14 days instead of 3. Safe to call
+// repeatedly — the partial unique index makes concurrent creates no-ops.
+export async function ensureAdminInternalChat(): Promise<string | null> {
+  const { rows: existing } = await pool.query(
+    "SELECT id FROM conversations WHERE is_internal = true LIMIT 1",
+  );
+  if (existing[0]) return existing[0].id as string;
+
+  const admins = await getAdminUsers();
+  const adminId = admins[0]?.id;
+  if (!adminId) return null;
+
+  const { rows } = await pool.query(
+    `INSERT INTO conversations
+       (buyer_id, initiator_role, initiator_id, counterparty_role, counterparty_id,
+        product_id, product_title, product_slug, product_image, initiator_read_at,
+        is_internal, message_ttl_days)
+     VALUES (NULL, 'admin', $1, 'admin', $1, NULL, 'CRE8-MARKET', NULL, NULL, now(), true, 14)
+     ON CONFLICT (is_internal) WHERE is_internal = true DO NOTHING
+     RETURNING id`,
+    [adminId],
+  );
+  if (rows[0]) return rows[0].id as string;
+
+  const { rows: again } = await pool.query(
+    "SELECT id FROM conversations WHERE is_internal = true LIMIT 1",
+  );
+  return (again[0]?.id as string) ?? null;
+}
+// Either party may be the initiator — buyers, sellers, or an admin.
+export async function findOrCreateConversation(params: {
+  initiator: ChatViewer;
+  productId: string;
+  counterpartyRole: ChatViewer["role"];
+  counterpartyId: string;
+  productTitle: string;
+  productSlug: string;
+  productImage: string | null;
+}): Promise<string> {
+  const { rows } = await pool.query(
+    `INSERT INTO conversations
+       (buyer_id, initiator_role, initiator_id, counterparty_role, counterparty_id,
+        product_id, product_title, product_slug, product_image, initiator_read_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, now())
+     ON CONFLICT (initiator_role, initiator_id, counterparty_role, counterparty_id, product_id)
+     DO UPDATE SET product_title = EXCLUDED.product_title,
+                   product_slug = EXCLUDED.product_slug,
+                   product_image = COALESCE(EXCLUDED.product_image, conversations.product_image)
+     RETURNING id`,
+    [
+      // buyer_id only exists for legacy buyer-started threads.
+      params.initiator.role === "buyer" ? params.initiator.id : null,
+      params.initiator.role,
+      params.initiator.id,
+      params.counterpartyRole,
+      params.counterpartyId,
+      params.productId,
+      params.productTitle,
+      params.productSlug,
+      params.productImage,
+    ],
+  );
+  return rows[0].id as string;
+}
+
+export async function insertChatMessage(params: {
+  conversationId: string;
+  senderRole: ChatViewer["role"];
+  senderId: string;
+  body: string;
+}): Promise<ChatMessage> {
+  const { rows } = await pool.query(
+    `INSERT INTO messages (conversation_id, sender_role, sender_id, body, expires_at)
+     VALUES ($1, $2, $3, $4, now() + ((SELECT message_ttl_days FROM conversations WHERE id = $1) || ' days')::interval)
+     RETURNING id, conversation_id, sender_role, sender_id, body, created_at, expires_at`,
+    [params.conversationId, params.senderRole, params.senderId, params.body],
+  );
+
+  // The sender has obviously seen their own message: keep their side's read
+  // marker current so they don't see their own reply as unread. Admins share
+  // one inbox, so any admin reply counts as the admin side having read it.
+  await pool.query(
+    `UPDATE conversations
+        SET last_message_at = now(),
+            admin_read_at = CASE WHEN is_internal
+                 THEN jsonb_set(COALESCE(admin_read_at, '{}'::jsonb), ARRAY[$3::text], to_jsonb(now()))
+                 ELSE admin_read_at END,
+            initiator_read_at =
+              CASE WHEN is_internal THEN initiator_read_at
+                   WHEN initiator_role = $2 AND (initiator_id = $3 OR $2 = 'admin')
+                   THEN now() ELSE initiator_read_at END,
+            counterparty_read_at =
+              CASE WHEN is_internal THEN counterparty_read_at
+                   WHEN initiator_role = $2 AND (initiator_id = $3 OR $2 = 'admin')
+                   THEN counterparty_read_at ELSE now() END
+      WHERE id = $1`,
+    [params.conversationId, params.senderRole, params.senderId],
+  );
+
+  const insertedId = rows[0].id as string;
+
+  // Re-read with sender details so the client can render avatar + name without
+  // a second round-trip.
+  const { rows: enriched } = await pool.query(
+    `SELECT m.id, m.conversation_id, m.sender_role, m.sender_id, m.body, m.created_at, m.expires_at,
+            CASE WHEN m.sender_role IN ('buyer', 'user') THEN u.name ELSE a.name END AS sender_name,
+            CASE WHEN m.sender_role IN ('buyer', 'user') THEN u.avatar ELSE a.avatar END AS sender_avatar
+       FROM messages m
+       LEFT JOIN users u
+         ON m.sender_role IN ('buyer', 'user') AND u.id::text = m.sender_id
+       LEFT JOIN admin_users a
+         ON m.sender_role = 'admin' AND a.id::text = m.sender_id
+      WHERE m.id = $1`,
+    [insertedId],
+  );
+
+  return mapChatMessage(enriched[0]);
+}
+
+// True when the viewer is the initiator side of a thread. Admins share one
+// inbox, so any admin counts as the initiator side of an admin-started thread.
+const viewerIsInitiatorSql = "c.initiator_role = $2 AND (c.initiator_id = $1 OR $2 = 'admin')";
+
+// Participants are matched by role + id; admins additionally see every thread
+// that involves the admin side (shared inbox).
+const viewerCanSeeSql = `(($2 = 'admin' AND (c.initiator_role = 'admin' OR c.counterparty_role = 'admin'))
+   OR (c.initiator_role = $2 AND c.initiator_id = $1)
+   OR (c.counterparty_role = $2 AND c.counterparty_id = $1))`;
+
+// Returns the conversation only if the viewer is actually a participant.
+export async function getConversationForViewer(
+  conversationId: string,
+  viewer: ChatViewer,
+): Promise<{ id: string; productId: string | null; isInternal: boolean } | null> {
+  const { rows } = await pool.query(
+    `SELECT c.id, c.product_id, c.is_internal
+       FROM conversations c
+      WHERE c.id = $3 AND ${viewerCanSeeSql}`,
+    [viewer.id, viewer.role, conversationId],
+  );
+  return rows[0]
+    ? { id: rows[0].id, productId: rows[0].product_id, isInternal: rows[0].is_internal === true }
+    : null;
+}
+
+export async function markConversationRead(
+  conversationId: string,
+  viewer: ChatViewer,
+): Promise<void> {
+  await pool.query(
+    `UPDATE conversations c
+        SET admin_read_at = CASE WHEN c.is_internal
+             THEN jsonb_set(COALESCE(c.admin_read_at, '{}'::jsonb), ARRAY[$1::text], to_jsonb(now()))
+             ELSE c.admin_read_at END,
+            initiator_read_at =
+              CASE WHEN c.is_internal THEN c.initiator_read_at
+                   WHEN ${viewerIsInitiatorSql} THEN now() ELSE c.initiator_read_at END,
+            counterparty_read_at =
+              CASE WHEN c.is_internal THEN c.counterparty_read_at
+                   WHEN ${viewerIsInitiatorSql} THEN c.counterparty_read_at ELSE now() END
+      WHERE c.id = $3 AND ${viewerCanSeeSql}`,
+    [viewer.id, viewer.role, conversationId],
+  );
+}
+
+// Total unread messages across every thread the viewer can see. Mirrors the
+// per-thread unread_count in getConversationsForViewer, so the badge in the
+// navbar always matches the number shown inside the chat panel.
+export async function getUnreadMessageCountForViewer(viewer: ChatViewer): Promise<number> {
+  const { rows } = await pool.query(
+    `SELECT COUNT(*)::int AS count
+       FROM conversations c
+       JOIN messages m
+         ON m.conversation_id = c.id AND m.expires_at > now()
+      WHERE ${viewerCanSeeSql}
+        AND NOT (m.sender_role = $2 AND m.sender_id = $1)
+        AND m.created_at > COALESCE(
+              CASE WHEN c.is_internal THEN (c.admin_read_at ->> $1)::timestamptz
+                   WHEN ${viewerIsInitiatorSql} THEN c.initiator_read_at
+                   ELSE c.counterparty_read_at END,
+              'epoch'::timestamptz
+            )`,
+    [viewer.id, viewer.role],
+  );
+  return Number(rows[0]?.count ?? 0);
+}
+
+export async function getMessagesForConversation(conversationId: string): Promise<ChatMessage[]> {
+  const { rows } = await pool.query(
+    `SELECT m.id, m.conversation_id, m.sender_role, m.sender_id, m.body, m.created_at, m.expires_at,
+            CASE WHEN m.sender_role IN ('buyer', 'user') THEN u.name ELSE a.name END AS sender_name,
+            CASE WHEN m.sender_role IN ('buyer', 'user') THEN u.avatar ELSE a.avatar END AS sender_avatar
+       FROM messages m
+       LEFT JOIN users u
+         ON m.sender_role IN ('buyer', 'user') AND u.id::text = m.sender_id
+       LEFT JOIN admin_users a
+         ON m.sender_role = 'admin' AND a.id::text = m.sender_id
+      WHERE m.conversation_id = $1 AND m.expires_at > now()
+      ORDER BY m.created_at ASC`,
+    [conversationId],
+  );
+  return rows.map(mapChatMessage);
+}
+
+// Thread list for the viewer's chat panel, newest activity first.
+export async function getConversationsForViewer(viewer: ChatViewer): Promise<ChatConversation[]> {
+  const { rows } = await pool.query(
+    `SELECT c.id,
+            c.initiator_role,
+            c.counterparty_role,
+            c.product_id,
+            c.product_title,
+            c.product_slug,
+            c.product_image,
+            c.created_at,
+            c.is_internal,
+            c.initiator_read_at,
+            c.counterparty_read_at,
+            iu.name AS initiator_user_name,
+            iu.avatar AS initiator_user_avatar,
+            ia.name AS initiator_admin_name,
+            ia.avatar AS initiator_admin_avatar,
+            cu.name AS counterpart_user_name,
+            cu.avatar AS counterpart_user_avatar,
+            ca.name AS counterpart_admin_name,
+            ca.avatar AS counterpart_admin_avatar,
+            last.body AS last_message,
+            last.created_at AS last_message_at,
+            last.sender_role AS last_sender_role,
+            unread.count AS unread_count,
+            total.count AS message_count,
+            CASE WHEN ${viewerIsInitiatorSql} THEN 'initiator' ELSE 'counterparty' END
+              AS viewer_side
+       FROM conversations c
+       LEFT JOIN users iu
+         ON c.initiator_role IN ('buyer', 'user') AND iu.id::text = c.initiator_id
+       LEFT JOIN admin_users ia
+         ON c.initiator_role = 'admin'
+        AND ia.id::text = CASE WHEN c.initiator_id = 'store'
+                               THEN (SELECT id::text FROM admin_users ORDER BY created_at ASC LIMIT 1)
+                               ELSE c.initiator_id END
+       LEFT JOIN users cu
+         ON c.counterparty_role IN ('buyer', 'user') AND cu.id::text = c.counterparty_id
+       LEFT JOIN admin_users ca
+         ON c.counterparty_role = 'admin'
+        AND ca.id::text = CASE WHEN c.counterparty_id = 'store'
+                               THEN (SELECT id::text FROM admin_users ORDER BY created_at ASC LIMIT 1)
+                               ELSE c.counterparty_id END
+       LEFT JOIN LATERAL (
+            SELECT m.body, m.created_at, m.sender_role
+              FROM messages m
+             WHERE m.conversation_id = c.id AND m.expires_at > now()
+             ORDER BY m.created_at DESC
+             LIMIT 1
+       ) last ON TRUE
+       LEFT JOIN LATERAL (
+            SELECT COUNT(*)::int AS count
+              FROM messages m
+             WHERE m.conversation_id = c.id AND m.expires_at > now()
+       ) total ON TRUE
+       LEFT JOIN LATERAL (
+            SELECT COUNT(*)::int AS count
+              FROM messages m
+             WHERE m.conversation_id = c.id
+               AND m.expires_at > now()
+               AND NOT (m.sender_role = $2 AND m.sender_id = $1)
+               AND m.created_at > COALESCE(
+                     CASE WHEN c.is_internal THEN (c.admin_read_at ->> $1)::timestamptz
+                          WHEN ${viewerIsInitiatorSql} THEN c.initiator_read_at
+                          ELSE c.counterparty_read_at END,
+                     'epoch'::timestamptz
+                   )
+       ) unread ON TRUE
+      WHERE ${viewerCanSeeSql}
+        AND (c.is_internal = true OR EXISTS (
+          SELECT 1 FROM messages m
+           WHERE m.conversation_id = c.id AND m.expires_at > now()
+        ))
+      ORDER BY c.is_internal DESC, COALESCE(last.created_at, c.created_at) DESC`,
+    [viewer.id, viewer.role],
+  );
+
+  return rows.map((row) => {
+    // Show the party on the other side of the thread from the viewer.
+    const viewerIsInitiator = row.viewer_side === "initiator";
+    const otherRole = (
+      viewerIsInitiator ? row.counterparty_role : row.initiator_role
+    ) as ChatConversation["counterpartRole"];
+    const otherName = viewerIsInitiator
+      ? otherRole === "admin"
+        ? row.counterpart_admin_name
+        : row.counterpart_user_name
+      : otherRole === "admin"
+        ? row.initiator_admin_name
+        : row.initiator_user_name;
+    const otherAvatar = viewerIsInitiator
+      ? otherRole === "admin"
+        ? row.counterpart_admin_avatar
+        : row.counterpart_user_avatar
+      : otherRole === "admin"
+        ? row.initiator_admin_avatar
+        : row.initiator_user_avatar;
+
+    return {
+      id: row.id as string,
+      counterpartName: row.is_internal
+        ? "CRE8-MARKET"
+        : ((otherName as string) ??
+          (otherRole === "admin" ? "CRE8MARKET" : otherRole === "buyer" ? "Buyer" : "Seller")),
+      counterpartAvatar: (otherAvatar as string) ?? null,
+      counterpartRole: otherRole ?? "user",
+      productId: (row.product_id as string) ?? null,
+      productTitle: (row.product_title as string) ?? null,
+      productSlug: (row.product_slug as string) ?? null,
+      productImage: (row.product_image as string) ?? null,
+      lastMessage: (row.last_message as string) ?? null,
+      lastMessageAt: row.last_message_at
+        ? new Date(row.last_message_at as string).toISOString()
+        : null,
+      lastSenderRole: (row.last_sender_role as ChatConversation["lastSenderRole"]) ?? null,
+      unreadCount: Number(row.unread_count ?? 0),
+      messageCount: Number(row.message_count ?? 0),
+      createdAt: new Date(row.created_at as string).toISOString(),
+      isInternal: row.is_internal === true,
+    };
+  });
+}
+
+export async function clearConversationMessages(conversationId: string): Promise<void> {
+  await pool.query("DELETE FROM messages WHERE conversation_id = $1", [conversationId]);
+  // Reset per-admin read markers so the emptied thread starts fresh.
+  await pool.query(
+    "UPDATE conversations SET admin_read_at = '{}'::jsonb, initiator_read_at = NULL, counterparty_read_at = NULL, last_message_at = created_at WHERE id = $1",
+    [conversationId],
+  );
+}
+function mapChatMessage(row: Record<string, unknown>): ChatMessage {
+  return {
+    id: row.id as string,
+    conversationId: row.conversation_id as string,
+    senderRole: row.sender_role as ChatMessage["senderRole"],
+    senderId: row.sender_id as string,
+    senderName: (row.sender_name as string) ?? null,
+    senderAvatar: (row.sender_avatar as string) ?? null,
+    body: row.body as string,
+    createdAt: new Date(row.created_at as string).toISOString(),
+    expiresAt: new Date(row.expires_at as string).toISOString(),
+  };
+}

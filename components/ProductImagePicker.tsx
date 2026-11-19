@@ -1,65 +1,55 @@
 "use client";
 
+import ImageUploader from "@/components/ImageUploader";
+
 export function ProductImagePicker({
   images,
-  onFile,
-  onRemove,
+  onChange,
   max,
 }: {
   images: string[];
-  onFile: (index: number, file: File) => void;
-  onRemove: (index: number) => void;
+  onChange: (images: string[]) => void;
   max?: number;
 }) {
   const limit = max ?? images.length;
-  const slots = images.slice(0, limit);
+  const slots = Array.from({ length: limit }, (_, i) => images[i] ?? "");
+
+  function setSlot(index: number, url: string) {
+    const next = [...images];
+    while (next.length <= index) next.push("");
+    next[index] = url;
+    onChange(next);
+  }
+
+  function removeSlot(index: number) {
+    const next = [...images];
+    while (next.length <= index) next.push("");
+    next[index] = "";
+    onChange(next);
+  }
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {slots.map((src, i) => (
-        <div key={i} className="relative aspect-square">
-          {src ? (
-            <div className="relative w-full h-full neu-inset overflow-hidden">
-              <img src={src} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
-              <label className="absolute inset-x-0 bottom-0 bg-black/50 text-white text-[10px] font-semibold text-center py-1.5 cursor-pointer hover:bg-black/60">
-                Replace
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) onFile(i, f);
-                    e.target.value = "";
-                  }}
-                />
-              </label>
-              <button
-                type="button"
-                onClick={() => onRemove(i)}
-                aria-label={`Remove image ${i + 1}`}
-                title="Remove image"
-                className="absolute top-1 right-1 w-6 h-6 rounded-full text-primary-foreground text-sm leading-none font-bold flex items-center justify-center shadow bg-primary border border-border"
-              >
-                ×
-              </button>
-            </div>
-          ) : (
-            <label className="neu-inset w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-muted transition-colors overflow-hidden">
-              <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                <span className="text-xl">📷</span>
-                <span className="text-[10px] font-semibold">Image {i + 1}</span>
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) onFile(i, f);
-                  e.target.value = "";
-                }}
-              />
-            </label>
+        <div key={i} className="relative">
+          <ImageUploader
+            width={800}
+            height={600}
+            value={src || null}
+            folder="cre8market/products"
+            label={`Image ${i + 1}`}
+            onUploadComplete={(url) => setSlot(i, url)}
+          />
+          {src && (
+            <button
+              type="button"
+              onClick={() => removeSlot(i)}
+              aria-label={`Remove image ${i + 1}`}
+              title="Remove image"
+              className="absolute top-1 right-1 z-10 grid size-6 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow"
+            >
+              ×
+            </button>
           )}
         </div>
       ))}

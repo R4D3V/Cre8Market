@@ -17,7 +17,7 @@ const OFFLINE_URL = "/offline.html";
 
 // Never cache anything behind a login. Otherwise a shared phone could show a
 // previous user's dashboard from cache after they sign out.
-const PRIVATE_PATHS = /^\/(admin|dashboard|login|register|reset-password)(\/|$)/;
+const PRIVATE_PATHS = /^\/(admin|dashboard|buyer|login|register|reset-password)(\/|$)/;
 
 const runtimeCaching: RuntimeCaching[] = [
   {

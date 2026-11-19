@@ -27,13 +27,13 @@ const sora = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.cre8-market.com"),
   title: {
-    default: "CRE8MARKET Entebbe | Buy & Sell in Uganda",
+    default: "CRE8MARKET Entebbe | Buy & Sell in Entebbe",
     template: "%s | CRE8MARKET Entebbe",
   },
   description:
     "Buy and sell phones, laptops, appliances, and local deals in Entebbe with CRE8MARKET — trusted, direct, and easy to use.",
   openGraph: {
-    title: "CRE8MARKET Entebbe | Buy & Sell in Uganda",
+    title: "CRE8MARKET Entebbe | Buy & Sell in Entebbe",
     description:
       "Buy and sell phones, laptops, appliances, and local deals in Entebbe with CRE8MARKET — trusted, direct, and easy to use.",
     url: "https://www.cre8-market.com",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "CRE8MARKET Entebbe | Buy & Sell in Uganda",
+    title: "CRE8MARKET Entebbe | Buy & Sell in Entebbe",
     description:
       "Buy and sell phones, laptops, appliances, and local deals in Entebbe with CRE8MARKET — trusted, direct, and easy to use.",
   },
@@ -72,9 +72,17 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`${sora.variable}`} data-scroll-behavior="smooth">
+    <html
+      lang="en"
+      className={`${sora.variable}`}
+      data-scroll-behavior="smooth"
+    >
       <body className="min-h-dvh bg-background font-body antialiased">
         <Providers>
           <LayoutWrapper>{children}</LayoutWrapper>

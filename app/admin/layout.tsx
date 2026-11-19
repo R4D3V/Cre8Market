@@ -20,8 +20,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       if (status === "unauthenticated") {
         router.replace("/admin/login");
       } else if (status === "authenticated" && session?.user?.role !== "admin") {
-        // A signed-in regular user shouldn't be able to reach the admin panel.
-        router.replace("/dashboard");
+        // A signed-in seller or buyer shouldn't be able to reach the admin panel.
+        router.replace(session?.user?.role === "buyer" ? "/buyer" : "/dashboard");
       }
     }, 0);
     return () => clearTimeout(timer);

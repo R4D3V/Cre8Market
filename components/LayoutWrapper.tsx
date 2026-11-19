@@ -13,7 +13,10 @@ import ResubscribeBanner from "./pwa/ResubscribeBanner";
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  const hideBottomNav = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
+  const hideBottomNav =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/buyer");
 
   return (
     <>

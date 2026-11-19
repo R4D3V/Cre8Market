@@ -63,14 +63,33 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      setError("Invalid phone number or password. Try registering a new account.");
+      const message = result.error.message ?? "";
+      const status = result.error.status;
+      if (status === 403 || /origin|forbidden/i.test(message)) {
+        setError(
+          "Sign-in is blocked for this domain. Please try again from the site's main address.",
+        );
+      } else if ((status && status >= 500) || /internal server error|fetch failed/i.test(message)) {
+        // The account may be perfectly valid — don't blame the credentials.
+        setError("The server could not complete sign-in. Please try again in a moment.");
+      } else {
+        setError("Invalid phone number or password. Try registering a new account.");
+      }
       setLoading(false);
       return;
     }
 
     const session = await getSession();
-    if (session?.user?.role === "admin") {
+    // Honour ?next= (e.g. "Message Seller" sent a logged-out visitor here).
+    // Only same-site paths, and every dashboard layout re-checks the role, so
+    // a wrong destination just bounces to the right home base.
+    const next = new URLSearchParams(window.location.search).get("next");
+    if (next && next.startsWith("/") && !next.startsWith("//")) {
+      router.push(next);
+    } else if (session?.user?.role === "admin") {
       router.push("/admin");
+    } else if (session?.user?.role === "buyer") {
+      router.push("/buyer");
     } else {
       router.push("/dashboard");
     }

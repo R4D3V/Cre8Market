@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import PageHero from "@/components/PageHero";
 
-export interface LegalSection {
+interface LegalSection {
   title: string;
   paragraphs: string[];
 }

@@ -58,7 +58,7 @@ export default function AdminNewUserPage() {
         banner: banner || null,
       });
       setSuccess(true);
-      setTimeout(() => router.push("/admin/users"), 1200);
+      setTimeout(() => router.push("/admin/sellers"), 1200);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to add user");
     } finally {
@@ -69,9 +69,9 @@ export default function AdminNewUserPage() {
   return (
     <div className="max-w-xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-extrabold text-foreground font-heading">Add User</h1>
-        <Link href="/admin/users" className="text-sm text-primary font-semibold hover:underline">
-          ← Back to Users
+        <h1 className="text-2xl font-extrabold text-foreground font-heading">Add Seller</h1>
+        <Link href="/admin/sellers" className="text-sm text-primary font-semibold hover:underline">
+          ← Back to Sellers
         </Link>
       </div>
 
@@ -81,9 +81,9 @@ export default function AdminNewUserPage() {
             <CheckCircle2 className="h-6 w-6" />
           </span>
           <h2 className="font-heading text-xl font-bold text-foreground mb-2">
-            User added successfully
+            Seller added successfully
           </h2>
-          <p className="text-muted-foreground text-sm">Redirecting back to users…</p>
+          <p className="text-muted-foreground text-sm">Redirecting back to sellers…</p>
         </div>
       ) : (
         <form onSubmit={handleCreate} className="neu-card p-5 space-y-3">

@@ -15,7 +15,7 @@ import {
 } from "@/lib/actions/products";
 import { useSession } from "@/lib/auth-client";
 import type { CategoryDB } from "@/lib/types";
-import { uploadProductImage, uploadProductVideo } from "@/lib/uploadImage";
+import { uploadProductVideo } from "@/lib/uploadImage";
 
 export default function EditMyProductPage() {
   const { id } = useParams();
@@ -48,19 +48,6 @@ export default function EditMyProductPage() {
   const isVerified = limit?.isVerified ?? false;
   const [categories, setCategories] = useState<CategoryDB[]>([]);
 
-  async function handleImageUpload(index: number, file: File) {
-    try {
-      const url = await uploadProductImage(file);
-      setImages((prev) => {
-        const next = [...prev];
-        next[index] = url;
-        return next;
-      });
-    } catch {
-      setError("Could not read that image. Please try a different file.");
-    }
-  }
-
   async function handleVideoUpload(file: File | null) {
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
@@ -73,14 +60,6 @@ export default function EditMyProductPage() {
     } catch {
       setError("Could not read that video. Please try a different file.");
     }
-  }
-
-  function removeImage(index: number) {
-    setImages((prev) => {
-      const next = [...prev];
-      next[index] = "";
-      return next;
-    });
   }
 
   useEffect(() => {
@@ -237,8 +216,7 @@ export default function EditMyProductPage() {
           </label>
           <ProductImagePicker
             images={images}
-            onFile={handleImageUpload}
-            onRemove={removeImage}
+            onChange={setImages}
             max={isVip || isVerified ? 5 : 3}
           />
         </div>

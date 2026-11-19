@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminPanel } from "@/components/admin/AdminPanel";
-import { fetchMyAdminProfileAction } from "@/lib/actions/admin";
+import { ProductImagePicker } from "@/components/ProductImagePicker";
+import { fetchMyAdminProfileAction, isMainAdminAction } from "@/lib/actions/admin";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import { checkSlugAction, createProductAction } from "@/lib/actions/products";
 import { ADMIN_IMAGE_LIMIT } from "@/lib/plans";
@@ -40,8 +41,12 @@ export default function NewProductPage() {
     sent: number;
     total: number;
   } | null>(null);
+  const [canAdd, setCanAdd] = useState<boolean | null>(null);
 
   useEffect(() => {
+    isMainAdminAction()
+      .then((value) => setCanAdd(value))
+      .catch(() => setCanAdd(false));
     fetchCategoriesAction().then((data) => setCategories(data ?? []));
     // Seller info defaults to the admin's own profile.
     fetchMyAdminProfileAction()
@@ -56,20 +61,6 @@ export default function NewProductPage() {
       })
       .catch(() => {});
   }, []);
-
-  async function handleImageUpload(index: number, file: File | null) {
-    if (!file) return;
-    try {
-      const url = await uploadProductImage(file);
-      setImages((prev) => {
-        const next = [...prev];
-        next[index] = url;
-        return next;
-      });
-    } catch {
-      // Ignore; the slot stays empty on failure.
-    }
-  }
 
   function slugify(text: string) {
     return text
@@ -240,6 +231,33 @@ export default function NewProductPage() {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
+  if (canAdd === false) {
+    return (
+      <AdminPanel title="Add New Product" description="List a new item for sale">
+        <div className="neu-card p-8 text-center">
+          <h1 className="mb-2 text-xl font-bold text-foreground">Access denied</h1>
+          <p className="text-sm text-muted-foreground">
+            Only the main admin can add new products. You can still edit existing
+            listings from the products page.
+          </p>
+          <Link
+            href="/admin/products"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground"
+          >
+            Back to Products
+          </Link>
+        </div>
+      </AdminPanel>
+    );
+  }
+  if (canAdd === null) {
+    return (
+      <AdminPanel title="Add New Product" description="List a new item for sale">
+        <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>
+      </AdminPanel>
+    );
+  }
+
   return (
     <AdminPanel
       title="Add New Product"
@@ -296,34 +314,7 @@ export default function NewProductPage() {
           <label className="block text-sm font-semibold text-muted-foreground mb-2">
             Product Images (up to {ADMIN_IMAGE_LIMIT})
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {Array.from({ length: ADMIN_IMAGE_LIMIT }, (_, i) => i).map((i) => (
-              <label
-                key={i}
-                className="neu-inset aspect-video flex flex-col items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors overflow-hidden"
-              >
-                {images[i] ? (
-                  <img
-                    src={images[i]}
-                    alt={`Image ${i + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                    <span className="text-xl">📷</span>
-                    <span className="text-[10px] font-semibold">Image {i + 1}</span>
-                    <span className="text-[9px] text-muted-foreground/80">Landscape</span>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleImageUpload(i, e.target.files?.[0] ?? null)}
-                />
-              </label>
-            ))}
-          </div>
+          <ProductImagePicker images={images} onChange={setImages} max={ADMIN_IMAGE_LIMIT} />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>

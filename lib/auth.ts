@@ -8,6 +8,7 @@ import { headers } from "next/headers";
 import { pool } from "./db/pool";
 import { getAdminUserByEmail, getUserByPhone } from "./db/queries";
 import { APP_URL } from "./env";
+import type { PartyRole } from "./types";
 
 async function verifyPasswordHash(hash: string, password: string): Promise<boolean> {
   if (!hash) return false;
@@ -85,6 +86,25 @@ const appAuth = betterAuth({
       role: { type: "string", required: false, input: false },
     },
   },
+  databaseHooks: {
+    session: {
+      create: {
+        // A session row is created on every successful sign-in. Stamping the
+        // legacy users row here means the dormant-account cleanup only counts
+        // real logins, not failed password attempts (legacy-sync runs on those).
+        after: async (session) => {
+          try {
+            await pool.query("UPDATE users SET last_login_at = now() WHERE id = $1", [
+              session.userId,
+            ]);
+          } catch (error) {
+            // Never block a sign-in if the migration hasn't been applied yet.
+            console.error("Could not record last_login_at:", error);
+          }
+        },
+      },
+    },
+  },
 });
 
 export const authHandler = toNextJsHandler(appAuth);
@@ -94,6 +114,14 @@ export async function syncLegacyUserToBetterAuth(phone: string) {
   if (!user) return null;
 
   const email = `${user.phone.replace(/\D/g, "")}@cre8market.local`;
+
+  // The `users` table is the source of truth. If this phone number was deleted
+  // and registered again, an orphan mirror row can still hold this email
+  // (unique) under the old id, which would make every sign-in fail with an
+  // "invalid credentials" error. Clear it — sessions and the credential row
+  // cascade away with it — then insert the authoritative row below.
+  await pool.query('DELETE FROM "user" WHERE email = $1 AND id <> $2', [email, user.id]);
+
   await pool.query(
     `INSERT INTO "user" (id, name, email, "emailVerified", image, "createdAt", "updatedAt", phone, whatsapp, role)
      VALUES ($1, $2, $3, true, $4, NOW(), NOW(), $5, $6, $7)
@@ -113,7 +141,9 @@ export async function syncLegacyUserToBetterAuth(phone: string) {
       user.avatar ?? null,
       user.phone,
       user.whatsapp ?? user.phone,
-      user.is_admin ? "admin" : "user",
+      // Three parties: admins stay 'admin', accounts flagged as buyers become
+      // 'buyer', everyone else is a seller ('user').
+      user.is_admin ? "admin" : user.account_type === "buyer" ? "buyer" : "user",
     ],
   );
 
@@ -141,6 +171,10 @@ export async function syncLegacyAdminToBetterAuth(email: string) {
   if (!admin) return null;
 
   const normalizedEmail = admin.email.trim().toLowerCase();
+
+  // Same reconciliation as the buyer/seller sync: an orphan mirror holding
+  // this email under another id would block the insert below.
+  await pool.query('DELETE FROM "user" WHERE email = $1 AND id <> $2', [normalizedEmail, admin.id]);
 
   await pool.query(
     `INSERT INTO "user" (id, name, email, "emailVerified", image, "createdAt", "updatedAt", role)
@@ -174,7 +208,7 @@ export async function syncLegacyAdminToBetterAuth(email: string) {
   return admin;
 }
 
-export async function authSessionFromHeaders() {
+async function authSessionFromHeaders() {
   const session = await appAuth.api.getSession({
     headers: await headers(),
   });
@@ -192,7 +226,7 @@ export async function authSessionFromHeaders() {
       email,
       phone: typeof user.phone === "string" ? user.phone : null,
       whatsapp: typeof user.whatsapp === "string" ? user.whatsapp : null,
-      role: (user.role as "admin" | "user") ?? (adminLookup ? "admin" : "user"),
+      role: (user.role as PartyRole) ?? (adminLookup ? "admin" : "user"),
     },
   };
 }

@@ -1,2 +1,14 @@
-auto crop image to a certain resolution to fit the 
 formart images to webp
+
+Why it’s usually not needed
+- Cloudinary can serve WebP (or AVIF) automatically with f_auto / q_auto at delivery time, while keeping a broadly compatible original (JPEG) in storage.
+- Your existing server route already applies transformation: [{ quality: "auto", fetch_format: "auto" }]; the signed-upload path can do the same via an eager transformation or by appending f_auto,q_auto to the delivered URL.
+- WebP encoding support in browsers is good now, but Safari/older clients and some tooling still handle JPEG more predictably.
+When client-side WebP would make sense
+- If you want smaller upload payloads and storage, and you’re okay restricting to modern browsers.
+- If you make the output format a prop of ImageUploader (e.g. format="webp" | "jpeg") so each field can decide.
+
+Recommendation
+Keep the cropped output as JPEG (current) and let Cloudinary optimize format on delivery. If you want, I can:
+1. Add an optional format prop to ImageUploader (default "jpeg"), and
+2. Add f_auto,q_auto to the Cloudinary delivery URL (or an eager transformation in the signed upload) so visitors get WebP/AVIF automatically.

@@ -26,6 +26,8 @@ import { useEffect, useState } from "react";
 import { fetchMyAdminProfileAction } from "@/lib/actions/admin";
 import { fetchMyProfileAction } from "@/lib/actions/users";
 import { signOut, useSession } from "@/lib/auth-client";
+import { useUnreadMessageCount } from "@/lib/useUnreadMessages";
+import { UnreadBadge } from "@/components/chat/UnreadBadge";
 
 const DESKTOP_LINKS = [
   { href: "/products", label: "All Products", Icon: ShoppingBag },
@@ -71,7 +73,13 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const isUser = session?.user != null;
-  const isAdmin = session?.user?.role === "admin";
+  const role = session?.user?.role;
+  const isAdmin = role === "admin";
+  const isBuyer = role === "buyer";
+  // Three parties, three home bases: /admin, /dashboard (sellers), /buyer.
+  const homeHref = isAdmin ? "/admin" : isBuyer ? "/buyer" : "/dashboard";
+  const chatsHref = isAdmin ? "/admin/chats" : isBuyer ? "/buyer/chats" : "/dashboard/chats";
+  const unreadCount = useUnreadMessageCount(isUser);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Session records don't always carry the latest avatar or name (legacy
@@ -181,7 +189,26 @@ export default function Navbar() {
             {isUser ? (
               <>
                 <Link
-                  href={isAdmin ? "/admin" : "/dashboard"}
+                  href={chatsHref}
+                  aria-label={
+                    unreadCount > 0
+                      ? `Messages, ${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`
+                      : "Messages"
+                  }
+                  className={`relative grid size-9 place-items-center rounded-full border transition ${
+                    isActive(chatsHref)
+                      ? "border-primary/40 bg-primary/10 text-primary"
+                      : "border-border/60 bg-muted/20 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                  }`}
+                >
+                  <MessageCircle className="size-4" />
+                  <UnreadBadge
+                    count={unreadCount}
+                    className="absolute -right-1 -top-1 ring-2 ring-background"
+                  />
+                </Link>
+                <Link
+                  href={homeHref}
                   className="group inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/20 py-1.5 pl-1.5 pr-2.5 text-xs font-semibold text-foreground transition hover:border-primary/40 hover:bg-muted/40"
                 >
                   {avatar ? (
@@ -355,6 +382,17 @@ export default function Navbar() {
             </nav>
 
             <div className="mt-4 grid grid-cols-2 gap-2">
+              {isUser && (
+                <Link
+                  href={chatsHref}
+                  onClick={() => setMobileOpen(false)}
+                  className="col-span-2 inline-flex items-center justify-center gap-1.5 rounded-full border border-border/70 bg-muted/30 px-4 py-3 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:text-primary"
+                >
+                  <MessageCircle className="size-4" />
+                  Messages
+                  <UnreadBadge count={unreadCount} className="ml-0.5" />
+                </Link>
+              )}
               <Link
                 href="/selltous"
                 onClick={() => setMobileOpen(false)}
@@ -364,7 +402,7 @@ export default function Navbar() {
                 <ArrowUpRight className="size-4" />
               </Link>
               <Link
-                href={isUser ? (isAdmin ? "/admin" : "/dashboard") : "/login"}
+                href={isUser ? homeHref : "/login"}
                 onClick={() => setMobileOpen(false)}
                 className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border/70 bg-muted/30 px-4 py-3 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:text-primary"
               >

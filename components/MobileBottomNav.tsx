@@ -1,17 +1,46 @@
 "use client";
 
-import { CirclePlus, House, ShoppingBag, Tag, User, Users } from "lucide-react";
+import { CirclePlus, House, MessageCircle, ShoppingBag, Tag, User, Users } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { UnreadBadge } from "@/components/chat/UnreadBadge";
 import { useSession } from "@/lib/auth-client";
 import { haptic } from "@/lib/haptics";
+import { isMainAdminAction } from "@/lib/actions/admin";
+import { useUnreadMessageCount } from "@/lib/useUnreadMessages";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
   const role = session?.user?.role;
+  const isBuyer = role === "buyer";
 
+  const [canAddProduct, setCanAddProduct] = useState(false);
+  useEffect(() => {
+    if (role !== "admin") {
+      setCanAddProduct(false);
+      return;
+    }
+    let active = true;
+    isMainAdminAction()
+      .then((value) => {
+        if (active) setCanAddProduct(value);
+      })
+      .catch(() => {
+        if (active) setCanAddProduct(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [role]);
+
+  // Three parties, three home bases: /admin, /dashboard (sellers), /buyer.
+  const homeHref = role === "admin" ? "/admin" : isBuyer ? "/buyer" : "/dashboard";
+  const chatsHref =
+    role === "admin" ? "/admin/chats" : isBuyer ? "/buyer/chats" : "/dashboard/chats";
+  const unreadCount = useUnreadMessageCount(isLoggedIn);
   const addProductHref = !isLoggedIn
     ? "/login"
     : role === "admin"
@@ -22,10 +51,16 @@ export default function MobileBottomNav() {
     { href: "/", label: "Home", Icon: House },
     { href: "/products", label: "Shop", Icon: ShoppingBag },
     { href: "/deals", label: "Deals", Icon: Tag },
-    { href: "/sellers", label: "Sellers", Icon: Users },
-    ...(isLoggedIn ? [{ href: addProductHref, label: "Add", Icon: CirclePlus }] : []),
+    // Signed-in users swap the Sellers entry for their inbox so the bar keeps
+    // the same width; buyers never see "Add" because they cannot post listings.
+    ...(isLoggedIn
+      ? [{ href: chatsHref, label: "Chats", Icon: MessageCircle }]
+      : [{ href: "/sellers", label: "Sellers", Icon: Users }]),
+    ...(isLoggedIn && !isBuyer && (role !== "admin" || canAddProduct)
+      ? [{ href: addProductHref, label: "Add", Icon: CirclePlus }]
+      : []),
     {
-      href: isLoggedIn ? "/dashboard" : "/login",
+      href: isLoggedIn ? homeHref : "/login",
       label: isLoggedIn ? "Dashboard" : "Login",
       Icon: User,
     },
@@ -59,7 +94,15 @@ export default function MobileBottomNav() {
                 active ? "bg-primary/10 text-primary" : "text-muted-foreground"
               }`}
             >
-              <Icon className="size-[22px]" strokeWidth={active ? 2.4 : 1.9} aria-hidden="true" />
+              <span className="relative">
+                <Icon className="size-[22px]" strokeWidth={active ? 2.4 : 1.9} aria-hidden="true" />
+                {isLoggedIn && href === chatsHref && (
+                  <UnreadBadge
+                    count={unreadCount}
+                    className="absolute -right-2.5 -top-2 px-[3px] text-[9px]"
+                  />
+                )}
+              </span>
               <span className="text-[10px] font-semibold leading-none">{label}</span>
             </Link>
           );

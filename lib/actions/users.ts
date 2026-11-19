@@ -6,7 +6,6 @@ import { auth } from "@/lib/auth";
 import {
   cancelUserSubscriptions,
   checkPhoneExists,
-  checkPhoneExistsExcluding,
   createUser,
   deleteUser,
   getPublicUsers,
@@ -37,9 +36,11 @@ async function requireAdmin() {
   }
 }
 
+// Profile-level guard: sellers ('user') and buyers both own a profile row.
+// Listing actions live in actions/products.ts and stay seller-only.
 async function requireUser() {
   const session = await auth();
-  if (!session || session.user.role !== "user") {
+  if (!session || (session.user.role !== "user" && session.user.role !== "buyer")) {
     throw new Error("Not authorized");
   }
   return session.user.id;
@@ -48,11 +49,6 @@ async function requireUser() {
 export async function fetchUsersAction() {
   await requireAdmin();
   return getUsers();
-}
-
-// Public: sellers directory (no auth) — active users with listings.
-export async function fetchPublicUsersAction() {
-  return getPublicUsers();
 }
 
 export async function fetchPublicUserAction(id: string) {
@@ -127,7 +123,8 @@ export async function createUserByAdminAction(data: {
     metadata: { name: data.name, phone: data.phone },
   });
 
-  revalidatePath("/admin/users");
+  revalidatePath("/admin/sellers");
+  revalidatePath("/admin/buyers");
   revalidatePath("/sellers");
   revalidatePath(sellerPath(user));
   return user;
@@ -145,18 +142,19 @@ export async function setUserActiveAction(id: string, isActive: boolean) {
     targetId: id,
     metadata: { isActive },
   });
-  revalidatePath("/admin/users");
+  revalidatePath("/admin/sellers");
+  revalidatePath("/admin/buyers");
   revalidatePath(`/admin/users/${id}/edit`);
   return user;
 }
 
-// Admin edits any user's name/phone/whatsapp.
+// Admin edits any user's name/whatsapp (and profile media). The phone number is
+// the login ID and is intentionally not changeable here.
 export async function updateUserByAdminAction(
   id: string,
   data: {
     name: string;
-    phone: string;
-    whatsapp?: string;
+    whatsapp?: string | null;
     avatar?: string | null;
     banner?: string | null;
   },
@@ -164,17 +162,14 @@ export async function updateUserByAdminAction(
   await requireAdmin();
 
   if (!data.name || !data.name.trim()) throw new Error("Name is required");
-  if (!data.phone || !data.phone.trim()) throw new Error("Phone number is required");
 
-  const phone = data.phone.trim();
-  if (await checkPhoneExistsExcluding(phone, id)) {
-    throw new Error("Another user already has this phone number");
-  }
+  const target = await getUserById(id);
+  if (!target) throw new Error("User not found");
 
   const user = await updateUserContact(id, {
     name: data.name.trim(),
-    phone,
-    whatsapp: data.whatsapp?.trim() || phone,
+    phone: target.phone,
+    whatsapp: data.whatsapp === null ? null : data.whatsapp?.trim() || target.phone,
     avatar: data.avatar,
     banner: data.banner,
   });
@@ -185,51 +180,14 @@ export async function updateUserByAdminAction(
     action: "user.update",
     targetType: "user",
     targetId: id,
-    metadata: { name: data.name.trim(), phone },
+    metadata: { name: data.name.trim(), phone: target.phone },
   });
-  revalidatePath("/admin/users");
+  revalidatePath("/admin/sellers");
+  revalidatePath("/admin/buyers");
   revalidatePath(`/admin/users/${id}/edit`);
   revalidatePath(sellerPath(user));
   revalidatePath("/sellers");
   revalidatePath("/admin");
-  return user;
-}
-
-// Admin verifies/unverifies a seller (verified sellers show a badge on their listings).
-export async function setUserVerifiedAction(id: string, isVerified: boolean) {
-  await requireAdmin();
-  const session = await auth();
-  const user = await updateUserVerifiedStatus(id, isVerified);
-  await logAudit({
-    actorId: session?.user?.id ?? null,
-    actorRole: "admin",
-    action: isVerified ? "user.verify" : "user.unverify",
-    targetType: "user",
-    targetId: id,
-    metadata: { isVerified },
-  });
-  revalidatePath("/admin/users");
-  revalidatePath("/admin");
-  revalidatePath("/products");
-  return user;
-}
-
-// Admin promotes/demotes a user to/from VIP (VIP sellers have unlimited listings).
-export async function setUserVipAction(id: string, isVip: boolean) {
-  await requireAdmin();
-  const session = await auth();
-  const user = await updateUserVipStatus(id, isVip);
-  await logAudit({
-    actorId: session?.user?.id ?? null,
-    actorRole: "admin",
-    action: isVip ? "user.promote_vip" : "user.demote_vip",
-    targetType: "user",
-    targetId: id,
-    metadata: { isVip },
-  });
-  revalidatePath("/admin/users");
-  revalidatePath("/admin");
-  revalidatePath("/products");
   return user;
 }
 
@@ -262,7 +220,8 @@ export async function setUserPlanAction(id: string, plan: "Free" | "Standard" | 
     metadata: { plan },
   });
 
-  revalidatePath("/admin/users");
+  revalidatePath("/admin/sellers");
+  revalidatePath("/admin/buyers");
   revalidatePath(`/admin/users/${id}/edit`);
   revalidatePath("/admin");
   revalidatePath("/dashboard");
@@ -286,7 +245,8 @@ export async function setUserAdminAction(id: string, isAdmin: boolean) {
     targetId: id,
     metadata: { isAdmin },
   });
-  revalidatePath("/admin/users");
+  revalidatePath("/admin/sellers");
+  revalidatePath("/admin/buyers");
   revalidatePath(`/admin/users/${id}/edit`);
   revalidatePath("/admin");
   return user;
@@ -308,7 +268,8 @@ export async function resetUserPasswordByAdminAction(id: string, newPassword: st
     targetType: "user",
     targetId: id,
   });
-  revalidatePath("/admin/users");
+  revalidatePath("/admin/sellers");
+  revalidatePath("/admin/buyers");
   revalidatePath(`/admin/users/${id}/edit`);
   return { success: true };
 }
@@ -328,7 +289,8 @@ export async function deleteUserAction(id: string) {
     targetId: id,
     metadata: { name: target?.name, phone: target?.phone },
   });
-  revalidatePath("/admin/users");
+  revalidatePath("/admin/sellers");
+  revalidatePath("/admin/buyers");
   revalidatePath("/admin");
   revalidatePath("/products");
 }
@@ -391,5 +353,32 @@ export async function changeMyPasswordAction(currentPassword: string, newPasswor
     targetType: "user",
     targetId: userId,
   });
+  return { success: true };
+}
+
+// Deletes the signed-in user's own account along with every listing they
+// created. Admin deletes use deleteUserAction, which keeps listings.
+export async function deleteMyAccountAction() {
+  const userId = await requireUser();
+  const target = await getUserById(userId).catch(() => null);
+
+  await deleteUser(userId, { deleteListings: true });
+
+  await logAudit({
+    actorId: userId,
+    actorRole: "user",
+    action: "user.self_delete",
+    targetType: "user",
+    targetId: userId,
+    metadata: { name: target?.name, phone: target?.phone },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/deals");
+  revalidatePath("/products");
+  revalidatePath("/sellers");
+  revalidatePath("/dashboard");
+  revalidatePath("/buyer");
+  if (target) revalidatePath(sellerPath(target));
   return { success: true };
 }

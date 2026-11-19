@@ -19,11 +19,12 @@ export function proxy(request: NextRequest) {
 
   const isAdminArea = pathname.startsWith("/admin");
   const isDashboardArea = pathname.startsWith("/dashboard");
+  const isBuyerArea = pathname.startsWith("/buyer");
 
   // Public sub-routes inside the admin area.
   const isAdminPublic = pathname === "/admin/login" || pathname === "/admin/reset-password";
 
-  if ((isAdminArea && !isAdminPublic) || isDashboardArea) {
+  if ((isAdminArea && !isAdminPublic) || isDashboardArea || isBuyerArea) {
     if (!hasSession) {
       const url = request.nextUrl.clone();
       url.pathname = isAdminArea ? "/admin/login" : "/login";
@@ -36,5 +37,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*"],
+  matcher: ["/admin/:path*", "/dashboard/:path*", "/buyer/:path*"],
 };

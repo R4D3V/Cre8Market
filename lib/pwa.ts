@@ -31,14 +31,6 @@ export function writeStorage(key: string, value: string): void {
   }
 }
 
-export function removeStorage(key: string): void {
-  try {
-    localStorage.removeItem(key);
-  } catch {
-    // ignore
-  }
-}
-
 export function readNumber(key: string, fallback = 0): number {
   const raw = readStorage(key);
   const n = raw == null ? NaN : Number(raw);

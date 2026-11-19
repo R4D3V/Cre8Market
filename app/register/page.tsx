@@ -11,7 +11,9 @@ import {
   LockKeyhole,
   MessageCircle,
   ShieldCheck,
+  ShoppingBag,
   Sparkles,
+  Store,
   UserRound,
   Zap,
 } from "lucide-react";
@@ -27,8 +29,22 @@ import { registerUserAction } from "@/lib/actions/auth";
 import { signIn } from "@/lib/auth-client";
 import { PLANS } from "@/lib/plans";
 
+type AccountType = "seller" | "buyer";
+
 const FIELD_CLASS =
   "w-full rounded-xl border border-border/70 bg-muted/30 py-3 pl-10 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-muted/50";
+
+// Two registration modes on one page: the original seller form (unchanged) and
+// the new buyer form. Switching tabs never clears what was already typed.
+const ACCOUNT_TABS: {
+  id: AccountType;
+  label: string;
+  hint: string;
+  icon: typeof Store;
+}[] = [
+  { id: "seller", label: "Seller", hint: "Post listings", icon: Store },
+  { id: "buyer", label: "Buyer", hint: "Browse & chat", icon: ShoppingBag },
+];
 
 const BENEFITS = [
   {
@@ -61,6 +77,7 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [accountExists, setAccountExists] = useState(false);
+  const [accountType, setAccountType] = useState<AccountType>("seller");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -85,9 +102,15 @@ export default function RegisterPage() {
       await registerUserAction({
         name,
         phone: toFullNumber(phone),
-        whatsapp: whatsapp ? toFullNumber(whatsapp) : undefined,
+        // Buyers don't collect a separate WhatsApp number; it falls back to
+        // their phone number on the server.
+        whatsapp:
+          accountType === "seller" && whatsapp
+            ? toFullNumber(whatsapp)
+            : undefined,
         password,
         pin,
+        accountType,
       });
 
       // Registration succeeded — sign the new account in right away.
@@ -105,7 +128,9 @@ export default function RegisterPage() {
       setSuccess(true);
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "Something went wrong. Please try again.";
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.";
       setError(message);
       if (message.includes("already exists")) setAccountExists(true);
     } finally {
@@ -119,7 +144,10 @@ export default function RegisterPage() {
         <Navbar />
 
         <main className="page-ambient relative overflow-hidden">
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+          >
             <div className="absolute -top-44 right-[-8%] h-[480px] w-[480px] rounded-full bg-primary/15 blur-[130px]" />
             <div className="absolute -left-36 top-16 h-[380px] w-[380px] rounded-full bg-secondary/20 blur-[120px]" />
           </div>
@@ -142,15 +170,23 @@ export default function RegisterPage() {
                     Welcome, {surname} {givenName}!
                   </h1>
                   <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-                    Your account has been created. You can now post listings and contact sellers.
+                    {accountType === "buyer"
+                      ? "Your buyer account is ready. Browse listings and message sellers directly."
+                      : "Your account has been created. You can now post listings and contact sellers."}
                   </p>
 
                   <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
                     <Link
-                      href="/dashboard/products/new"
+                      href={
+                        accountType === "buyer"
+                          ? "/buyer"
+                          : "/dashboard/products/new"
+                      }
                       className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90"
                     >
-                      Add a Listing
+                      {accountType === "buyer"
+                        ? "Open my dashboard"
+                        : "Add a Listing"}
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                     <Link
@@ -176,7 +212,10 @@ export default function RegisterPage() {
       <Navbar />
 
       <main className="page-ambient relative overflow-hidden">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+        >
           <div className="absolute -top-44 right-[-8%] h-[480px] w-[480px] rounded-full bg-primary/15 blur-[130px]" />
           <div className="absolute -left-36 top-16 h-[380px] w-[380px] rounded-full bg-secondary/20 blur-[120px]" />
           <div
@@ -185,7 +224,8 @@ export default function RegisterPage() {
               backgroundImage:
                 "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
               backgroundSize: "56px 56px",
-              maskImage: "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
+              maskImage:
+                "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
               WebkitMaskImage:
                 "radial-gradient(ellipse 85% 65% at 50% 0%, black 25%, transparent 100%)",
             }}
@@ -229,8 +269,8 @@ export default function RegisterPage() {
                     </span>
                   </h1>
                   <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-                    Create a free account to buy, sell, and get the best deals in Uganda — directly
-                    with local people.
+                    Create a free account to buy, sell, and get the best deals
+                    in Entebbe — directly with local people.
                   </p>
 
                   <ul className="mt-7 space-y-3">
@@ -243,7 +283,9 @@ export default function RegisterPage() {
                           <Icon className="h-4 w-4" />
                         </span>
                         <div>
-                          <p className="text-sm font-bold text-foreground">{title}</p>
+                          <p className="text-sm font-bold text-foreground">
+                            {title}
+                          </p>
                           <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                             {description}
                           </p>
@@ -255,7 +297,8 @@ export default function RegisterPage() {
                   <div className="mt-6 flex items-start gap-2 rounded-2xl border border-secondary/25 bg-secondary/10 p-3.5">
                     <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
                     <p className="text-[11px] leading-relaxed text-muted-foreground">
-                      Your details are only used to manage your account and connect you with buyers.
+                      Your details are only used to manage your account and
+                      connect you with buyers.
                     </p>
                   </div>
                 </div>
@@ -277,9 +320,52 @@ export default function RegisterPage() {
                         <UserRound className="h-5 w-5" />
                       </span>
                       <div>
-                        <h2 className="text-sm font-bold text-foreground">Create your account</h2>
-                        <p className="text-xs text-muted-foreground">It only takes a minute.</p>
+                        <h2 className="text-sm font-bold text-foreground">
+                          Create your account
+                        </h2>
+                        <p className="text-xs text-muted-foreground">
+                          It only takes a minute.
+                        </p>
                       </div>
+                    </div>
+
+                    {/* Account type: sellers post listings, buyers browse & chat */}
+                    <div
+                      role="tablist"
+                      aria-label="Account type"
+                      className="mb-6 grid grid-cols-2 gap-2 rounded-2xl border border-border/70 bg-muted/30 p-1.5"
+                    >
+                      {ACCOUNT_TABS.map((tab) => {
+                        const activeTab = accountType === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            type="button"
+                            role="tab"
+                            aria-selected={activeTab}
+                            onClick={() => setAccountType(tab.id)}
+                            className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold transition ${
+                              activeTab
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            <tab.icon className="h-4 w-4" />
+                            <span className="flex flex-col items-center leading-tight">
+                              <span>{tab.label}</span>
+                              <span
+                                className={`text-[10px] font-semibold ${
+                                  activeTab
+                                    ? "text-primary-foreground/80"
+                                    : "text-muted-foreground"
+                                }`}
+                              >
+                                {tab.hint}
+                              </span>
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
@@ -337,7 +423,9 @@ export default function RegisterPage() {
                             htmlFor="register-phone"
                             className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
                           >
-                            Phone / WhatsApp number
+                            {accountType === "buyer"
+                              ? "Phone number"
+                              : "Phone / WhatsApp number"}
                           </label>
                           <PhoneInput
                             id="register-phone"
@@ -350,25 +438,27 @@ export default function RegisterPage() {
                           />
                         </div>
 
-                        <div>
-                          <label
-                            htmlFor="register-whatsapp"
-                            className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
-                          >
-                            WhatsApp number{" "}
-                            <span className="font-medium normal-case tracking-normal text-muted-foreground/70">
-                              (if different)
-                            </span>
-                          </label>
-                          <PhoneInput
-                            id="register-whatsapp"
-                            autoComplete="tel-national"
-                            value={whatsapp}
-                            onChange={setWhatsapp}
-                            placeholder="Leave blank to use the number above"
-                            outerClassName="h-11"
-                          />
-                        </div>
+                        {accountType === "seller" && (
+                          <div>
+                            <label
+                              htmlFor="register-whatsapp"
+                              className="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground"
+                            >
+                              WhatsApp number{" "}
+                              <span className="font-medium normal-case tracking-normal text-muted-foreground/70">
+                                (if different)
+                              </span>
+                            </label>
+                            <PhoneInput
+                              id="register-whatsapp"
+                              autoComplete="tel-national"
+                              value={whatsapp}
+                              onChange={setWhatsapp}
+                              placeholder="Leave blank to use the number above"
+                              outerClassName="h-11"
+                            />
+                          </div>
+                        )}
                       </div>
 
                       <div className="space-y-4 border-t border-border/60 pt-5">
@@ -438,14 +528,16 @@ export default function RegisterPage() {
                               maxLength={4}
                               autoComplete="off"
                               value={pin}
-                              onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+                              onChange={(e) =>
+                                setPin(e.target.value.replace(/\D/g, ""))
+                              }
                               placeholder="e.g. 1234"
                               className={FIELD_CLASS}
                             />
                           </div>
                           <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                            You&apos;ll use this pin to verify your identity when resetting your
-                            password.
+                            You&apos;ll use this pin to verify your identity
+                            when resetting your password.
                           </p>
                         </div>
                       </div>
@@ -471,35 +563,62 @@ export default function RegisterPage() {
                         </div>
                       )}
 
-                      <div className="rounded-2xl border border-secondary/25 bg-secondary/10 p-4">
-                        <div className="flex items-center justify-between gap-3">
+                      {accountType === "seller" ? (
+                        <div className="rounded-2xl border border-secondary/25 bg-secondary/10 p-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="flex items-center gap-2 text-xs font-bold text-foreground">
+                              <Sparkles className="h-3.5 w-3.5 text-secondary" />
+                              Seller plans
+                            </p>
+                            <Link
+                              href="/subscription"
+                              className="group inline-flex items-center gap-1 text-[11px] font-bold text-secondary transition hover:text-secondary/80"
+                            >
+                              View plans
+                              <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
+                            </Link>
+                          </div>
+                          <ul className="mt-3 space-y-1.5">
+                            {PLANS.map((p) => (
+                              <li
+                                key={p.name}
+                                className="flex items-start gap-2 text-xs text-muted-foreground"
+                              >
+                                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-secondary" />
+                                <span>
+                                  <span className="font-semibold text-foreground">
+                                    {p.name}
+                                  </span>{" "}
+                                  — {p.price} / {p.period.toLowerCase()},{" "}
+                                  {p.features[0].toLowerCase()}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-secondary/25 bg-secondary/10 p-4">
                           <p className="flex items-center gap-2 text-xs font-bold text-foreground">
                             <Sparkles className="h-3.5 w-3.5 text-secondary" />
-                            Seller plans
+                            Buyer accounts are free
                           </p>
-                          <Link
-                            href="/subscription"
-                            className="group inline-flex items-center gap-1 text-[11px] font-bold text-secondary transition hover:text-secondary/80"
-                          >
-                            View plans
-                            <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
-                          </Link>
+                          <ul className="mt-3 space-y-1.5">
+                            {[
+                              "Message any seller directly from a listing",
+                              "No plans, no fees — just browse and chat",
+                              "Your messages clear themselves after 3 days",
+                            ].map((perk) => (
+                              <li
+                                key={perk}
+                                className="flex items-start gap-2 text-xs text-muted-foreground"
+                              >
+                                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-secondary" />
+                                <span>{perk}</span>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <ul className="mt-3 space-y-1.5">
-                          {PLANS.map((p) => (
-                            <li
-                              key={p.name}
-                              className="flex items-start gap-2 text-xs text-muted-foreground"
-                            >
-                              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-secondary" />
-                              <span>
-                                <span className="font-semibold text-foreground">{p.name}</span> —{" "}
-                                {p.price} / {p.period.toLowerCase()}, {p.features[0].toLowerCase()}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                      )}
 
                       <button
                         type="submit"

@@ -9,7 +9,6 @@ import { ProductImagePicker } from "@/components/ProductImagePicker";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import { fetchProductByIdAction, updateProductAction } from "@/lib/actions/products";
 import type { CategoryDB } from "@/lib/types";
-import { uploadProductImage } from "@/lib/uploadImage";
 
 export default function EditProductPage() {
   const { id } = useParams();
@@ -32,19 +31,6 @@ export default function EditProductPage() {
     sellerWhatsapp: "",
   });
   const [images, setImages] = useState<string[]>(["", "", "", ""]);
-
-  async function handleImageUpload(index: number, file: File) {
-    try {
-      const url = await uploadProductImage(file);
-      setImages((prev) => {
-        const next = [...prev];
-        next[index] = url;
-        return next;
-      });
-    } catch {
-      // Keep the slot unchanged on failure.
-    }
-  }
 
   function removeImage(index: number) {
     setImages((prev) => {
@@ -178,7 +164,7 @@ export default function EditProductPage() {
           <label className="block text-sm font-semibold text-muted-foreground mb-2">
             Product Images (up to 4)
           </label>
-          <ProductImagePicker images={images} onFile={handleImageUpload} onRemove={removeImage} />
+          <ProductImagePicker images={images} onChange={setImages} />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

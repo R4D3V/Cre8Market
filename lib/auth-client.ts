@@ -2,10 +2,11 @@
 
 import { createAuthClient } from "better-auth/react";
 import { APP_URL } from "./env";
+import type { PartyRole } from "./types";
 
 const baseURL = typeof window !== "undefined" ? window.location.origin : APP_URL;
 
-export const authClient = createAuthClient({ baseURL });
+const authClient = createAuthClient({ baseURL });
 
 type AppSessionUser = {
   id?: string;
@@ -14,10 +15,10 @@ type AppSessionUser = {
   image?: string | null;
   phone?: string | null;
   whatsapp?: string | null;
-  role?: "admin" | "user";
+  role?: PartyRole;
 };
 
-function inferRoleFromEmail(email?: string | null): "admin" | "user" {
+function inferRoleFromEmail(email?: string | null): PartyRole {
   if (!email) return "user";
   return email.endsWith("@cre8market.local") ? "user" : "admin";
 }
@@ -29,8 +30,7 @@ function normalizeSession(session: unknown): { user: AppSessionUser } | null {
   return {
     user: {
       ...s.user,
-      role:
-        (s.user.role as "admin" | "user" | undefined) ?? inferRoleFromEmail(s.user.email ?? null),
+      role: (s.user.role as PartyRole | undefined) ?? inferRoleFromEmail(s.user.email ?? null),
     },
   };
 }
@@ -77,7 +77,7 @@ function toLegacyEmail(phone?: string) {
   return digits ? `${digits}@cre8market.local` : "";
 }
 
-export type SignInError = {
+type SignInError = {
   message: string;
   status?: number;
   code?: string;

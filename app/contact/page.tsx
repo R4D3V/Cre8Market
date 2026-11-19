@@ -27,7 +27,7 @@ const CONTACT_METHODS = [
   {
     icon: MapPin,
     label: "Visit us",
-    value: "Kitoro, Entebbe, Uganda",
+    value: "Kitoro, Entebbe, Entebbe",
     href: undefined,
   },
   {
@@ -158,14 +158,20 @@ export default function ContactPage() {
                       {href ? (
                         <a
                           href={href}
-                          target={href.startsWith("http") ? "_blank" : undefined}
-                          rel={href.startsWith("http") ? "noreferrer" : undefined}
+                          target={
+                            href.startsWith("http") ? "_blank" : undefined
+                          }
+                          rel={
+                            href.startsWith("http") ? "noreferrer" : undefined
+                          }
                           className="mt-0.5 block break-words text-sm font-semibold text-foreground transition hover:text-primary"
                         >
                           {value}
                         </a>
                       ) : (
-                        <p className="mt-0.5 text-sm font-semibold text-foreground">{value}</p>
+                        <p className="mt-0.5 text-sm font-semibold text-foreground">
+                          {value}
+                        </p>
                       )}
                     </div>
                   </li>
@@ -188,9 +194,14 @@ export default function ContactPage() {
                   ["Saturday", "9:00 AM – 4:00 PM"],
                   ["Sunday", "Closed"],
                 ].map(([day, hours]) => (
-                  <li key={day} className="flex items-center justify-between py-2.5">
+                  <li
+                    key={day}
+                    className="flex items-center justify-between py-2.5"
+                  >
                     <span className="text-muted-foreground">{day}</span>
-                    <span className="font-semibold text-foreground">{hours}</span>
+                    <span className="font-semibold text-foreground">
+                      {hours}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -209,8 +220,8 @@ export default function ContactPage() {
                   Prefer to chat?
                 </h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  Skip the form and message our team directly on WhatsApp. We usually reply within a
-                  few hours.
+                  Skip the form and message our team directly on WhatsApp. We
+                  usually reply within a few hours.
                 </p>
                 <a
                   href="https://wa.me/256767155113"
@@ -244,8 +255,8 @@ export default function ContactPage() {
                     Thanks for reaching out!
                   </h2>
                   <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-                    We&apos;ll get back to you on WhatsApp shortly. For anything urgent, message us
-                    directly and we&apos;ll jump on it.
+                    We&apos;ll get back to you on WhatsApp shortly. For anything
+                    urgent, message us directly and we&apos;ll jump on it.
                   </p>
 
                   <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
@@ -281,8 +292,12 @@ export default function ContactPage() {
                       <MessageSquare className="h-5 w-5" />
                     </span>
                     <div>
-                      <h2 className="text-sm font-bold text-foreground">Send us a message</h2>
-                      <p className="text-xs text-muted-foreground">Fields marked * are required</p>
+                      <h2 className="text-sm font-bold text-foreground">
+                        Send us a message
+                      </h2>
+                      <p className="text-xs text-muted-foreground">
+                        Fields marked * are required
+                      </p>
                     </div>
                   </div>
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const DEFAULT_APP_URL = "http://localhost:3000";
+const DEFAULT_APP_URL = "http://localhost:3000";
 
 function deployedUrl(): string | undefined {
   // Vercel exposes the deployment host and the stable production domain without

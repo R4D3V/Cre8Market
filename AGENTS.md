@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Cre8Market
 
-Next.js 16 App Router + React 19 + TypeScript (strict), Tailwind CSS 4 (CSS-first config in `app/globals.css` — there is no `tailwind.config.*`). Marketplace for Entebbe, Uganda. See `README.md` for routes and env vars.
+Next.js 16 App Router + React 19 + TypeScript (strict), Tailwind CSS 4 (CSS-first config in `app/globals.css` — there is no `tailwind.config.*`). Postgres/Neon via raw SQL. Marketplace for Entebbe, Entebbe. See `README.md` for routes and env vars.
 
 ## Commands
 
@@ -26,17 +26,22 @@ pnpm test:e2e e2e/auth.spec.ts         # single e2e spec
 pnpm migrate          # apply numbered SQL migrations (idempotent)
 ```
 
-- CI (`pnpm typecheck` → `pnpm lint` → `pnpm test` → `pnpm build`) is the verification order. Node 22, pnpm 9.
+- CI order (`.github/workflows/ci.yml`): `pnpm typecheck` → `pnpm lint` → `pnpm test` → `pnpm build`. Node 22, pnpm 9. Playwright is NOT run in CI.
 - Biome is the only lint/format tool (no ESLint/Prettier). Double quotes, 100-char lines, organize-imports on.
 - `pnpm typecheck` compiles two projects: the main `tsconfig.json` (excludes `scripts/` and `app/sw.ts`) plus `tsconfig.sw.json` (webworker lib, `app/sw.ts` only). Changing the service worker requires both to pass.
 - `migrate`/`seed:deals`/`seed:plans` run with `node --env-file=.env.local` — they fail without a populated `.env.local` (copy from `.env.example`). A new migration is just a new numbered `.sql` file in `migrations/`; each runs in a transaction and is tracked in `schema_migrations`.
+- `pnpm build` prerenders `/`, `/deals` and `/sellers` (ISR `revalidate = 60`), so it queries the DB. Those pages catch DB failures and fall back to `lib/data.ts` or empty lists, so a build can "succeed" with a dead DB and render placeholder listings.
 
 ## Architecture notes
 
-- **No ORM.** All SQL is raw parameterized strings in `lib/db/queries.ts`, run through the shared `pool` from `lib/db/pool.ts`. That pool wraps `query()` with retries for Neon free-tier cold starts and force-appends `sslmode=verify-full` for `*.neon.tech` URLs — don't bypass it or create ad-hoc `pg` clients. (`kysely` appears only inside better-auth's adapter.)
-- **`proxy.ts` at the repo root is Next 16's middleware** (renamed convention — don't "fix" it back to `middleware.ts`). It guards `/admin` and `/dashboard` by cookie presence, and deliberately matches `__Secure-`-prefixed and chunked (`better-auth.session_token.0`) cookie names; simplifying that breaks prod logins.
+- **No ORM.** Raw parameterized SQL mostly in `lib/db/queries.ts`, always through the shared `pool` from `lib/db/pool.ts` (Neon free-tier cold-start retries; force-appends `sslmode=verify-full` for `*.neon.tech` URLs). Don't create ad-hoc `pg` clients in app code — only `scripts/` does. A few auth queries are inline in `lib/auth.ts` and `lib/actions/auth.ts`. (`kysely` appears only inside better-auth's adapter.)
+- **Authorization is two-layer.** `proxy.ts` at the repo root is Next 16's middleware (renamed convention — don't "fix" it back to `middleware.ts`). It only checks that a better-auth session cookie exists before redirecting, and deliberately matches `__Secure-`-prefixed and chunked (`better-auth.session_token.0`) names — simplifying that breaks prod logins. Every Server Action must re-check the role: each `lib/actions/*.ts` file defines its own local `requireAdmin`/`requireUser`. New action files need their own guard; the proxy is not authorization.
+- **Admins are a separate table.** Admin accounts live in `admin_users`, not `users`; `auth()` returns `role: "admin"` by looking up the session email there. `getAdminUsers()` is ordered by `created_at`, so the first row is the "main admin" — the only account allowed to manage other admins. `/admin/login` and `/admin/reset-password` are public.
+- **Login must go through `signIn()` in `lib/auth-client.ts`.** It POSTs `/api/auth/legacy-sync` first (mirrors phone users and `admin_users` rows into better-auth) and only then calls `signIn.email`. Calling `authClient.signIn.email` directly skips the sync and breaks phone/legacy accounts. The handler folder is still `app/api/auth/[...nextauth]/route.ts` even though better-auth provides the handler.
+- **Password resets:** users self-reset with a 4-digit `pin_hash`; legacy accounts without a PIN need an admin reset. Admin resets require `ADMIN_RESET_PIN` and are disabled when it is unset (there is intentionally no default).
+- **Plan limits:** `PLAN_LIMITS` in `lib/plans.ts` is the single source shared by the listing forms and Server Actions. Effective plan comes from `users.is_verified` (Standard) / `is_vip` (Premium); admin listings get `ADMIN_IMAGE_LIMIT`.
+- **Schema changes:** add a numbered `migrations/NNNN_*.sql` and mirror it in `lib/db/schema.sql`, the idempotent reference schema (it has drifted before — `0006` backfilled tables that existed only there). The handle slug rules in `lib/seller-handle.ts` are duplicated in `migrations/0005_seller_handles.sql`; keep the two in sync.
 - **Service worker**: `app/sw.ts` is not a normal Next bundle — `app/serwist/[path]/route.ts` compiles it (esbuild) and serves it at `/serwist/sw.js` with scope `/`. It must keep private paths (`/admin`, `/dashboard`, auth pages, `/api/push/*`) on `NetworkOnly` — caching them leaks sessions on shared devices.
-- **Auth**: better-auth handles `/api/auth/*`; legacy phone-based accounts are synced into it as `<digits>@cre8market.local` emails (see `lib/auth.ts`).
-- **Images**: compressed client-side to JPEG data URLs (`lib/imageCompress.ts`), sent through a Server Action — the 10 MB `serverActions.bodySizeLimit` in `next.config.ts` exists for this. Uploads land on Cloudinary.
+- **Images**: compressed client-side to JPEG data URLs (`lib/imageCompress.ts`), then `lib/uploadImage.ts` POSTs the data URL to `/api/upload-image` (session required; forwards to Cloudinary). If Cloudinary is not configured the helper silently keeps the data URL. This is an API route, not a Server Action; the 10 MB `serverActions.bodySizeLimit` covers listing actions that embed those images.
 - Server Actions live in `lib/actions/`; path alias `@/*` maps to the repo root (mirrored in `vitest.config.mts`).
-- E2E tests hit a real dev server + database (auth fixture in `e2e/fixtures/auth.ts` registers/logs in a real user); unit tests (`lib/**/*.test.ts`, `tests/**/*.test.ts`) need nothing.
+- **Tests**: unit tests are pure (`lib/**/*.test.ts`, `tests/**/*.test.ts`) and need nothing. E2E hits a real dev server + database; `products.spec.ts` needs seeded listings (`pnpm seed:deals`), and `e2e/fixtures/auth.ts` only provides login/register helpers (currently unused by specs).

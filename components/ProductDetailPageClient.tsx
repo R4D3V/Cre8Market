@@ -16,6 +16,7 @@ import {
   MessageCircle,
   Package,
   Phone,
+  Send,
   Share2,
   ShieldCheck,
   Sparkles,
@@ -23,12 +24,15 @@ import {
   Tag,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import ScrollReveal from "@/components/ScrollReveal";
+import { startChatAction } from "@/lib/actions/chats";
 import { fetchProductBySlugAction, fetchRelatedProductsAction } from "@/lib/actions/products";
+import { useSession } from "@/lib/auth-client";
 import { sellerHandle } from "@/lib/seller-handle";
 import type { Product } from "@/lib/types";
 
@@ -85,6 +89,15 @@ export default function ProductDetailPageClient({
   const [offerSent, setOfferSent] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  // In-app inquiry: any signed-in party (buyer, seller or admin) can message
+  // the listing owner from here.
+  const [msgOpen, setMsgOpen] = useState(false);
+  const [msgBody, setMsgBody] = useState("");
+  const [msgSending, setMsgSending] = useState(false);
+  const [msgError, setMsgError] = useState("");
+  const router = useRouter();
+  const { data: session, status: sessionStatus } = useSession();
+  const myRole = session?.user?.role;
 
   useEffect(() => {
     if (initialProduct) {
@@ -216,6 +229,48 @@ export default function ProductDetailPageClient({
     setOfferSent(true);
   }
 
+  const productSlug = product.slug ?? slug;
+  // Nobody can message themselves: a seller on their own listing, or an admin
+  // on an admin-owned store listing, has no counterparty.
+  const isOwnListing =
+    !!session?.user?.id && !!product.user_id && product.user_id === session.user.id;
+  const isStoreListingOwnedByAdmin = !product.user_id && myRole === "admin";
+  const canMessageSeller = !isOwnListing && !isStoreListingOwnedByAdmin;
+
+  function handleMessageSellerClick() {
+    if (sessionStatus === "loading") return;
+    if (!session?.user) {
+      router.push(`/login?next=/products/${productSlug}`);
+      return;
+    }
+    if (!canMessageSeller) return;
+    setMsgOpen((open) => !open);
+    setMsgError("");
+  }
+
+  async function handleStartChat(e: React.FormEvent) {
+    e.preventDefault();
+    const body = msgBody.trim();
+    if (!product || !body || msgSending) return;
+    setMsgSending(true);
+    setMsgError("");
+    try {
+      const { conversationId } = await startChatAction({ productId: product.id, message: body });
+      setMsgBody("");
+      const inbox =
+        myRole === "admin"
+          ? "/admin/chats"
+          : myRole === "buyer"
+            ? "/buyer/chats"
+            : "/dashboard/chats";
+      router.push(`${inbox}?c=${conversationId}`);
+    } catch (err: unknown) {
+      setMsgError(err instanceof Error ? err.message : "Could not start that conversation");
+    } finally {
+      setMsgSending(false);
+    }
+  }
+
   return (
     <>
       <Navbar />
@@ -319,14 +374,14 @@ export default function ProductDetailPageClient({
             <ScrollReveal>
               <div className="overflow-hidden rounded-3xl border border-border/70 bg-card/80 backdrop-blur-sm">
                 <div
-                  className="relative aspect-[4/3] w-full sm:aspect-[16/11]"
+                  className="relative aspect-[4/3] w-full"
                   style={{ backgroundColor: bg }}
                 >
                   {images[selectedImage] ? (
                     <img
                       src={images[selectedImage]}
                       alt={product.title}
-                      className="h-full w-full object-contain"
+                      className="h-full w-full object-cover"
                     />
                   ) : product.categoryIcon ? (
                     <span className="grid h-full w-full place-items-center text-8xl opacity-60">
@@ -547,6 +602,67 @@ export default function ProductDetailPageClient({
                     <MessageCircle className="h-5 w-5" />
                     WhatsApp seller
                   </a>
+
+                  {canMessageSeller ? (
+                    <button
+                      type="button"
+                      onClick={handleMessageSellerClick}
+                      className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90"
+                    >
+                      <Send className="h-4 w-4" />
+                      Message Seller
+                    </button>
+                  ) : (
+                    <p className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full border border-border/70 bg-muted/30 py-3.5 text-sm font-bold text-muted-foreground">
+                      <Package className="h-4 w-4" />
+                      {isOwnListing ? "This is your listing" : "CRE8MARKET store listing"}
+                    </p>
+                  )}
+                  <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                    {isOwnListing
+                      ? "Buyers and other sellers can message you about this listing from here."
+                      : myRole === "buyer"
+                        ? "Chat in the app — messages clear themselves after 3 days."
+                        : session?.user
+                          ? "Message this seller directly. Replies land in your Chats inbox."
+                          : "Sign in to chat with this seller in the app."}
+                  </p>
+
+                  {msgOpen && canMessageSeller && (
+                    <form onSubmit={handleStartChat} className="mt-3 space-y-2.5">
+                      <textarea
+                        value={msgBody}
+                        onChange={(e) => setMsgBody(e.target.value)}
+                        rows={4}
+                        maxLength={2000}
+                        required
+                        placeholder="Hi, is this still available? I'd like to know more…"
+                        aria-label="Message to the seller"
+                        className="w-full resize-none rounded-2xl border border-border/70 bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none"
+                      />
+                      {msgError && (
+                        <p className="rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive">
+                          {msgError}
+                        </p>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setMsgOpen(false)}
+                          className="flex-1 rounded-full border border-border/70 bg-card/60 py-2.5 text-xs font-bold text-foreground transition hover:border-primary/40 hover:text-primary"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={msgSending || !msgBody.trim()}
+                          className="flex flex-[2] items-center justify-center gap-2 rounded-full bg-primary py-2.5 text-xs font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+                        >
+                          {msgSending ? "Sending…" : "Send message"}
+                        </button>
+                      </div>
+                    </form>
+                  )}
 
                   <button
                     type="button"

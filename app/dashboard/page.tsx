@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { UnreadBadge } from "@/components/chat/UnreadBadge";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import { fetchMyListingLimitAction, fetchMyProductsAction } from "@/lib/actions/products";
 import { fetchMySubscriptionAction } from "@/lib/actions/subscriptions";
@@ -26,8 +27,16 @@ import { formatPrice } from "@/lib/data";
 import { getCurrentPlanName, getPlanByName, type PlanName, planTierFromName } from "@/lib/plans";
 import { sellerPath } from "@/lib/seller-handle";
 import type { AppUser, Product, UserSubscription } from "@/lib/types";
+import { useUnreadMessageCount } from "@/lib/useUnreadMessages";
 
 const HUB_CARDS = [
+  {
+    href: "/dashboard/chats",
+    icon: MessageCircle,
+    label: "Chats",
+    description:
+      "Message any seller from a listing, or reply to buyers. Messages clear after 3 days.",
+  },
   {
     href: "/dashboard/profile",
     icon: UserCircle,
@@ -63,6 +72,7 @@ export default function DashboardHubPage() {
   const [limitInfo, setLimitInfo] = useState<ListingLimit | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [copied, setCopied] = useState(false);
+  const unreadCount = useUnreadMessageCount(true);
 
   useEffect(() => {
     let active = true;
@@ -562,6 +572,9 @@ export default function DashboardHubPage() {
             </span>
             <h3 className="relative mt-1 font-heading text-lg font-extrabold tracking-tight text-foreground">
               {label}
+              {label === "Chats" && (
+                <UnreadBadge count={unreadCount} className="relative -top-0.5 ml-2 align-middle" />
+              )}
             </h3>
             <p className="relative text-sm text-muted-foreground">{description}</p>
             <span className="relative mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">

@@ -86,7 +86,7 @@ export default function EditUserPage() {
       .then(([u, planData, s]) => {
         if (!active) return;
         if (!u) {
-          router.push("/admin/users");
+          router.push("/admin/sellers");
           return;
         }
         const planList = (planData as { id: string; name: string }[]) ?? [];
@@ -109,7 +109,7 @@ export default function EditUserPage() {
         if (s?.expiresAt) setExpiresAt(s.expiresAt.slice(0, 10));
         setLoading(false);
       })
-      .catch(() => router.push("/admin/users"));
+      .catch(() => router.push("/admin/sellers"));
 
     return () => {
       active = false;
@@ -147,8 +147,7 @@ export default function EditUserPage() {
     try {
       await updateUserByAdminAction(id as string, {
         name: form.name,
-        phone: toFullNumber(form.phone),
-        whatsapp: form.whatsapp ? toFullNumber(form.whatsapp) : undefined,
+        whatsapp: isBuyer ? null : form.whatsapp ? toFullNumber(form.whatsapp) : undefined,
         avatar: avatar || null,
         banner: banner || null,
       });
@@ -159,7 +158,8 @@ export default function EditUserPage() {
 
       const initialPlan = user?.isVip ? "Premium" : user?.isVerified ? "Standard" : "Free";
       const nextPlan = isVip ? "Premium" : isVerified ? "Standard" : "Free";
-      if (nextPlan !== initialPlan) {
+      // Plans only apply to sellers; buyers always stay on Free.
+      if (!isBuyer && nextPlan !== initialPlan) {
         await setUserPlanAction(id as string, nextPlan);
       }
 
@@ -192,23 +192,28 @@ export default function EditUserPage() {
   }
 
   const initial = (form.name || user?.name || "U")[0].toUpperCase();
+  const isBuyer = user?.accountType === "buyer";
+  const backHref = isBuyer ? "/admin/buyers" : "/admin/sellers";
+  const backLabel = isBuyer ? "Buyers" : "Sellers";
 
   return (
     <AdminPanel
-      title="Edit User"
+      title={isBuyer ? "Edit Buyer" : "Edit Seller"}
       description={
         user
-          ? `${user.name} · joined ${new Date(user.createdAt).toLocaleDateString()} · ${
-              user.productCount ?? 0
-            } product${(user.productCount ?? 0) === 1 ? "" : "s"}`
-          : "Update this user's account"
+          ? isBuyer
+            ? `${user.name} · joined ${new Date(user.createdAt).toLocaleDateString()}`
+            : `${user.name} · joined ${new Date(user.createdAt).toLocaleDateString()} · ${
+                user.productCount ?? 0
+              } product${(user.productCount ?? 0) === 1 ? "" : "s"}`
+          : "Update this account"
       }
       action={
         <Link
-          href="/admin/users"
+          href={backHref}
           className="inline-flex items-center gap-2 rounded-xl bg-background px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
         >
-          ← Back to Users
+          ← Back to {backLabel}
         </Link>
       }
     >
@@ -249,41 +254,43 @@ export default function EditUserPage() {
           </div>
         </div>
 
-        {/* Banner */}
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-muted-foreground">
-            Seller Page Banner
-          </label>
-          <p className="mb-3 text-xs text-muted-foreground">
-            Displayed at the top of this seller&apos;s public profile. Wide images work best.
-          </p>
-          {banner && (
-            <div className="mb-3 overflow-hidden rounded-2xl border border-border/70">
-              <img src={banner} alt="Seller page banner" className="h-28 w-full object-cover" />
-            </div>
-          )}
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-border/70 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
-              <ImagePlus className="h-4 w-4" />
-              {banner ? "Change banner" : "Upload banner"}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleBannerUpload(e.target.files?.[0] ?? null)}
-              />
+        {/* Banner (sellers only — buyers have no public storefront) */}
+        {!isBuyer && (
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-muted-foreground">
+              Seller Page Banner
             </label>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Displayed at the top of this seller&apos;s public profile. Wide images work best.
+            </p>
             {banner && (
-              <button
-                type="button"
-                onClick={() => setBanner("")}
-                className="text-sm font-semibold text-destructive hover:underline"
-              >
-                Remove banner
-              </button>
+              <div className="mb-3 overflow-hidden rounded-2xl border border-border/70">
+                <img src={banner} alt="Seller page banner" className="h-28 w-full object-cover" />
+              </div>
             )}
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-border/70 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
+                <ImagePlus className="h-4 w-4" />
+                {banner ? "Change banner" : "Upload banner"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleBannerUpload(e.target.files?.[0] ?? null)}
+                />
+              </label>
+              {banner && (
+                <button
+                  type="button"
+                  onClick={() => setBanner("")}
+                  className="text-sm font-semibold text-destructive hover:underline"
+                >
+                  Remove banner
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Personal details */}
         <div>
@@ -302,25 +309,31 @@ export default function EditUserPage() {
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-muted-foreground">
-                Phone *
+                Phone (login ID)
               </label>
               <PhoneInput
-                required
+                disabled
                 value={form.phone}
-                onChange={(v) => setForm((f) => ({ ...f, phone: v }))}
+                onChange={() => {}}
                 placeholder="700000000"
+                className="opacity-60"
               />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Phone number is the login ID and cannot be changed.
+              </p>
             </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold text-muted-foreground">
-                WhatsApp (optional)
-              </label>
-              <PhoneInput
-                value={form.whatsapp}
-                onChange={(v) => setForm((f) => ({ ...f, whatsapp: v }))}
-                placeholder={form.phone}
-              />
-            </div>
+            {!isBuyer && (
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-muted-foreground">
+                  WhatsApp (optional)
+                </label>
+                <PhoneInput
+                  value={form.whatsapp}
+                  onChange={(v) => setForm((f) => ({ ...f, whatsapp: v }))}
+                  placeholder={form.phone}
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -334,29 +347,35 @@ export default function EditUserPage() {
               onLabel="● Active"
               offLabel="○ Disabled"
             />
-            <Toggle
-              checked={isVerified && !isVip}
-              onChange={(on) => {
-                setIsVerified(on);
-                if (on) setIsVip(false);
-              }}
-              onLabel="✦ Standard Plan"
-              offLabel="○ Standard off"
-            />
-            <Toggle
-              checked={isVip}
-              onChange={(on) => {
-                setIsVip(on);
-                if (on) setIsVerified(true);
-              }}
-              onLabel="★ Premium Plan"
-              offLabel="○ Premium off"
-            />
+            {!isBuyer && (
+              <>
+                <Toggle
+                  checked={isVerified && !isVip}
+                  onChange={(on) => {
+                    setIsVerified(on);
+                    if (on) setIsVip(false);
+                  }}
+                  onLabel="✦ Standard Plan"
+                  offLabel="○ Standard off"
+                />
+                <Toggle
+                  checked={isVip}
+                  onChange={(on) => {
+                    setIsVip(on);
+                    if (on) setIsVerified(true);
+                  }}
+                  onLabel="★ Premium Plan"
+                  offLabel="○ Premium off"
+                />
+              </>
+            )}
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Current plan: <span className="font-semibold text-foreground">{currentPlan}</span>
-            {" · "}Standard adds verified status, Premium adds VIP perks.
-          </p>
+          {!isBuyer && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Current plan: <span className="font-semibold text-foreground">{currentPlan}</span>
+              {" · "}Standard adds verified status, Premium adds VIP perks.
+            </p>
+          )}
           {isAdmin && (
             <p className="mt-3 text-xs text-muted-foreground">
               Making this user an admin grants them access to the admin panel.
@@ -402,7 +421,7 @@ export default function EditUserPage() {
             {saving ? "Saving…" : "Save Changes"}
           </button>
           <Link
-            href="/admin/users"
+            href={backHref}
             className="text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
           >
             Cancel

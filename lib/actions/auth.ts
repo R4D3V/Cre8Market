@@ -19,6 +19,9 @@ export async function registerUserAction(data: {
   whatsapp?: string;
   password: string;
   pin: string;
+  // 'seller' = the original registration (posts listings), 'buyer' = new
+  // browsing-only account. Defaults to seller so old callers stay valid.
+  accountType?: "seller" | "buyer";
 }) {
   if (!data.name || !data.phone || !data.password) {
     throw new Error("Name, phone and password are required");
@@ -30,6 +33,8 @@ export async function registerUserAction(data: {
     throw new Error("Reset pin must be a 4-digit code");
   }
 
+  const accountType: "seller" | "buyer" = data.accountType === "buyer" ? "buyer" : "seller";
+
   const exists = await checkPhoneExists(data.phone);
   if (exists) throw new Error("An account with this phone number already exists");
 
@@ -38,18 +43,20 @@ export async function registerUserAction(data: {
   const user = await createUser({
     name: data.name,
     phone: data.phone,
-    whatsapp: data.whatsapp || data.phone,
+    // Buyers have no WhatsApp field; sellers fall back to their phone number.
+    whatsapp: accountType === "buyer" ? undefined : data.whatsapp || data.phone,
     password_hash,
     pin_hash,
+    account_type: accountType,
   });
 
   await logAudit({
     actorId: user.id,
-    actorRole: "user",
+    actorRole: accountType,
     action: "user.register",
     targetType: "user",
     targetId: user.id,
-    metadata: { name: data.name, phone: data.phone },
+    metadata: { name: data.name, phone: data.phone, accountType },
   });
 
   return user;

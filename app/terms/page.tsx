@@ -3,7 +3,8 @@ import LegalPage from "@/components/LegalPage";
 
 export const metadata: Metadata = {
   title: "Terms of Service | CRE8MARKET Entebbe",
-  description: "The rules and agreements that apply when buying and selling on CRE8MARKET ENTEBBE.",
+  description:
+    "The rules and agreements that apply when buying and selling on CRE8MARKET ENTEBBE.",
   alternates: {
     canonical: "/terms",
   },
@@ -26,7 +27,7 @@ export default function TermsPage() {
         {
           title: "Prohibited Items",
           paragraphs: [
-            "You may not list stolen goods, counterfeit products, weapons, drugs, or any items prohibited by Ugandan law.",
+            "You may not list stolen goods, counterfeit products, weapons, drugs, or any items prohibited by Entebbe law.",
           ],
         },
         {
@@ -44,7 +45,7 @@ export default function TermsPage() {
         {
           title: "Contact",
           paragraphs: [
-            "For questions about these Terms, contact us at raymonjohns@gmail.com or visit our office at Kitoro, Entebbe, Uganda.",
+            "For questions about these Terms, contact us at raymonjohns@gmail.com or visit our office at Kitoro, Entebbe, Entebbe.",
           ],
         },
       ]}

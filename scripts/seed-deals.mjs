@@ -279,7 +279,7 @@ const deals = [
     condition: "Used - Good",
     location: "Entebbe",
     description:
-      "ZTE MF935 4G LTE Mobile WiFi Hotspot router, MTN Uganda locked. Connect up to 10 devices simultaneously. Compact pocket-size design. Includes original charger.",
+      "ZTE MF935 4G LTE Mobile WiFi Hotspot router, MTN Entebbe locked. Connect up to 10 devices simultaneously. Compact pocket-size design. Includes original charger.",
     specs: [
       { label: "Network", value: "4G LTE" },
       { label: "Carrier", value: "MTN Locked" },
@@ -412,10 +412,14 @@ let inserted = 0;
 let skipped = 0;
 
 try {
-  await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_deal BOOLEAN DEFAULT false");
+  await pool.query(
+    "ALTER TABLE products ADD COLUMN IF NOT EXISTS is_deal BOOLEAN DEFAULT false",
+  );
 
   for (const d of deals) {
-    const exists = await pool.query("SELECT 1 FROM products WHERE slug = $1", [d.slug]);
+    const exists = await pool.query("SELECT 1 FROM products WHERE slug = $1", [
+      d.slug,
+    ]);
     if (exists.rows.length > 0) {
       skipped++;
       continue;
@@ -440,7 +444,9 @@ try {
     );
     inserted++;
   }
-  console.log(`Seed complete — ${inserted} inserted, ${skipped} skipped (already present).`);
+  console.log(
+    `Seed complete — ${inserted} inserted, ${skipped} skipped (already present).`,
+  );
 } catch (err) {
   console.error("Seed failed:", err.message);
   process.exitCode = 1;

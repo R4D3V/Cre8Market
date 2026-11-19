@@ -1,9 +1,10 @@
 "use client";
 
-import { Camera, ImagePlus } from "lucide-react";
+import { Camera } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AdminPanel } from "@/components/admin/AdminPanel";
+import ImageUploader from "@/components/ImageUploader";
 import PasswordInput from "@/components/PasswordInput";
 import {
   changeMyAdminPasswordAction,
@@ -47,16 +48,6 @@ export default function AdminProfilePage() {
     try {
       const dataUrl = await compressImage(file, 400, 0.7);
       setAvatar(dataUrl);
-    } catch {
-      setInfoError("Could not read that image. Please try a different file.");
-    }
-  }
-
-  async function handleBannerUpload(file: File | null) {
-    if (!file) return;
-    try {
-      const dataUrl = await compressImage(file, 1200, 0.75);
-      setBanner(dataUrl);
     } catch {
       setInfoError("Could not read that image. Please try a different file.");
     }
@@ -150,32 +141,24 @@ export default function AdminProfilePage() {
             <label className="block text-sm font-semibold text-muted-foreground mb-1.5">
               Banner Image (shown on your public store page)
             </label>
+            <ImageUploader
+              width={1600}
+              height={500}
+              value={banner || null}
+              folder="cre8market/banners"
+              label="Upload banner"
+              onUploadComplete={(url) => setBanner(url)}
+              onUploadError={(err) => setInfoError(err.message)}
+            />
             {banner && (
-              <div className="mb-2 overflow-hidden rounded-xl border border-border">
-                <img src={banner} alt="Profile banner" className="w-full h-32 object-cover" />
-              </div>
+              <button
+                type="button"
+                onClick={() => setBanner("")}
+                className="mt-2 text-xs font-semibold text-destructive"
+              >
+                Remove Banner
+              </button>
             )}
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="neu-pill bg-card text-primary text-xs font-semibold px-3 py-1.5 cursor-pointer text-center inline-flex items-center justify-center gap-1.5">
-                <ImagePlus className="h-3.5 w-3.5" />
-                Upload Banner
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleBannerUpload(e.target.files?.[0] ?? null)}
-                />
-              </label>
-              {banner && (
-                <button
-                  type="button"
-                  onClick={() => setBanner("")}
-                  className="text-xs text-destructive font-semibold"
-                >
-                  Remove Banner
-                </button>
-              )}
-            </div>
             <p className="mt-1.5 text-xs text-muted-foreground">
               Wide images look best. This appears at the top of{" "}
               <Link href="/sellers/store" className="text-primary hover:underline">

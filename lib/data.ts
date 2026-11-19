@@ -412,7 +412,7 @@ export const latestProducts: Product[] = [
     condition: "Used - Good",
     location: "Entebbe",
     description:
-      "ZTE MF935 4G LTE Mobile WiFi Hotspot router, MTN Uganda locked. Connect up to 10 devices simultaneously. Compact pocket-size design. Includes original charger.",
+      "ZTE MF935 4G LTE Mobile WiFi Hotspot router, MTN Entebbe locked. Connect up to 10 devices simultaneously. Compact pocket-size design. Includes original charger.",
     seller: {
       name: "Network Hub",
       phone: "256712345678",
@@ -457,8 +457,6 @@ export const latestProducts: Product[] = [
     ],
   },
 ];
-
-export const allProducts: Product[] = [...latestProducts];
 
 export function formatPrice(price: number): string {
   return `UGX ${price.toLocaleString("en-UG")}`;

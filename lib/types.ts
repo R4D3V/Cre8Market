@@ -1,4 +1,4 @@
-export interface Seller {
+interface Seller {
   name: string;
   phone: string;
   whatsapp: string;
@@ -72,6 +72,13 @@ export interface ProductWithOwner extends Product {
 }
 
 // Registered marketplace user (distinct from admin_users).
+// `accountType` is what separates the three parties: 'seller' posts listings,
+// 'buyer' browses and messages sellers. Admins are in admin_users.
+type AccountType = "seller" | "buyer";
+
+// Role as it appears on the session: 'admin' | seller ('user') | 'buyer'.
+export type PartyRole = "admin" | "user" | "buyer";
+
 export interface AppUser {
   id: string;
   name: string;
@@ -85,8 +92,45 @@ export interface AppUser {
   isVerified: boolean;
   isVip?: boolean;
   hasPin?: boolean;
+  accountType?: AccountType;
   createdAt: string;
   productCount?: number;
+}
+
+// ── Direct chat ──
+
+export interface ChatMessage {
+  id: string;
+  conversationId: string;
+  senderRole: PartyRole;
+  senderId: string;
+  /** Display name of the sender, resolved from users/admin_users. */
+  senderName?: string | null;
+  /** Avatar URL/data-URL of the sender. */
+  senderAvatar?: string | null;
+  body: string;
+  createdAt: string;
+  /** Self-destruct: the row is deleted once this passes. */
+  expiresAt: string;
+}
+
+export interface ChatConversation {
+  id: string;
+  /** Buyer's name when viewed by a seller/admin, seller/admin's name for a buyer. */
+  counterpartName: string;
+  counterpartAvatar: string | null;
+  counterpartRole: PartyRole;
+  productId: string | null;
+  productTitle: string | null;
+  productSlug: string | null;
+  productImage: string | null;
+  lastMessage: string | null;
+  lastMessageAt: string | null;
+  lastSenderRole: PartyRole | null;
+  unreadCount: number;
+  messageCount?: number;
+  createdAt: string;
+  isInternal?: boolean;
 }
 
 export interface CategoryDB {

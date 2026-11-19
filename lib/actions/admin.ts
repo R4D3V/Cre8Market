@@ -2,7 +2,7 @@
 
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
+import { auth, syncLegacyAdminToBetterAuth } from "@/lib/auth";
 import {
   createAdminUser,
   deleteAdminUser,
@@ -14,6 +14,7 @@ import {
   logAudit,
   setFeatureFlag,
   updateAdminProfile,
+  updateAdminUser,
   updateAdminUserPassword,
 } from "@/lib/db/queries";
 
@@ -96,6 +97,74 @@ export async function deleteAdminUserAction(id: string) {
   return { success: true };
 }
 
+// The main admin can edit the profile of any other admin. The email is the
+// login ID and stays fixed; an optional new password can be set here so a
+// locked-out admin can be recovered without touching the database.
+export async function updateAdminUserByMainAdminAction(
+  id: string,
+  data: {
+    name: string;
+    phone?: string | null;
+    whatsapp?: string | null;
+    avatar?: string | null;
+    banner?: string | null;
+    password?: string;
+  },
+) {
+  const actorId = await requireMainAdmin();
+
+  const target = await getAdminUserById(id);
+  if (!target) throw new Error("Admin not found");
+  if (!data.name || !data.name.trim()) throw new Error("Name is required");
+
+  const newPassword = data.password?.trim();
+  if (newPassword && newPassword.length < 6) {
+    throw new Error("Password must be at least 6 characters");
+  }
+
+  const admin = await updateAdminUser(id, {
+    name: data.name.trim(),
+    phone: data.phone?.trim() || null,
+    whatsapp: data.whatsapp?.trim() || null,
+    avatar: data.avatar ?? null,
+    // Banners are only edited from the admin's own profile page; preserve the
+    // existing one when this form doesn't touch it.
+    banner: data.banner ?? target.banner ?? null,
+  });
+  if (!admin) throw new Error("Admin not found");
+
+  if (newPassword) {
+    await updateAdminUserPassword(id, await bcrypt.hash(newPassword, 12));
+    await logAudit({
+      actorId,
+      actorRole: "admin",
+      action: "admin.password_reset",
+      targetType: "admin",
+      targetId: id,
+      metadata: { email: target.email, by: "main_admin" },
+    });
+  }
+
+  // Keep the better-auth mirror (name/avatar/password) in step with the row.
+  await syncLegacyAdminToBetterAuth(target.email);
+
+  await logAudit({
+    actorId,
+    actorRole: "admin",
+    action: "admin.update",
+    targetType: "admin",
+    targetId: id,
+    metadata: { email: target.email, name: admin.name },
+  });
+
+  revalidatePath("/admin/admins");
+  revalidatePath("/admin");
+  revalidatePath("/admin/profile");
+  revalidatePath("/sellers");
+  revalidatePath("/sellers/store");
+  return admin;
+}
+
 export async function fetchMyAdminProfileAction() {
   const adminId = await requireAdmin();
   const admin = await getAdminUserById(adminId);
@@ -151,13 +220,8 @@ export async function changeMyAdminPasswordAction(currentPassword: string, newPa
 
 // ── Feature flags ──
 
-export async function fetchFeatureFlagsAction() {
-  await requireAdmin();
-  return getFeatureFlags();
-}
-
 export async function toggleFeatureFlagAction(key: string, enabled: boolean) {
-  const adminId = await requireAdmin();
+  const adminId = await requireMainAdmin();
   const cleanKey = key.trim().toLowerCase();
 
   if (!/^[a-z0-9][a-z0-9-]{1,48}$/.test(cleanKey)) {

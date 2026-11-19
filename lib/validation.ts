@@ -37,8 +37,6 @@ export const productInputSchema = z.object({
   user_id: z.string().uuid().nullable().optional(),
 });
 
-export type ProductInput = z.infer<typeof productInputSchema>;
-
 export const pushSubscribeSchema = z.object({
   endpoint: z.string().url("Invalid endpoint"),
   keys: z.object({
@@ -51,9 +49,4 @@ export const pushNotifySchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(120),
   body: z.string().trim().max(300).optional(),
   url: z.string().max(500).optional(),
-});
-
-export const loginSchema = z.object({
-  email: z.string().trim().email("Invalid email"),
-  password: z.string().min(6, "Password too short"),
 });

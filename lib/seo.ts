@@ -1,6 +1,7 @@
 import type { Product } from "@/lib/types";
 
-export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.cre8-market.com";
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_APP_URL || "https://www.cre8-market.com";
 export const SITE_NAME = "CRE8MARKET Entebbe";
 
 const CONDITION_SCHEMA: Record<string, string> = {
@@ -33,7 +34,7 @@ export function buildProductTitle(p: Product): string {
  */
 export function buildProductDescription(p: Product): string {
   const place = p.location ?? "Entebbe";
-  const lead = `${clean(p.title)}${p.condition ? `, ${p.condition}` : ""} for ${formatUgx(p.price)} in ${place}, Uganda.`;
+  const lead = `${clean(p.title)}${p.condition ? `, ${p.condition}` : ""} for ${formatUgx(p.price)} in ${place}, Entebbe.`;
   const seller = p.description ? clean(p.description) : "";
   const tail = seller || "Chat directly with the seller on WhatsApp.";
   const full = `${lead} ${tail}`;
@@ -51,7 +52,9 @@ export function buildProductJsonLd(p: Product) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: clean(p.title),
-    description: p.description ? clean(p.description) : buildProductDescription(p),
+    description: p.description
+      ? clean(p.description)
+      : buildProductDescription(p),
     ...(images.length ? { image: images } : {}),
     category: p.category,
     ...(p.condition && CONDITION_SCHEMA[p.condition]
@@ -64,7 +67,9 @@ export function buildProductJsonLd(p: Product) {
       priceCurrency: "UGX",
       price: p.price,
       availability: "https://schema.org/InStock",
-      ...(sellerName ? { seller: { "@type": "Person", name: sellerName } } : {}),
+      ...(sellerName
+        ? { seller: { "@type": "Person", name: sellerName } }
+        : {}),
     },
   };
 }

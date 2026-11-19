@@ -4,6 +4,7 @@ import { Package, Star } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
+import { isMainAdminAction } from "@/lib/actions/admin";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import {
   deleteProductsAction,
@@ -40,6 +41,7 @@ function AdminProductsPageInner() {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
+  const [canAddProduct, setCanAddProduct] = useState(false);
 
   useEffect(() => {
     fetchProductsWithOwnersAction().then((data) => {
@@ -47,6 +49,7 @@ function AdminProductsPageInner() {
       setLoading(false);
     });
     fetchCategoriesAction().then((data) => setCategories(data ?? []));
+    isMainAdminAction().then((value) => setCanAddProduct(value)).catch(() => {});
   }, []);
 
   // Distinct users who have added products, for the "sort by user" dropdown.
@@ -174,12 +177,14 @@ function AdminProductsPageInner() {
             {filteredProducts.length !== products.length && ` of ${products.length} total`}
           </p>
         </div>
-        <Link
-          href="/admin/products/new"
-          className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90"
-        >
-          + Add Product
-        </Link>
+        {canAddProduct && (
+          <Link
+            href="/admin/products/new"
+            className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90"
+          >
+            + Add Product
+          </Link>
+        )}
       </div>
 
       {/* Filters */}
@@ -263,13 +268,15 @@ function AdminProductsPageInner() {
           >
             Unmark Featured
           </button>
-          <button
-            onClick={() => handleBulkDuplicate()}
-            disabled={busy}
-            className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
-          >
-            Duplicate Selected
-          </button>
+          {canAddProduct && (
+            <button
+              onClick={() => handleBulkDuplicate()}
+              disabled={busy}
+              className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
+            >
+              Duplicate Selected
+            </button>
+          )}
           <button
             onClick={() => handleBulkDelete()}
             disabled={busy}
@@ -300,12 +307,14 @@ function AdminProductsPageInner() {
               ? "Add your first product to get started."
               : "Try a different filter or search."}
           </p>
-          <Link
-            href="/admin/products/new"
-            className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm inline-block"
-          >
-            + Add Product
-          </Link>
+          {canAddProduct && (
+            <Link
+              href="/admin/products/new"
+              className="neu-pill bg-primary text-primary-foreground font-bold px-5 py-2.5 text-sm inline-block"
+            >
+              + Add Product
+            </Link>
+          )}
         </div>
       ) : (
         <>
@@ -365,14 +374,16 @@ function AdminProductsPageInner() {
                   >
                     Edit
                   </Link>
-                  <button
-                    type="button"
-                    onClick={() => handleDuplicate(p.id)}
-                    disabled={busy}
-                    className="neu-pill bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition-all disabled:opacity-60"
-                  >
-                    Duplicate
-                  </button>
+                  {canAddProduct && (
+                    <button
+                      type="button"
+                      onClick={() => handleDuplicate(p.id)}
+                      disabled={busy}
+                      className="neu-pill bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition-all disabled:opacity-60"
+                    >
+                      Duplicate
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => handleDelete(p.id)}
@@ -463,13 +474,15 @@ function AdminProductsPageInner() {
                         >
                           Edit
                         </Link>
-                        <button
-                          onClick={() => handleDuplicate(p.id)}
-                          disabled={busy}
-                          className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 transition-all disabled:opacity-60"
-                        >
-                          Duplicate
-                        </button>
+                        {canAddProduct && (
+                          <button
+                            onClick={() => handleDuplicate(p.id)}
+                            disabled={busy}
+                            className="neu-pill bg-card text-foreground text-xs font-semibold px-3 py-1.5 transition-all disabled:opacity-60"
+                          >
+                            Duplicate
+                          </button>
+                        )}
                         <button
                           onClick={() => handleDelete(p.id)}
                           className="neu-pill bg-destructive text-white text-xs font-semibold px-3 py-1.5 transition-all"

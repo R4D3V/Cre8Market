@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import type { AuditLogFilters, ProductsPageParams } from "@/lib/db/queries";
 import {
+  getAdminUsers,
   checkSlugExists,
   clearAuditLog,
   countAuditLog,
@@ -43,6 +44,18 @@ async function requireAdmin() {
   if (!session?.user || session.user.role !== "admin") {
     throw new Error("Not authorized");
   }
+}
+
+async function requireMainAdmin() {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "admin") {
+    throw new Error("Not authorized");
+  }
+  const admins = await getAdminUsers();
+  if (admins.length === 0 || admins[0].id !== session.user.id) {
+    throw new Error("Only the main admin can do this");
+  }
+  return session.user.id;
 }
 
 async function requireUser() {
@@ -142,24 +155,12 @@ export async function fetchMyListingLimitAction() {
   };
 }
 
-export async function fetchProductsAction() {
-  return getProducts();
-}
-
 export async function fetchProductsPageAction(params: ProductsPageParams = {}) {
   return getProductsPage(params);
 }
 
 export async function fetchSellersAction() {
   return getSellers();
-}
-
-export async function fetchFeaturedProductsAction() {
-  return getFeaturedProducts();
-}
-
-export async function fetchDealsAction() {
-  return getDeals();
 }
 
 export async function fetchRelatedProductsAction(product: Product, limit = 4) {
@@ -203,7 +204,7 @@ export async function fetchAuditLogAction(filters: AuditLogFilters = {}) {
 }
 
 export async function clearAuditLogAction() {
-  await requireAdmin();
+  await requireMainAdmin();
   await clearAuditLog();
   revalidatePath("/admin/audit");
 }
@@ -211,7 +212,7 @@ export async function clearAuditLogAction() {
 // ── Admin-only product management (any product) ──
 
 export async function createProductAction(data: Record<string, unknown>) {
-  await requireAdmin();
+  await requireMainAdmin();
   const session = await auth();
   const parsed = productInputSchema.safeParse(data);
   if (!parsed.success) {
@@ -285,24 +286,6 @@ export async function updateProductAction(id: string, data: Record<string, unkno
   return product;
 }
 
-export async function deleteProductAction(id: string) {
-  await requireAdmin();
-  const session = await auth();
-  const existing = await getProductById(id).catch(() => null);
-  await deleteProduct(id);
-  await logAudit({
-    actorId: session?.user?.id ?? null,
-    actorRole: "admin",
-    action: "product.delete",
-    targetType: "product",
-    targetId: id,
-    metadata: { title: existing?.title, slug: existing?.slug },
-  });
-  revalidatePath("/admin");
-  revalidatePath("/products");
-  revalidatePath("/deals");
-}
-
 export async function deleteProductsAction(ids: string[]) {
   await requireAdmin();
   const session = await auth();
@@ -337,7 +320,7 @@ export async function setProductsFeaturedAction(ids: string[], featured: boolean
 }
 
 export async function duplicateProductsAction(ids: string[]) {
-  await requireAdmin();
+  await requireMainAdmin();
   const session = await auth();
   if (ids.length === 0) return;
   const created: string[] = [];

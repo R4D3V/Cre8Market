@@ -42,11 +42,6 @@ export async function fetchAllSubscriptionPlansAction() {
   return getSubscriptionPlans(false);
 }
 
-export async function fetchSubscriptionPlanByIdAction(id: string) {
-  await requireAdmin();
-  return getSubscriptionPlanById(id);
-}
-
 export async function upsertSubscriptionPlanAction(data: {
   id?: string;
   name: string;
@@ -113,7 +108,8 @@ export async function assignSubscriptionAction(
     metadata: { plan: plan.name, expiresAt },
   });
 
-  revalidatePath("/admin/users");
+  revalidatePath("/admin/sellers");
+  revalidatePath("/admin/buyers");
   revalidatePath(`/admin/users/${userId}/edit`);
   revalidatePath("/admin");
   revalidatePath("/dashboard");

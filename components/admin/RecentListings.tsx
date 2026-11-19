@@ -4,19 +4,21 @@ import { formatPrice } from "@/lib/data";
 import type { ProductWithOwner } from "@/lib/types";
 import { AdminSection } from "./AdminSection";
 
-export function RecentListings({ products }: { products: ProductWithOwner[] }) {
+export function RecentListings({ products, canAdd = true }: { products: ProductWithOwner[]; canAdd?: boolean }) {
   return (
     <AdminSection
       title="Recent listings"
       description="The newest products added to the marketplace."
       action={
-        <Link
-          href="/admin/products/new"
-          className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
-        >
-          + Add product
-          <ArrowRight className="size-3.5" />
-        </Link>
+        canAdd ? (
+          <Link
+            href="/admin/products/new"
+            className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+          >
+            + Add product
+            <ArrowRight className="size-3.5" />
+          </Link>
+        ) : undefined
       }
       className="h-full"
     >

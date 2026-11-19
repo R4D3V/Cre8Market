@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
+import { ProductImagePicker } from "@/components/ProductImagePicker";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import {
   checkSlugAction,
@@ -14,7 +15,6 @@ import {
 import { useSession } from "@/lib/auth-client";
 import { PLAN_LIMITS } from "@/lib/plans";
 import type { CategoryDB } from "@/lib/types";
-import { uploadProductImage } from "@/lib/uploadImage";
 
 export default function NewMyProductPage() {
   const router = useRouter();
@@ -58,19 +58,6 @@ export default function NewMyProductPage() {
       .catch(() => {});
   }, []);
 
-  async function handleImageUpload(index: number, file: File | null) {
-    if (!file) return;
-    try {
-      const url = await uploadProductImage(file);
-      setImages((prev) => {
-        const next = [...prev];
-        next[index] = url;
-        return next;
-      });
-    } catch {
-      setError("Could not read that image. Please try a different file.");
-    }
-  }
 
   function slugify(text: string) {
     return text
@@ -328,34 +315,7 @@ export default function NewMyProductPage() {
             <label className="block text-sm font-semibold text-muted-foreground mb-2">
               Product Images (up to {maxImages})
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {Array.from({ length: maxImages }).map((_, i) => (
-                <label
-                  key={i}
-                  className="neu-inset aspect-video flex flex-col items-center justify-center cursor-pointer hover:bg-muted transition-colors overflow-hidden"
-                >
-                  {images[i] ? (
-                    <img
-                      src={images[i]}
-                      alt={`Image ${i + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                      <span className="text-xl">📷</span>
-                      <span className="text-[10px] font-semibold">Image {i + 1}</span>
-                      <span className="text-[9px] text-muted-foreground/80">Landscape</span>
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleImageUpload(i, e.target.files?.[0] ?? null)}
-                  />
-                </label>
-              ))}
-            </div>
+            <ProductImagePicker images={images} onChange={setImages} max={maxImages} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

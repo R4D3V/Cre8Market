@@ -3,6 +3,7 @@
 import { Download, RefreshCw, Search, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { clearAuditLogAction, fetchAuditLogAction } from "@/lib/actions/products";
+import { isMainAdminAction } from "@/lib/actions/admin";
 
 interface AuditEntry {
   id: string;
@@ -129,6 +130,13 @@ export default function AdminAuditPage() {
   }, [search, action, actorRole, targetType, from, to, limit, refreshKey]);
 
   const [clearing, setClearing] = useState(false);
+  const [isMainAdmin, setIsMainAdmin] = useState(false);
+
+  useEffect(() => {
+    isMainAdminAction()
+      .then(setIsMainAdmin)
+      .catch(() => setIsMainAdmin(false));
+  }, []);
 
   const clearLog = useCallback(async () => {
     if (!confirm("Clear all audit log entries? This cannot be undone.")) return;
@@ -229,15 +237,17 @@ export default function AdminAuditPage() {
             <RefreshCw className="size-4" />
             Refresh
           </button>
-          <button
-            type="button"
-            onClick={clearLog}
-            disabled={clearing || entries.length === 0}
-            className="inline-flex items-center gap-2 rounded-xl border border-red-500/40 px-3 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-500/10 disabled:opacity-40"
-          >
-            <Trash2 className="size-4" />
-            {clearing ? "Clearing…" : "Clear log"}
-          </button>
+          {isMainAdmin && (
+            <button
+              type="button"
+              onClick={clearLog}
+              disabled={clearing || entries.length === 0}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-500/40 px-3 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-500/10 disabled:opacity-40"
+            >
+              <Trash2 className="size-4" />
+              {clearing ? "Clearing…" : "Clear log"}
+            </button>
+          )}
           <button
             type="button"
             onClick={exportCsv}

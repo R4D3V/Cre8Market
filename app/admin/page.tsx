@@ -3,8 +3,10 @@ import {
   ClipboardList,
   CreditCard,
   FolderTree,
+  MessageCircle,
   Package,
   ShieldCheck,
+  Store,
   Tag,
   UserCircle,
   Users,
@@ -17,6 +19,7 @@ import { NeedsAttention } from "@/components/admin/NeedsAttention";
 import { RecentActivity } from "@/components/admin/RecentActivity";
 import { RecentListings } from "@/components/admin/RecentListings";
 import { StoreIdentityCard } from "@/components/admin/StoreIdentityCard";
+import { ChatUnreadBadge } from "@/components/chat/ChatUnreadBadge";
 import { SubscriptionHealth } from "@/components/admin/SubscriptionHealth";
 import { auth } from "@/lib/auth";
 import {
@@ -38,6 +41,12 @@ const QUICK_ACTIONS = [
     icon: Package,
   },
   {
+    label: "Chats",
+    description: "Store threads and chats you start from a listing",
+    href: "/admin/chats",
+    icon: MessageCircle,
+  },
+  {
     label: "Categories",
     description: "Manage marketplace categories",
     href: "/admin/categories",
@@ -50,9 +59,15 @@ const QUICK_ACTIONS = [
     icon: CreditCard,
   },
   {
-    label: "Users",
-    description: "Manage registered sellers",
-    href: "/admin/users",
+    label: "Sellers",
+    description: "Manage seller accounts and plans",
+    href: "/admin/sellers",
+    icon: Store,
+  },
+  {
+    label: "Buyers",
+    description: "Manage buyer accounts",
+    href: "/admin/buyers",
     icon: Users,
   },
   {
@@ -132,7 +147,7 @@ export default async function AdminDashboardPage() {
           label="Admins"
           value={overview.totalAdmins}
           icon={ShieldCheck}
-          hint={`${overview.needsAttention.unverifiedSellers} sellers unverified`}
+          hint="Full dashboard access"
         />
       </div>
 
@@ -145,12 +160,12 @@ export default async function AdminDashboardPage() {
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
         <RecentActivity entries={auditEntries} />
-        <RecentListings products={recentProducts} />
+        <RecentListings products={recentProducts} canAdd={isMainAdmin} />
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
         <StoreIdentityCard avatar={storeProfile.avatar} banner={storeProfile.banner} />
-        <FeatureFlagsPanel initialFlags={flags} />
+        {isMainAdmin && <FeatureFlagsPanel initialFlags={flags} />}
       </div>
 
       <div className="mt-8">
@@ -171,6 +186,7 @@ export default async function AdminDashboardPage() {
                 <span className="block font-semibold text-foreground">{label}</span>
                 <span className="block text-sm text-muted-foreground">{description}</span>
               </span>
+              {href === "/admin/chats" && <ChatUnreadBadge className="ml-auto shrink-0" />}
             </Link>
           ))}
         </div>

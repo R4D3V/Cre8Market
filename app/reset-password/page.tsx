@@ -65,6 +65,8 @@ export default function ResetPasswordPage() {
         const session = await getSession();
         if (session?.user?.role === "admin") {
           router.push("/admin");
+        } else if (session?.user?.role === "buyer") {
+          router.push("/buyer");
         } else {
           router.push("/dashboard");
         }

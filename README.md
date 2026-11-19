@@ -1,7 +1,7 @@
 # CRE8MARKET
 
 A full clone of [cre8market.com](https://cre8market.com) — a buy-and-sell
-marketplace for Entebbe, Uganda. Listings, a wanted board, hot deals, an admin
+marketplace for Entebbe, Entebbe. Listings, a wanted board, hot deals, an admin
 dashboard, AI-assisted listing creation, push notifications and phone-based
 accounts.
 
@@ -45,6 +45,7 @@ See `.env.example` for the full annotated list. The essentials:
 - `OPENAI_API_KEY` — for the AI listing auto-fill
 - `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `NEXT_PUBLIC_VAPID_PUBLIC_KEY` — web push
 - `ADMIN_RESET_PIN` — backup PIN for admin password resets
+- `CRON_SECRET` — bearer token for the scheduled `/api/cleanup-chats` and `/api/cleanup-inactive-users` jobs
 - `NEXT_PUBLIC_APP_URL` — the app's public base URL (falls back to `http://localhost:3000`)
 
 ## Scripts
@@ -74,14 +75,20 @@ See `.env.example` for the full annotated list. The essentials:
 | `/dashboard/products/new`                              | Post a listing (regular users) with AI auto-fill                    |
 | `/admin/products/new`                                  | Post a listing (admins) with AI auto-fill                           |
 | `/selltous`                                            | Sell your item to CRE8MARKET ENTEBBE for cash                       |
-| `/login`, `/register`, `/reset-password`               | Account management                                                  |
-| `/dashboard`                                           | Logged-in users — profile, listings                                 |
-| `/admin`                                               | Admin dashboard — products, users, categories, admins               |
+| `/login`, `/register`, `/reset-password`               | Account management (register: Sell or Buy tab)                      |
+| `/dashboard`                                           | Seller dashboard — profile, listings, chats                         |
+| `/buyer`, `/buyer/profile`, `/buyer/chats`             | Buyer dashboard — profile and chats                                 |
+| `/admin`                                               | Admin dashboard — products, sellers, buyers, categories, admins     |
+| `/admin/sellers`                                       | Seller accounts — plans, status, editing                            |
+| `/admin/buyers`                                        | Buyer accounts — status and editing                                 |
+| `/admin/chats`                                         | Admin inbox — store threads and chats started by admins             |
 | `/contact`, `/about`, `/privacy`, `/terms`, `/install` | Static/info pages                                                   |
 
 ## API Routes
 
 - `POST /api/ai-product-fill` — AI-generated listing details (OpenAI)
+- `GET|POST /api/cleanup-chats` — purges chat messages past their 3-day expiry (`CRON_SECRET`)
+- `GET|POST /api/cleanup-inactive-users` — deletes accounts dormant for 4 months; sellers lose their listings (`CRON_SECRET`, add `?dryRun=1` to preview)
 - `/api/auth/*` — better-auth handler + `/api/auth/legacy-sync`
 - `/api/push/subscribe`, `/api/push/notify` — web push management/sending
 

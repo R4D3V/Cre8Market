@@ -36,10 +36,18 @@ const SUPPORT_LINKS = [
   { label: "Terms of service", href: "/terms" },
 ];
 
-function LinkColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {
+function LinkColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: { label: string; href: string }[];
+}) {
   return (
     <nav aria-label={title}>
-      <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/80">{title}</h3>
+      <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/80">
+        {title}
+      </h3>
       <ul className="mt-4 space-y-3">
         {links.map(({ label, href }) => (
           <li key={`${title}-${label}`}>
@@ -70,7 +78,8 @@ export default function Footer() {
             backgroundImage:
               "linear-gradient(to right, rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.045) 1px, transparent 1px)",
             backgroundSize: "56px 56px",
-            maskImage: "radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 100%)",
+            maskImage:
+              "radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 100%)",
             WebkitMaskImage:
               "radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 100%)",
           }}
@@ -80,7 +89,10 @@ export default function Footer() {
       <div className="container relative py-12 sm:py-16">
         {/* Footer CTA */}
         <div className="relative overflow-hidden rounded-[1.75rem] border border-primary/20 bg-[#04202b] p-6 sm:rounded-[2rem] sm:p-8 lg:p-10">
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+          >
             <div className="absolute -right-24 -top-28 h-64 w-64 rounded-full bg-primary/20 blur-[100px]" />
             <div className="absolute -bottom-24 left-1/4 h-56 w-56 rounded-full bg-secondary/20 blur-[110px]" />
           </div>
@@ -95,8 +107,8 @@ export default function Footer() {
                 Buy local. Sell direct. Keep it simple.
               </h2>
               <p className="mt-2 max-w-lg text-sm leading-relaxed text-white/60">
-                Fresh deals from trusted sellers, with no middlemen and no hidden fees — right here
-                in Entebbe.
+                Fresh deals from trusted sellers, with no middlemen and no
+                hidden fees — right here in Entebbe.
               </p>
             </div>
 
@@ -122,7 +134,11 @@ export default function Footer() {
         <div className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-12">
           {/* Brand */}
           <div className="lg:col-span-3">
-            <Link href="/" aria-label="CRE8MARKET home" className="inline-flex items-center">
+            <Link
+              href="/"
+              aria-label="CRE8MARKET home"
+              className="inline-flex items-center"
+            >
               <Image
                 src="/brand/cre8-market-logo-transparent.svg"
                 alt="Cre8 Market"
@@ -133,14 +149,14 @@ export default function Footer() {
               />
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Entebbe&apos;s #1 marketplace for new and secondhand electronics, phones, surplus
-              goods, and discounted products.
+              Entebbe&apos;s #1 marketplace for new and secondhand electronics,
+              phones, surplus goods, and discounted products.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/25 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 <BadgeCheck className="size-3.5 text-primary" />
-                Ugandan-owned
+                Entebbe-owned
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/25 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                 <MapPin className="size-3.5 text-primary" />
