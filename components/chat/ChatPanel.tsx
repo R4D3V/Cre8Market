@@ -197,7 +197,7 @@ export default function ChatPanel({ ttlNote }: { ttlNote?: string } = {}) {
   const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-border/70 bg-card/80 backdrop-blur-sm">
+    <div className="w-full max-w-full overflow-hidden rounded-3xl border border-border/70 bg-card/80 backdrop-blur-sm">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-muted/20 px-5 py-4">
         <div className="flex items-center gap-2.5">
@@ -224,7 +224,7 @@ export default function ChatPanel({ ttlNote }: { ttlNote?: string } = {}) {
         </p>
       </div>
 
-      <div className="grid min-h-[28rem] grid-cols-1 lg:grid-cols-5">
+      <div className="grid min-h-[60vh] grid-cols-1 lg:grid-cols-5">
         {/* Conversation list */}
         <div
           className={`border-border/60 lg:col-span-2 lg:border-r ${active ? "hidden lg:block" : "block"}`}
@@ -253,7 +253,7 @@ export default function ChatPanel({ ttlNote }: { ttlNote?: string } = {}) {
               </Link>
             </div>
           ) : (
-            <ul className="max-h-[32rem] divide-y divide-border/50 overflow-y-auto">
+            <ul className="max-h-[60vh] divide-y divide-border/50 overflow-y-auto">
               {conversations.map((c) => {
                 const isSelected = c.id === selectedId;
                 return (
@@ -315,7 +315,7 @@ export default function ChatPanel({ ttlNote }: { ttlNote?: string } = {}) {
         {/* Thread */}
         <div className={`lg:col-span-3 ${active ? "block" : "hidden lg:block"}`}>
           {!active ? (
-            <div className="flex h-full min-h-[28rem] flex-col items-center justify-center px-6 text-center">
+            <div className="flex h-full min-h-[50vh] flex-col items-center justify-center px-6 text-center">
               <span className="grid size-12 place-items-center rounded-2xl border border-border/70 bg-muted/40 text-muted-foreground">
                 <UserRound className="size-5" />
               </span>
@@ -327,7 +327,7 @@ export default function ChatPanel({ ttlNote }: { ttlNote?: string } = {}) {
               </p>
             </div>
           ) : (
-            <div className="flex h-full min-h-[28rem] flex-col">
+            <div className="flex h-full min-h-[50vh] flex-col">
               {/* Thread header */}
               <div className="flex items-center gap-3 border-b border-border/60 px-4 py-3">
                 <button
@@ -390,7 +390,7 @@ export default function ChatPanel({ ttlNote }: { ttlNote?: string } = {}) {
               </div>
 
               {/* Messages */}
-              <div className="max-h-80 space-y-3 overflow-y-auto overscroll-contain px-4 py-4">
+              <div className="max-h-[60vh] space-y-3 overflow-y-auto overscroll-contain px-4 py-4">
                 {loadingThread && messages.length === 0 ? (
                   <div className="space-y-3">
                     {[0, 1].map((i) => (
