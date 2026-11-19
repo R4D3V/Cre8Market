@@ -11,7 +11,6 @@ import TrendingSection, { type ProductGroup } from "@/components/home/TrendingSe
 import TrustStrip from "@/components/home/TrustStrip";
 import Navbar from "@/components/Navbar";
 import ScrollReveal from "@/components/ScrollReveal";
-import { latestProducts } from "@/lib/data";
 import { getProducts } from "@/lib/db/queries";
 import type { Product } from "@/lib/types";
 
@@ -54,7 +53,7 @@ async function ProductSections() {
     console.error("DB unavailable on homepage load, using fallback data:", (err as Error).message);
   }
 
-  const source = products.length > 0 ? products : latestProducts;
+  const source = products;
 
   return (
     <>
