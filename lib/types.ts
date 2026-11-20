@@ -140,5 +140,7 @@ export interface CategoryDB {
   icon: string;
   color: string;
   bg_color: string;
+  /** NULL for a top-level group; otherwise the id of the parent group. */
+  parent_id: string | null;
   created_at: string;
 }

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import CategoryOptions from "@/components/CategoryOptions";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import PageHero from "@/components/PageHero";
@@ -281,11 +282,11 @@ export default function SellToUsClient() {
                               className={`${FIELD_CLASS} appearance-none pr-9`}
                             >
                               <option value="">Select…</option>
-                              {categories.map((c) => (
-                                <option key={c.id} value={c.name}>
-                                  {c.icon} {c.name}
-                                </option>
-                              ))}
+                              <CategoryOptions
+                                categories={categories}
+                                currentValue={category}
+                                valueField="name"
+                              />
                             </select>
                             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                           </div>

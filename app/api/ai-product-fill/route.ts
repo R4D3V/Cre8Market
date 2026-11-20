@@ -69,7 +69,14 @@ export async function POST(request: Request) {
     }
 
     const categories = await getCategories();
-    const validSlugs = categories.map((category) => category.slug);
+    // Only offer leaf categories (subcategories and childless groups) so the AI
+    // never files a listing on a top-level group that has its own children.
+    const parentIds = new Set(
+      categories.map((category) => category.parent_id).filter((id): id is string => Boolean(id)),
+    );
+    const validSlugs = categories
+      .filter((category) => !parentIds.has(category.id))
+      .map((category) => category.slug);
     const categoryList = validSlugs.join(", ");
 
     const client = new OpenAI({ apiKey });
@@ -80,7 +87,7 @@ export async function POST(request: Request) {
         {
           role: "system",
           content: `You are a product listing assistant for a marketplace in Entebbe. Return valid JSON only with this exact shape: {
-            "categorySlug": "phones-tablets",
+            "categorySlug": "mobile-phones",
             "condition": "New",
             "description": "Sales-focused description in 1-2 sentences.",
             "specs": "Storage: 256GB\nRAM: 8GB\nColor: Phantom Black",

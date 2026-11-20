@@ -28,6 +28,7 @@ export async function createCategoryAction(data: {
   icon?: string;
   color?: string;
   bg_color?: string;
+  parent_id?: string | null;
 }) {
   const actorId = await requireAdmin();
   const category = await createCategory(data);
@@ -48,7 +49,14 @@ export async function createCategoryAction(data: {
 
 export async function updateCategoryAction(
   id: string,
-  data: { name: string; slug: string; icon: string; color: string; bg_color: string },
+  data: {
+    name: string;
+    slug: string;
+    icon: string;
+    color: string;
+    bg_color: string;
+    parent_id?: string | null;
+  },
 ) {
   const actorId = await requireAdmin();
   const category = await updateCategory(id, data);

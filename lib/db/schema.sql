@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Two-level taxonomy: parent_id is NULL for a top-level group and points at the
+-- group for a subcategory. See migrations/0016_category_hierarchy.sql.
 CREATE TABLE IF NOT EXISTS categories (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
@@ -59,8 +61,12 @@ CREATE TABLE IF NOT EXISTS categories (
   icon TEXT NOT NULL DEFAULT '📦',
   color TEXT NOT NULL DEFAULT '#64748b',
   bg_color TEXT NOT NULL DEFAULT '#f8fafc',
+  parent_id UUID REFERENCES categories(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+ALTER TABLE categories ADD COLUMN IF NOT EXISTS parent_id UUID REFERENCES categories(id) ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS idx_categories_parent_id ON categories(parent_id);
 
 CREATE TABLE IF NOT EXISTS audit_log (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

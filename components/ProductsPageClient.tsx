@@ -4,6 +4,7 @@ import { Clock, Search, SlidersHorizontal, Star, WifiOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import BottomSheet from "@/components/BottomSheet";
+import CategoryOptions from "@/components/CategoryOptions";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import PageHero from "@/components/PageHero";
@@ -232,11 +233,7 @@ function ProductsPageContent({
           className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         >
           <option value="">All Categories</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.slug}>
-              {c.icon} {c.name}
-            </option>
-          ))}
+          <CategoryOptions categories={categories} includeParents currentValue={selectedCategory} />
         </select>
       </div>
 

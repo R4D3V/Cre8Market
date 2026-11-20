@@ -86,7 +86,14 @@ export async function getProductsPage(
 
   if (categorySlug) {
     values.push(categorySlug);
-    conditions.push(`p.category_slug = $${values.length}`);
+    const idx = values.length;
+    // A parent group also matches every listing filed under one of its
+    // subcategories; a subcategory slug matches only itself.
+    conditions.push(`(p.category_slug = $${idx} OR p.category_slug IN (
+      SELECT child.slug FROM categories child
+      JOIN categories parent ON parent.id = child.parent_id
+      WHERE parent.slug = $${idx}
+    ))`);
   }
 
   if (sellerId === "store") {
@@ -406,7 +413,11 @@ export async function checkSlugExists(slug: string, excludeId?: string): Promise
 // ── Categories ──
 
 export async function getCategories(): Promise<CategoryDB[]> {
-  const { rows } = await pool.query("SELECT * FROM categories ORDER BY name");
+  // Top-level groups first, then their subcategories; the client renders the
+  // list as grouped <optgroup>s.
+  const { rows } = await pool.query(
+    "SELECT * FROM categories ORDER BY parent_id NULLS FIRST, name",
+  );
   return rows;
 }
 
@@ -416,10 +427,19 @@ export async function createCategory(data: {
   icon?: string;
   color?: string;
   bg_color?: string;
+  parent_id?: string | null;
 }): Promise<CategoryDB> {
   const { rows } = await pool.query(
-    `INSERT INTO categories (name, slug, icon, color, bg_color) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-    [data.name, data.slug, data.icon ?? "📦", data.color ?? "#64748b", data.bg_color ?? "#f8fafc"],
+    `INSERT INTO categories (name, slug, icon, color, bg_color, parent_id)
+     VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+    [
+      data.name,
+      data.slug,
+      data.icon ?? "📦",
+      data.color ?? "#64748b",
+      data.bg_color ?? "#f8fafc",
+      data.parent_id || null,
+    ],
   );
   return rows[0];
 }
@@ -432,11 +452,14 @@ export async function updateCategory(
     icon: string;
     color: string;
     bg_color: string;
+    parent_id?: string | null;
   },
 ): Promise<CategoryDB> {
   const { rows } = await pool.query(
-    `UPDATE categories SET name=$1, slug=$2, icon=$3, color=$4, bg_color=$5 WHERE id=$6 RETURNING *`,
-    [data.name, data.slug, data.icon, data.color, data.bg_color, id],
+    `UPDATE categories
+     SET name=$1, slug=$2, icon=$3, color=$4, bg_color=$5, parent_id=$6
+     WHERE id=$7 RETURNING *`,
+    [data.name, data.slug, data.icon, data.color, data.bg_color, data.parent_id || null, id],
   );
   return rows[0];
 }

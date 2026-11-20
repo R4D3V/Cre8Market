@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminPanel } from "@/components/admin/AdminPanel";
+import CategoryOptions from "@/components/CategoryOptions";
 import { ProductImagePicker } from "@/components/ProductImagePicker";
 import { fetchMyAdminProfileAction, isMainAdminAction } from "@/lib/actions/admin";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
@@ -341,11 +342,7 @@ export default function NewProductPage() {
               className="neu-inset w-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             >
               <option value="">Select…</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.slug}>
-                  {c.icon} {c.name}
-                </option>
-              ))}
+              <CategoryOptions categories={categories} currentValue={form.categorySlug} />
             </select>
           </div>
         </div>

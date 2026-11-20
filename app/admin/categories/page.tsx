@@ -15,6 +15,7 @@ interface Cat {
   icon: string;
   color: string;
   bg_color: string;
+  parent_id: string | null;
 }
 
 const defaultColors = [
@@ -43,6 +44,7 @@ export default function AdminCategoriesPage() {
     icon: "📦",
     color: "#64748b",
     bg_color: "#f8fafc",
+    parent_id: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -72,6 +74,7 @@ export default function AdminCategoriesPage() {
       icon: "📦",
       color: "#64748b",
       bg_color: "#f8fafc",
+      parent_id: "",
     });
     setEditing(null);
   }
@@ -79,7 +82,11 @@ export default function AdminCategoriesPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const payload = { ...form, slug: form.slug || slugify(form.name) };
+    const payload = {
+      ...form,
+      slug: form.slug || slugify(form.name),
+      parent_id: form.parent_id || null,
+    };
     if (editing) {
       await updateCategoryAction(editing, payload);
     } else {
@@ -91,7 +98,13 @@ export default function AdminCategoriesPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this category?")) return;
+    const hasChildren = cats.some((c) => c.parent_id === id);
+    if (
+      !confirm(
+        hasChildren ? "Delete this category and all its subcategories?" : "Delete this category?",
+      )
+    )
+      return;
     await deleteCategoryAction(id);
     load();
   }
@@ -103,9 +116,14 @@ export default function AdminCategoriesPage() {
       icon: c.icon,
       color: c.color,
       bg_color: c.bg_color,
+      parent_id: c.parent_id ?? "",
     });
     setEditing(c.id);
   }
+
+  // A group that already has subcategories must stay at the top level so the
+  // taxonomy never grows beyond two levels.
+  const editingHasChildren = editing ? cats.some((c) => c.parent_id === editing) : false;
 
   return (
     <div>
@@ -155,6 +173,31 @@ export default function AdminCategoriesPage() {
               placeholder="electronics"
             />
           </div>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-muted-foreground mb-1">
+            Parent category
+          </label>
+          <select
+            value={form.parent_id}
+            onChange={(e) => setForm((f) => ({ ...f, parent_id: e.target.value }))}
+            disabled={editingHasChildren}
+            className="neu-inset w-full px-3 py-2 text-sm text-foreground focus:outline-none disabled:opacity-60"
+          >
+            <option value="">None — top-level group</option>
+            {cats
+              .filter((c) => !c.parent_id && c.id !== editing)
+              .map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.icon} {c.name}
+                </option>
+              ))}
+          </select>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {editingHasChildren
+              ? "This category has subcategories, so it must stay a top-level group."
+              : "Leave empty to create a group; pick a group to create a subcategory."}
+          </p>
         </div>
         <div className="flex gap-3">
           <div className="w-20">
@@ -233,6 +276,7 @@ export default function AdminCategoriesPage() {
                 <th className="pb-3 pr-4 font-semibold">Icon</th>
                 <th className="pb-3 pr-4 font-semibold">Name</th>
                 <th className="pb-3 pr-4 font-semibold">Slug</th>
+                <th className="pb-3 pr-4 font-semibold">Parent</th>
                 <th className="pb-3 pr-4 font-semibold">Colors</th>
                 <th className="pb-3 pr-4 font-semibold">Actions</th>
               </tr>
@@ -241,8 +285,19 @@ export default function AdminCategoriesPage() {
               {cats.map((c) => (
                 <tr key={c.id} className="border-t border-border">
                   <td className="py-3 pr-4 text-xl">{c.icon}</td>
-                  <td className="py-3 pr-4 font-semibold text-foreground">{c.name}</td>
+                  <td className="py-3 pr-4 font-semibold text-foreground">
+                    {c.parent_id ? (
+                      <span className="pl-3 font-normal text-muted-foreground">↳ {c.name}</span>
+                    ) : (
+                      c.name
+                    )}
+                  </td>
                   <td className="py-3 pr-4 text-muted-foreground font-mono text-xs">{c.slug}</td>
+                  <td className="py-3 pr-4 text-xs text-muted-foreground">
+                    {c.parent_id
+                      ? (cats.find((parent) => parent.id === c.parent_id)?.name ?? "—")
+                      : "—"}
+                  </td>
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-2">
                       <span

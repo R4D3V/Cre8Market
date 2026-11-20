@@ -4,6 +4,7 @@ import { Flame, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import CategoryOptions from "@/components/CategoryOptions";
 import { DashboardPanel } from "@/components/dashboard/DashboardPanel";
 import { ProductImagePicker } from "@/components/ProductImagePicker";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
@@ -343,11 +344,7 @@ export default function NewMyProductPage() {
                 className="neu-inset w-full px-4 py-2.5 text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
               >
                 <option value="">Select…</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.slug}>
-                    {c.icon} {c.name}
-                  </option>
-                ))}
+                <CategoryOptions categories={categories} currentValue={form.categorySlug} />
               </select>
             </div>
           </div>

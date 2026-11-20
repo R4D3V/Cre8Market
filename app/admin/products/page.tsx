@@ -4,6 +4,7 @@ import { Package, Star } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
+import CategoryOptions from "@/components/CategoryOptions";
 import { isMainAdminAction } from "@/lib/actions/admin";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
 import {
@@ -67,7 +68,15 @@ function AdminProductsPageInner() {
     let list = [...products];
 
     if (categoryFilter) {
-      list = list.filter((p) => p.categorySlug === categoryFilter);
+      // Selecting a group also shows everything filed under its subcategories.
+      const selected = categories.find((c) => c.slug === categoryFilter);
+      const slugs = new Set<string>([categoryFilter]);
+      if (selected) {
+        for (const c of categories) {
+          if (c.parent_id === selected.id) slugs.add(c.slug);
+        }
+      }
+      list = list.filter((p) => slugs.has(p.categorySlug));
     }
     if (ownerFilter === "user" && selectedUserId) {
       list = list.filter((p) => p.user_id === selectedUserId);
@@ -87,7 +96,15 @@ function AdminProductsPageInner() {
       );
     }
     return list;
-  }, [products, categoryFilter, ownerFilter, selectedUserId, missingImagesOnly, search]);
+  }, [
+    products,
+    categories,
+    categoryFilter,
+    ownerFilter,
+    selectedUserId,
+    missingImagesOnly,
+    search,
+  ]);
 
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this product?")) return;
@@ -201,11 +218,7 @@ function AdminProductsPageInner() {
           className="neu-inset px-3 py-2 text-sm text-foreground focus:outline-none"
         >
           <option value="">All Categories</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.slug}>
-              {c.icon} {c.name}
-            </option>
-          ))}
+          <CategoryOptions categories={categories} includeParents currentValue={categoryFilter} />
         </select>
         <select
           value={ownerFilter}
