@@ -25,7 +25,7 @@ const benefits = [
 
 export default function TrustStrip() {
   return (
-    <section className="container">
+    <section className="container pt-2">
       <div className="grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-border/60 bg-border/50 sm:grid-cols-2 lg:grid-cols-4">
         {benefits.map(({ icon: Icon, title, description }) => (
           <div
@@ -37,7 +37,9 @@ export default function TrustStrip() {
             </span>
             <div>
               <p className="text-sm font-bold text-foreground">{title}</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                {description}
+              </p>
             </div>
           </div>
         ))}
