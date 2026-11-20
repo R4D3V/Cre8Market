@@ -1,17 +1,19 @@
 "use client";
 
-import { Clock, Search, SlidersHorizontal, Star, WifiOff } from "lucide-react";
+import { Search, SlidersHorizontal, WifiOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import BottomSheet from "@/components/BottomSheet";
 import CategoryOptions from "@/components/CategoryOptions";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import PageHero from "@/components/PageHero";
 import ProductCard from "@/components/ProductCard";
 import ScrollReveal from "@/components/ScrollReveal";
 import { fetchCategoriesAction } from "@/lib/actions/categories";
-import { fetchProductsPageAction, fetchSellersAction } from "@/lib/actions/products";
+import {
+  fetchProductsPageAction,
+  fetchSellersAction,
+} from "@/lib/actions/products";
 import { sellerHandle } from "@/lib/seller-handle";
 import type { CategoryDB, Product } from "@/lib/types";
 
@@ -86,7 +88,9 @@ function ProductsPageContent({
 
   const [products, setProducts] = useState<Product[]>(initialProducts ?? []);
   const [total, setTotal] = useState(initialTotal ?? 0);
-  const [categories, setCategories] = useState<CategoryDB[]>(initialCategories ?? []);
+  const [categories, setCategories] = useState<CategoryDB[]>(
+    initialCategories ?? [],
+  );
   const [sellers, setSellers] = useState<
     {
       id: string;
@@ -198,9 +202,13 @@ function ProductsPageContent({
     setPage(1);
   }
 
-  const activeFilterCount = [search, selectedCategory, selectedSeller, minPrice, maxPrice].filter(
-    Boolean,
-  ).length;
+  const activeFilterCount = [
+    search,
+    selectedCategory,
+    selectedSeller,
+    minPrice,
+    maxPrice,
+  ].filter(Boolean).length;
 
   const filterFields = (
     <>
@@ -233,7 +241,11 @@ function ProductsPageContent({
           className="rounded-xl border border-border/70 bg-muted/40 focus:border-primary/50 w-full px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         >
           <option value="">All Categories</option>
-          <CategoryOptions categories={categories} includeParents currentValue={selectedCategory} />
+          <CategoryOptions
+            categories={categories}
+            includeParents
+            currentValue={selectedCategory}
+          />
         </select>
       </div>
 
@@ -253,7 +265,9 @@ function ProductsPageContent({
           {sellers.map((s) => (
             <option
               key={s.id}
-              value={s.id === "store" ? "store" : (s.handle ?? sellerHandle(s.name))}
+              value={
+                s.id === "store" ? "store" : (s.handle ?? sellerHandle(s.name))
+              }
             >
               {s.name} ({s.productCount})
             </option>
@@ -294,36 +308,15 @@ function ProductsPageContent({
   return (
     <>
       <Navbar />
-      <PageHero
-        eyebrow="Browse the market"
-        title={
-          featuredParam === "1" ? (
-            <span className="inline-flex items-center gap-3">
-              <Star className="h-7 w-7 fill-featured text-featured" />
-              Featured Listings
-            </span>
-          ) : sortParam === "latest" ? (
-            <span className="inline-flex items-center gap-3">
-              <Clock className="h-7 w-7 text-primary" />
-              Latest Listings
-            </span>
-          ) : (
-            "All Listings"
-          )
-        }
-        description={`${total} ${total === 1 ? "result" : "results"}${
-          selectedCategory
-            ? ` in ${categories.find((c) => c.slug === selectedCategory)?.name ?? selectedCategory}`
-            : ""
-        }`}
-      />
-      <main className="page-ambient container py-6 pb-24 sm:pb-8 overflow-x-hidden max-w-full">
-        <ScrollReveal className="flex flex-col lg:flex-row gap-6">
+      <main className="page-ambient container py-6 pb-24 sm:pb-8 overflow-x-clip max-w-full">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Desktop: persistent sidebar. Mobile uses the bottom sheet below. */}
-          <aside className="hidden shrink-0 lg:block lg:w-56">
-            <div className="rounded-2xl border border-border/70 bg-card/80 p-4 lg:sticky lg:top-24">
+          <aside className="hidden shrink-0 lg:block lg:w-56 pt-4">
+            <div className="rounded-2xl border border-border/70 bg-card/80 p-4 lg:sticky lg:top-32">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-heading font-bold text-foreground">Filters</h2>
+                <h2 className="font-heading font-bold text-foreground">
+                  Filters
+                </h2>
                 <button
                   onClick={resetFilters}
                   className="text-xs text-primary font-semibold hover:underline"
@@ -335,7 +328,7 @@ function ProductsPageContent({
             </div>
           </aside>
 
-          <div className="flex-1 min-w-0">
+          <ScrollReveal className="flex-1 min-w-0">
             <div className="mb-4 flex items-center justify-end gap-2">
               <button
                 type="button"
@@ -434,22 +427,24 @@ function ProductsPageContent({
                 >
                   ← Previous
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => {
-                      setPage(n);
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
-                    className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${
-                      page === n
-                        ? "bg-primary text-primary-foreground neu-dark-pill"
-                        : "border border-border bg-card text-muted-foreground"
-                    }`}
-                  >
-                    {n}
-                  </button>
-                ))}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (n) => (
+                    <button
+                      key={n}
+                      onClick={() => {
+                        setPage(n);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className={`w-9 h-9 rounded-full text-sm font-bold transition-all ${
+                        page === n
+                          ? "bg-primary text-primary-foreground neu-dark-pill"
+                          : "border border-border bg-card text-muted-foreground"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  ),
+                )}
                 <button
                   onClick={() => {
                     setPage((p) => Math.min(totalPages, p + 1));
@@ -462,8 +457,8 @@ function ProductsPageContent({
                 </button>
               </div>
             )}
-          </div>
-        </ScrollReveal>
+          </ScrollReveal>
+        </div>
       </main>
 
       <BottomSheet
@@ -484,7 +479,9 @@ function ProductsPageContent({
               onClick={() => setFiltersOpen(false)}
               className="press min-h-12 flex-[2] rounded-full bg-primary text-sm font-bold text-primary-foreground"
             >
-              {loading ? "Show results" : `Show ${total} ${total === 1 ? "result" : "results"}`}
+              {loading
+                ? "Show results"
+                : `Show ${total} ${total === 1 ? "result" : "results"}`}
             </button>
           </div>
         }
